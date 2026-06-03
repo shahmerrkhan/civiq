@@ -39,7 +39,7 @@ export default async function PollsPage() {
     userVotes = await db
       .select({ pollId: pollVotes.pollId, optionIndex: pollVotes.optionIndex })
       .from(pollVotes)
-      .where(eq(pollVotes.userId, userId));
+      .where(eq(pollVotes.userId, userId)) as { pollId: string; optionIndex: number }[];
 
     const user = await db.select({ compassPosition: users.compassPosition }).from(users).where(eq(users.id, userId));
     if (user[0]?.compassPosition) compassPosition = user[0].compassPosition as { x: number; y: number };
