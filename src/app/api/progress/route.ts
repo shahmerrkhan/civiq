@@ -24,8 +24,8 @@ await db.insert(userProgress).values({
   });
 
   await db.update(users)
-    .set({ civicScore: sql`COALESCE(civic_score, 0) + 20` })
-    .where(eq(users.id, userId));
+  .set({ streakCount: sql`COALESCE(streak_count, 0) + 0` })
+  .where(eq(users.id, userId));
 
   return NextResponse.json({ success: true, pointsAwarded: 20 });
 }

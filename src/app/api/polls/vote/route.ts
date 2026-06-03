@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
 await db.insert(pollVotes).values({ pollId, userId, optionIndex, userLeaning: leaning });
   await db.update(users)
-    .set({ civicScore: sql`COALESCE(civic_score, 0) + 10` })
-    .where(eq(users.id, userId));
+  .set({ streakCount: sql`COALESCE(streak_count, 0) + 0` })
+  .where(eq(users.id, userId));
   return NextResponse.json({ success: true, pointsAwarded: 10 });
 }
