@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ bookmarked: false });
   }
 
-  await db.insert(bookmarks).values({
+  await (db.insert(bookmarks) as any).values({
     userId,
     cardTitle,
     cardSummary,
