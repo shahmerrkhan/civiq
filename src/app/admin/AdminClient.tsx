@@ -290,7 +290,7 @@ export default function AdminClient({ cards: initial, polls }: { cards: Card[]; 
 
   return (
     <AppLayout active="/dashboard">
-      <div style={{ padding: "40px 48px", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
+      <div style={{ padding: "24px 20px", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
 
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -384,7 +384,7 @@ export default function AdminClient({ cards: initial, polls }: { cards: Card[]; 
                   />
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
                   <div>
                     <label style={labelStyle}>Source URL</label>
                     <input value={createForm.sourceUrl} onChange={e => setCreateForm(f => ({ ...f, sourceUrl: e.target.value }))} placeholder="https://..." style={inputStyle} />
@@ -419,7 +419,7 @@ export default function AdminClient({ cards: initial, polls }: { cards: Card[]; 
 
                 <div>
                   <label style={labelStyle}>Perspectives</label>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
                     {(["leftPerspective", "centrePerspective", "rightPerspective"] as const).map((key, i) => (
                       <div key={key}>
                         <div style={{ fontSize: "11px", color: "#444", marginBottom: "6px", fontWeight: "600" }}>

@@ -1,7 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { users, userOpinions, pollVotes, userProgress } from "@/db/schema";
+import { users, userOpinions, pollVotes, userProgress, dailyAnswers } from "@/db/schema";
 import { eq, count } from "drizzle-orm";
 import ProfileClient from "./ProfileClient";
 
@@ -29,6 +29,17 @@ export default async function Profile() {
     .where(eq(userOpinions.userId, userId))
     .orderBy(userOpinions.createdAt);
 
+  const correctAnswers = await db
+    .select({ count: count() })
+    .from(dailyAnswers)
+    .where(eq(dailyAnswers.userId, userId));
+
+  const civicScore =
+    (progressCount[0]?.count ?? 0) * 10 +
+    (votesCount[0]?.count ?? 0) * 5 +
+    (correctAnswers[0]?.count ?? 0) * 15 +
+    (opinions.length) * 3;
+
 return (
     <ProfileClient
       name={user?.firstName || "Anonymous"}
@@ -36,7 +47,7 @@ return (
       imageUrl={user?.imageUrl || ""}
       compassPosition={(dbUser[0].compassPosition as { x: number; y: number }) || null}
       streakCount={dbUser[0].streakCount ?? 0}
-      civicScore={0}
+      civicScore={civicScore}
       opinions={opinions as any[]}
       pollsVoted={votesCount[0]?.count ?? 0}
       modulesCompleted={progressCount[0]?.count ?? 0}
