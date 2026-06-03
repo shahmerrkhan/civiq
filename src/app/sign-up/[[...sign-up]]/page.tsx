@@ -64,7 +64,6 @@ export default function SignUpPage() {
               },
               footerActionLink: { color: "#f5a623" },
               backLink: { color: "#aaa" },
-              identityPreviewEditButton: { color: "#f5a623" },
               formFieldAction: { color: "#f5a623" },
               navbar: { display: "none" },
               navbarMobileMenuButton: { display: "none" },
