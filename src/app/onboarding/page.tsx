@@ -159,8 +159,8 @@ const [step, setStep] = useState(0);
     }
   };
 
-  const styles: Record<string, React.CSSProperties> = {
-    root: {
+  const styles: Record<string, any> = {
+      root: {
       minHeight: "100vh",
       backgroundColor: "#06060c",
       display: "flex",
