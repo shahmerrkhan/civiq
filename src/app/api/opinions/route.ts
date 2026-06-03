@@ -36,7 +36,7 @@ await db.insert(userOpinions).values({
   }).onConflictDoNothing();
 
   await db.update(users)
-    .set({ civicScore: sql`COALESCE(civic_score, 0) + 15` })
+    .set({ streakCount: sql`COALESCE(streak_count, 0) + 0` })
     .where(eq(users.id, userId));
 
   return NextResponse.json({ success: true, pointsAwarded: 15 });
