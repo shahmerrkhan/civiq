@@ -215,7 +215,7 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
   return (
     <AppLayout active="/learn">
       <div
-        style={{ padding: "40px 60px", maxWidth: "700px", width: "100%", fontFamily: "'DM Sans', sans-serif", margin: "0 auto" }}
+        style={{ padding: "24px 20px", maxWidth: "700px", width: "100%", fontFamily: "'DM Sans', sans-serif", margin: "0 auto" }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -356,7 +356,7 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
                     overflowY: "auto",
                   }}
                 >
-                  <div style={{ fontSize: "15px", color: "#ccc", lineHeight: "1.85" }}>
+                    <div style={{ fontSize: "14px", color: "#ccc", lineHeight: "1.7", wordBreak: "break-word" }}>
                     {card.back}
                   </div>
                 </motion.div>

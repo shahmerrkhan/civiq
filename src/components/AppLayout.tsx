@@ -177,6 +177,7 @@ if (!mounted) return null;
               alignItems: "center",
               justifyContent: "space-between",
               padding: "14px 20px",
+              gap: "16px",
               borderBottom: "1px solid rgba(255,255,255,0.05)",
               backgroundColor: "rgba(6,6,12,0.85)",
               position: "sticky",

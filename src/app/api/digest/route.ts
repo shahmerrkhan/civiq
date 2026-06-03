@@ -76,7 +76,7 @@ export async function POST(req: Request) {
             `;
           }).join("")}
 
-          <a href="http://localhost:3000" class="cta">Read the full feed →</a>
+          <a href="https://civiq-sooty.vercel.app" class="cta">Read the full feed →</a>
 
           <div class="footer">
             You're getting this because you signed up for Civiq.<br>
