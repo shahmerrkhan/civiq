@@ -1,4 +1,5 @@
 import { db } from "@/db";
+export const dynamic = "force-dynamic";
 import { contentCards, polls } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import AdminClient from "./AdminClient";

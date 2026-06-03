@@ -39,6 +39,31 @@ export default function Home() {
   const [wordIndex, setWordIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [showInstall, setShowInstall] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showIOSHint, setShowIOSHint] = useState(false);
+
+  useEffect(() => {
+    const ios = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+    const android = /android/.test(navigator.userAgent.toLowerCase());
+    const standalone = (window.navigator as any).standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+    if (standalone) return; // already installed
+    if (ios) { setIsIOS(true); setShowInstall(true); }
+    if (android) {
+      const handler = (e: Event) => { e.preventDefault(); setInstallPrompt(e); setShowInstall(true); };
+      window.addEventListener("beforeinstallprompt", handler as any);
+      return () => window.removeEventListener("beforeinstallprompt", handler as any);
+    }
+  }, []);
+
+  const handleInstall = async () => {
+    if (isIOS) { setShowIOSHint(h => !h); return; }
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") setShowInstall(false);
+  };
 
   useEffect(() => {
     const current = WORDS[wordIndex];
@@ -222,10 +247,39 @@ export default function Home() {
             </motion.p>
 
             {/* BUTTONS */}
-            <motion.div variants={fadeUp} className="cta-row" style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "64px" }}>
+            <motion.div variants={fadeUp} className="cta-row" style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: showIOSHint ? "16px" : "64px" }}>
               <Link href="/sign-up" className="cta-amber">Start for free</Link>
               <Link href="/learn" className="cta-ghost">Explore modules</Link>
+              {showInstall && (
+                <motion.button
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleInstall}
+                  style={{
+                    padding: "15px 24px", borderRadius: "10px",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    backgroundColor: "rgba(255,255,255,0.05)",
+                    color: "#fff", fontSize: "16px", fontWeight: "600",
+                    cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    display: "flex", alignItems: "center", gap: "8px",
+                  }}
+                >
+                  📲 Add to Home Screen
+                </motion.button>
+              )}
             </motion.div>
+            {showIOSHint && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                style={{
+                  marginBottom: "40px", padding: "14px 16px", borderRadius: "12px",
+                  backgroundColor: "rgba(245,166,35,0.08)", border: "1px solid rgba(245,166,35,0.2)",
+                  fontSize: "13px", color: "#aaa", lineHeight: "1.6", maxWidth: "340px",
+                }}
+              >
+                Tap the <strong style={{ color: "#f5a623" }}>Share</strong> button in Safari, then <strong style={{ color: "#f5a623" }}>"Add to Home Screen"</strong> to install Civiq.
+              </motion.div>
+            )}
 
             {/* FEED CARD */}
             <motion.div

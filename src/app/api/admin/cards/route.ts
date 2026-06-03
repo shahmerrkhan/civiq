@@ -31,10 +31,31 @@ export async function GET() {
       ...card,
       poll: pollsByCardId[card.id] ?? null,
     }));
-1
     return NextResponse.json({ cards: result });
   } catch (err) {
     console.error("feed error:", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
+
+  }
+
+export async function PATCH(req: Request) {
+  try {
+    const { id, approved } = await req.json();
+    await db.update(contentCards).set({ approved }).where(eq(contentCards.id, id));
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { id } = await req.json();
+    await db.delete(polls).where(eq(polls.cardId, id));
+    await db.delete(contentCards).where(eq(contentCards.id, id));
+    return NextResponse.json({ ok: true });
+  } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }   

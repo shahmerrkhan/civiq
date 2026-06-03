@@ -25,6 +25,15 @@ const PATHS = [
       { title: "What is Gerrymandering?", minutes: 4, slug: "gerrymandering" },
       { title: "How Political Parties Work", minutes: 5, slug: "political-parties" },
       { title: "What is a Referendum?", minutes: 4, slug: "what-is-referendum" },
+      { title: "How Cabinet Government Works", minutes: 5, slug: "cabinet-government" },
+      { title: "What is the Governor General?", minutes: 4, slug: "governor-general" },
+      { title: "How Minority Governments Work", minutes: 5, slug: "minority-governments" },
+      { title: "What is Prorogation?", minutes: 4, slug: "prorogation" },
+      { title: "How Public Services Are Funded", minutes: 5, slug: "public-services-funding" },
+      { title: "What is the Ombudsman?", minutes: 4, slug: "ombudsman" },
+      { title: "How Auditor Generals Work", minutes: 4, slug: "auditor-general" },
+      { title: "What is a Coalition Government?", minutes: 5, slug: "coalition-government" },
+      { title: "How Question Period Works", minutes: 4, slug: "question-period" },
     ],
   },
   {
@@ -41,6 +50,17 @@ const PATHS = [
       { title: "What is Anarchism?", minutes: 5, slug: "what-is-anarchism" },
       { title: "What is Fascism?", minutes: 5, slug: "what-is-fascism" },
       { title: "What is Social Democracy?", minutes: 4, slug: "what-is-social-democracy" },
+      { title: "What is Nationalism?", minutes: 5, slug: "what-is-nationalism" },
+      { title: "What is Populism?", minutes: 5, slug: "what-is-populism" },
+      { title: "What is Feminism?", minutes: 5, slug: "what-is-feminism" },
+      { title: "What is Green Politics?", minutes: 4, slug: "what-is-green-politics" },
+      { title: "What is Neoliberalism?", minutes: 5, slug: "what-is-neoliberalism" },
+      { title: "What is Communism?", minutes: 6, slug: "what-is-communism" },
+      { title: "What is Authoritarianism?", minutes: 5, slug: "what-is-authoritarianism" },
+      { title: "What is Progressivism?", minutes: 4, slug: "what-is-progressivism" },
+      { title: "What is Classical Liberalism?", minutes: 5, slug: "what-is-classical-liberalism" },
+      { title: "What is Christian Democracy?", minutes: 4, slug: "what-is-christian-democracy" },
+      { title: "What is Technocracy?", minutes: 4, slug: "what-is-technocracy" },
     ],
   },
   {
@@ -67,6 +87,12 @@ const PATHS = [
       { title: "Alexandria Ocasio-Cortez and Progressive Politics", minutes: 5, slug: "aoc" },
       { title: "Winston Churchill: Hero or Villain?", minutes: 6, slug: "winston-churchill" },
       { title: "Vladimir Putin and Russian Power", minutes: 6, slug: "vladimir-putin" },
+      { title: "Mao Zedong and Modern China", minutes: 7, slug: "mao-zedong" },
+      { title: "Simone de Beauvoir and Political Feminism", minutes: 5, slug: "simone-de-beauvoir" },
+      { title: "Lester B. Pearson and Canadian Peacekeeping", minutes: 5, slug: "lester-pearson" },
+      { title: "Rosa Parks and the Civil Rights Movement", minutes: 5, slug: "rosa-parks" },
+      { title: "John A. Macdonald: Father and Controversies", minutes: 6, slug: "john-a-macdonald" },
+      { title: "Mark Carney and Economic Policy", minutes: 5, slug: "mark-carney" },
     ],
   },
   {
@@ -89,6 +115,16 @@ const PATHS = [
       { title: "Russia-Ukraine War: Background", minutes: 6, slug: "russia-ukraine" },
       { title: "China's Political System", minutes: 6, slug: "china-politics" },
       { title: "What is the G7?", minutes: 4, slug: "what-is-g7" },
+      { title: "Truth and Reconciliation in Canada", minutes: 7, slug: "truth-and-reconciliation" },
+      { title: "What is the World Bank?", minutes: 5, slug: "world-bank" },
+      { title: "How the IMF Works", minutes: 5, slug: "imf" },
+      { title: "What is CUSMA/NAFTA?", minutes: 5, slug: "cusma-nafta" },
+      { title: "Canada's Role in Afghanistan", minutes: 6, slug: "canada-afghanistan" },
+      { title: "What is the Paris Agreement?", minutes: 5, slug: "paris-agreement" },
+      { title: "India's Political System", minutes: 6, slug: "india-politics" },
+      { title: "The European Union Explained", minutes: 6, slug: "european-union" },
+      { title: "What is BRICS?", minutes: 5, slug: "what-is-brics" },
+      { title: "North Korea: What's Actually Going On?", minutes: 6, slug: "north-korea" },
     ],
   },
   {
@@ -111,6 +147,60 @@ const PATHS = [
       { title: "Rent Control Debate", minutes: 5, slug: "rent-control" },
       { title: "Minimum Wage Economics", minutes: 5, slug: "minimum-wage-economics" },
       { title: "Electoral Reform in Canada", minutes: 5, slug: "electoral-reform" },
+      { title: "Housing Crisis in Ontario", minutes: 6, slug: "housing-crisis-ontario" },
+      { title: "Student Debt and Tuition Policy", minutes: 5, slug: "student-debt-tuition" },
+      { title: "Trans Rights and Politics", minutes: 6, slug: "trans-rights-politics" },
+      { title: "Indigenous Land Rights", minutes: 7, slug: "indigenous-land-rights" },
+      { title: "Carbon Tax: For and Against", minutes: 5, slug: "carbon-tax" },
+      { title: "Euthanasia and MAID in Canada", minutes: 6, slug: "maid-canada" },
+      { title: "Media Bias and How to Spot It", minutes: 5, slug: "media-bias" },
+      { title: "Misinformation and Democracy", minutes: 5, slug: "misinformation-democracy" },
+      { title: "Online Privacy and Surveillance", minutes: 5, slug: "online-privacy" },
+      { title: "AI and Political Power", minutes: 5, slug: "ai-and-politics" },
+    ],
+  },
+  {
+    category: "Economy",
+    color: "#f472b6",
+    icon: "💰",
+    modules: [
+      { title: "How Inflation Works", minutes: 5, slug: "how-inflation-works" },
+      { title: "What is the Bank of Canada?", minutes: 5, slug: "bank-of-canada" },
+      { title: "How Interest Rates Affect You", minutes: 5, slug: "interest-rates" },
+      { title: "What is a Recession?", minutes: 4, slug: "what-is-recession" },
+      { title: "How Trade Deficits Work", minutes: 5, slug: "trade-deficits" },
+      { title: "What is GDP?", minutes: 4, slug: "what-is-gdp" },
+      { title: "How Government Debt Works", minutes: 5, slug: "government-debt" },
+      { title: "What is Austerity?", minutes: 5, slug: "what-is-austerity" },
+      { title: "How Taxes Fund Public Services", minutes: 5, slug: "taxes-public-services" },
+      { title: "What is Quantitative Easing?", minutes: 5, slug: "quantitative-easing" },
+      { title: "Gig Economy and Worker Rights", minutes: 5, slug: "gig-economy" },
+      { title: "What is a Living Wage?", minutes: 4, slug: "living-wage" },
+      { title: "How Supply Chains Affect Politics", minutes: 5, slug: "supply-chains-politics" },
+      { title: "Corporate Tax and Loopholes", minutes: 5, slug: "corporate-tax" },
+      { title: "What is Economic Nationalism?", minutes: 5, slug: "economic-nationalism" },
+    ],
+  },
+  {
+    category: "History",
+    color: "#e879f9",
+    icon: "📜",
+    modules: [
+      { title: "The Cold War Explained", minutes: 7, slug: "cold-war" },
+      { title: "How World War II Changed Politics", minutes: 7, slug: "ww2-politics" },
+      { title: "The Civil Rights Movement", minutes: 6, slug: "civil-rights-movement" },
+      { title: "The Fall of the Soviet Union", minutes: 6, slug: "fall-of-soviet-union" },
+      { title: "Canada's Role in World War I", minutes: 5, slug: "canada-ww1" },
+      { title: "The October Crisis of 1970", minutes: 5, slug: "october-crisis" },
+      { title: "Apartheid in South Africa", minutes: 6, slug: "apartheid" },
+      { title: "The French Revolution and Democracy", minutes: 6, slug: "french-revolution" },
+      { title: "The Rwandan Genocide", minutes: 6, slug: "rwandan-genocide" },
+      { title: "How the Holocaust Shaped Human Rights", minutes: 7, slug: "holocaust-human-rights" },
+      { title: "The Arab Spring", minutes: 6, slug: "arab-spring" },
+      { title: "Residential Schools in Canada", minutes: 7, slug: "residential-schools" },
+      { title: "The Vietnam War and Its Legacy", minutes: 6, slug: "vietnam-war" },
+      { title: "The Cuban Missile Crisis", minutes: 5, slug: "cuban-missile-crisis" },
+      { title: "How Colonialism Shaped the Modern World", minutes: 7, slug: "colonialism-modern-world" },
     ],
   },
 ];
@@ -122,32 +212,58 @@ const filterColors: Record<string, string> = {
   Figures: "#f5a623",
   "Canada & World": "#34d399",
   Issues: "#fb923c",
+  Economy: "#f472b6",
+  History: "#e879f9",
 };
+
+const PAGE_SIZE = 20;
 
 export default function Learn() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
-  const filters = ["All", "Systems", "Ideologies", "Figures", "Canada & World", "Issues"];
+  const filters = ["All", "Systems", "Ideologies", "Figures", "Canada & World", "Issues", "Economy", "History"];
 
   const grouped = activeFilter === "All"
     ? PATHS.map(p => ({ ...p, modules: p.modules.filter(m => m.title.toLowerCase().includes(search.toLowerCase())) })).filter(p => p.modules.length > 0)
     : PATHS.filter(p => p.category === activeFilter).map(p => ({ ...p, modules: p.modules.filter(m => m.title.toLowerCase().includes(search.toLowerCase())) })).filter(p => p.modules.length > 0);
 
+  // flatten all modules for pagination
+  const allModules = grouped.flatMap(p => p.modules.map(m => ({ ...m, category: p.category, color: p.color, icon: p.icon })));
+  const totalPages = Math.ceil(allModules.length / PAGE_SIZE);
+  const paginated = allModules.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // re-group paginated modules by category
+  const paginatedGrouped = grouped.map(p => ({
+    ...p,
+    modules: paginated.filter(m => m.category === p.category),
+  })).filter(p => p.modules.length > 0);
+
+  const handleFilterChange = (f: string) => {
+    setActiveFilter(f);
+    setPage(1);
+  };
+
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    setPage(1);
+  };
+
   return (
     <AppLayout active="/learn">
-      <div style={{ padding: "40px 48px", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
+      <div style={{ padding: "24px 20px", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
 
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ marginBottom: "28px" }}>
           <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>Learn</div>
-          <div style={{ fontSize: "14px", color: "#444" }}>Flashcard modules on politics, systems, and ideas.</div>
+          <div style={{ fontSize: "14px", color: "#444" }}>Flashcard modules on politics, systems, and ideas. · {allModules.length} total</div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
           <input
             placeholder="Search modules..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => handleSearch(e.target.value)}
             style={{
               width: "100%", padding: "12px 18px",
               backgroundColor: "rgba(255,255,255,0.03)",
@@ -155,7 +271,7 @@ export default function Learn() {
               borderRadius: "12px", color: "#fff",
               fontSize: "14px", fontFamily: "'DM Sans', sans-serif",
               outline: "none", marginBottom: "16px",
-              transition: "border-color 0.2s ease",
+              boxSizing: "border-box",
             }}
           />
           <div style={{ display: "flex", gap: "8px", marginBottom: "36px", flexWrap: "wrap" }}>
@@ -164,7 +280,7 @@ export default function Learn() {
                 key={f}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => setActiveFilter(f)}
+                onClick={() => handleFilterChange(f)}
                 style={{
                   padding: "7px 18px", borderRadius: "100px",
                   fontSize: "13px", fontWeight: "600",
@@ -180,13 +296,13 @@ export default function Learn() {
         </motion.div>
 
         <AnimatePresence mode="wait">
-          <motion.div key={activeFilter + search}>
-            {grouped.length === 0 && (
+          <motion.div key={activeFilter + search + page}>
+            {paginatedGrouped.length === 0 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: "center", padding: "60px 20px", color: "#333", fontSize: "14px" }}>
-                No modules found for "{search}"
+                No modules found{search ? ` for "${search}"` : ""}.
               </motion.div>
             )}
-            {grouped.map((path, pi) => (
+            {paginatedGrouped.map((path, pi) => (
               <motion.div
                 key={path.category}
                 initial={{ opacity: 0, y: 20 }}
@@ -234,6 +350,53 @@ export default function Learn() {
             ))}
           </motion.div>
         </AnimatePresence>
+
+        {totalPages > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", marginTop: "40px", paddingBottom: "40px" }}>
+            <motion.button
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              style={{
+                padding: "8px 16px", borderRadius: "10px",
+                border: "1px solid rgba(255,255,255,0.08)",
+                backgroundColor: "transparent", color: page === 1 ? "#333" : "#aaa",
+                fontSize: "13px", fontWeight: "600", cursor: page === 1 ? "default" : "pointer",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >← Prev</motion.button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+              <motion.button
+                key={p}
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                onClick={() => setPage(p)}
+                style={{
+                  width: "36px", height: "36px", borderRadius: "10px",
+                  border: page === p ? "1px solid #f5a623" : "1px solid rgba(255,255,255,0.08)",
+                  backgroundColor: page === p ? "rgba(245,166,35,0.1)" : "transparent",
+                  color: page === p ? "#f5a623" : "#555",
+                  fontSize: "13px", fontWeight: "600", cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >{p}</motion.button>
+            ))}
+
+            <motion.button
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              style={{
+                padding: "8px 16px", borderRadius: "10px",
+                border: "1px solid rgba(255,255,255,0.08)",
+                backgroundColor: "transparent", color: page === totalPages ? "#333" : "#aaa",
+                fontSize: "13px", fontWeight: "600", cursor: page === totalPages ? "default" : "pointer",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >Next →</motion.button>
+          </div>
+        )}
+
       </div>
     </AppLayout>
   );
