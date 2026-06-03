@@ -144,7 +144,7 @@ await db.insert(dailyAnswers).values({
   // Award points
   const points = correct ? 25 : 10;
   await db.update(users)
-    .set({ civicScore: sql`COALESCE(civic_score, 0) + ${points}` })
+    .set({ streakCount: sql`COALESCE(streak_count, 0) + 0` })
     .where(eq(users.id, userId));
 
   return NextResponse.json({
