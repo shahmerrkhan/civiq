@@ -211,7 +211,7 @@ const [step, setStep] = useState(0);
       flexDirection: "column",
       gap: "12px",
     },
-    option: (isSelected: boolean): React.CSSProperties => ({
+    option: (isSelected: boolean) => ({
       padding: "18px 22px",
       borderRadius: "12px",
       border: isSelected ? "1px solid #f5a623" : "1px solid rgba(255,255,255,0.07)",
