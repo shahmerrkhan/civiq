@@ -13,5 +13,5 @@ export default async function AdminPage() {
     .select()
     .from(polls);
 
-  return <AdminClient cards={cards as any} polls={allPolls} />;
+  return <AdminClient cards={cards as any} polls={allPolls as any} />;
   }
