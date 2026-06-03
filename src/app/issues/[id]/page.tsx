@@ -22,7 +22,7 @@ export default async function IssuePage({ params }: { params: { id: string } }) 
       userVotes = await db
         .select({ pollId: pollVotes.pollId, optionIndex: pollVotes.optionIndex })
         .from(pollVotes)
-        .where(eq(pollVotes.userId, userId));
+        .where(eq(pollVotes.userId, userId)) as { pollId: string; optionIndex: number }[];
     }
 
     const opinion = await db
