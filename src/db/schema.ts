@@ -142,3 +142,12 @@ export const userActivity = pgTable("user_activity", {
   meta: jsonb("meta"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").references(() => users.id),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});

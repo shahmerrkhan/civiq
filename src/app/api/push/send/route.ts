@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 webpush.setVapidDetails(
   process.env.VAPID_EMAIL!,
@@ -9,26 +10,20 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 );
 
-const MESSAGES = [
-  { title: "Ontario Feed is Live 🗞️", body: "3 new stories just dropped. Swipe through.", url: "/daily" },
-  { title: "What's happening in Ontario?", body: "Today's feed is ready. Stay informed.", url: "/daily" },
-  { title: "Your daily Ontario briefing 📍", body: "New stories are waiting. Takes 2 minutes.", url: "/daily" },
-  { title: "Don't break your streak 🔥", body: "Today's stories are live. Keep it going.", url: "/daily" },
-  { title: "New perspectives just dropped", body: "See what the left, centre, and right are saying.", url: "/daily" },
-];
-
-export async function GET(req: Request) {
+export async function POST(req: Request) {
   try {
     const authHeader = req.headers.get("authorization");
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const subs = await db.select().from(pushSubscriptions);
-    if (!subs.length) return NextResponse.json({ sent: 0 });
+    const { title, body, url, tag, userId } = await req.json();
 
-    const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
-    const payload = JSON.stringify({ ...msg, tag: "daily-feed" });
+    const subs = userId
+      ? await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId))
+      : await db.select().from(pushSubscriptions);
+
+    const payload = JSON.stringify({ title, body, url: url || "/dashboard", tag });
 
     const results = await Promise.allSettled(
       subs.map((sub) =>
@@ -42,7 +37,6 @@ export async function GET(req: Request) {
     const sent = results.filter((r) => r.status === "fulfilled").length;
     const failed = results.filter((r) => r.status === "rejected").length;
 
-    console.log(`Push cron: ${sent} sent, ${failed} failed`);
     return NextResponse.json({ sent, failed });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });

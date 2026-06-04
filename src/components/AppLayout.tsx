@@ -22,7 +22,36 @@ export default function AppLayout({ children, active }: { children: React.ReactN
   const [mounted, setMounted] = useState(false);
   const [streak, setStreak] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [notifPrompt, setNotifPrompt] = useState(false);
 
+  useEffect(() => {
+    if (!isMobile) return;
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
+    if (Notification.permission === "default") {
+      setTimeout(() => setNotifPrompt(true), 5000);
+    }
+  }, [isMobile]);
+
+  const enableNotifications = async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") { setNotifPrompt(false); return; }
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      });
+      await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sub),
+      });
+      setNotifPrompt(false);
+    } catch (e) {
+      setNotifPrompt(false);
+    }
+  };
+  
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
@@ -347,7 +376,53 @@ export default function AppLayout({ children, active }: { children: React.ReactN
             )}
           </AnimatePresence>
         )}
-      </div>
+</div>
+
+      {isMobile && notifPrompt && (
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 100, opacity: 0 }}
+          style={{
+            position: "fixed", bottom: "80px", left: "16px", right: "16px",
+            backgroundColor: "#0f0f18",
+            border: "1px solid rgba(245,166,35,0.25)",
+            borderRadius: "16px", padding: "16px 18px",
+            zIndex: 60, display: "flex", alignItems: "center",
+            justifyContent: "space-between", gap: "12px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: "#f0ede6", marginBottom: "2px" }}>
+              🔔 Stay in the loop
+            </div>
+            <div style={{ fontSize: "11px", color: "#555" }}>
+              Get notified when new Ontario stories drop
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+            <button
+              onClick={() => setNotifPrompt(false)}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: "#444", fontFamily: "'DM Sans', sans-serif" }}
+            >
+              Not now
+            </button>
+            <button
+              onClick={enableNotifications}
+              style={{
+                backgroundColor: "#f5a623", color: "#000",
+                border: "none", borderRadius: "8px",
+                padding: "7px 14px", fontSize: "12px",
+                fontWeight: "700", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              Enable
+            </button>
+          </div>
+        </motion.div>
+      )}
     </>
   );
-}
+}v
