@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
@@ -51,8 +51,18 @@ export default function ProfileClient({
     ? getLabel(compassPosition.x, compassPosition.y)
     : { label: "Not taken yet", color: "#333" };
 
+  const [leaderboard, setLeaderboard] = useState<{ userId: string; username: string; streakCount: number; civicScore: number; isCurrentUser: boolean }[]>([]);
+  const [currentUserRank, setCurrentUserRank] = useState<number | null>(null);
+
   useEffect(() => {
     fetch("/api/streak", { method: "POST" });
+    fetch("/api/leaderboard")
+      .then(r => r.json())
+      .then(d => {
+        if (d.leaderboard) setLeaderboard(d.leaderboard);
+        if (d.currentUserRank) setCurrentUserRank(d.currentUserRank);
+      })
+      .catch(() => {});
   }, []);
 const stats = [
     { label: "Day Streak", value: streakCount, icon: "🔥", color: "#f5a623" },
@@ -169,6 +179,58 @@ const stats = [
                 <div style={{ fontSize: "13px", color: "#444" }}>Based on your onboarding quiz</div>
               </div>
               <Link href="/onboarding" style={{ fontSize: "12px", color: "#444", textDecoration: "none", border: "1px solid rgba(255,255,255,0.08)", padding: "6px 14px", borderRadius: "8px" }}>Retake quiz</Link>
+            </div>
+          )}
+        </motion.div>
+        {/* Leaderboard */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "24px 28px", marginBottom: "20px" }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+            <div style={{ fontSize: "11px", color: "#444", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase" }}>Ontario Leaderboard</div>
+            {currentUserRank && (
+              <div style={{ fontSize: "12px", color: "#f5a623", fontWeight: "700" }}>You're #{currentUserRank}</div>
+            )}
+          </div>
+
+          {leaderboard.length === 0 ? (
+            <div style={{ fontSize: "13px", color: "#333", textAlign: "center", padding: "20px 0" }}>Loading...</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {leaderboard.slice(0, 10).map((u, i) => {
+                const medals = ["🥇", "🥈", "🥉"];
+                const rank = i + 1;
+                return (
+                  <motion.div
+                    key={u.userId}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "12px",
+                      padding: "10px 14px", borderRadius: "12px",
+                      backgroundColor: u.isCurrentUser ? "rgba(245,166,35,0.08)" : "rgba(255,255,255,0.02)",
+                      border: u.isCurrentUser ? "1px solid rgba(245,166,35,0.2)" : "1px solid rgba(255,255,255,0.04)",
+                    }}
+                  >
+                    <div style={{ fontSize: rank <= 3 ? "18px" : "13px", fontWeight: "700", color: "#555", width: "24px", textAlign: "center", flexShrink: 0 }}>
+                      {rank <= 3 ? medals[rank - 1] : `${rank}`}
+                    </div>
+                    <div style={{ flex: 1, fontSize: "14px", fontWeight: u.isCurrentUser ? "700" : "500", color: u.isCurrentUser ? "#f5a623" : "#ccc" }}>
+                      {u.isCurrentUser ? "You" : u.username}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      {u.streakCount > 0 && (
+                        <div style={{ fontSize: "12px", color: "#f5a623", fontWeight: "600" }}>🔥 {u.streakCount}</div>
+                      )}
+                      <div style={{ fontSize: "13px", fontWeight: "700", color: "#888" }}>{u.civicScore} pts</div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </motion.div>
