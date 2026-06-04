@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { label: "Home", href: "/dashboard", icon: "🏠" },
   { label: "Learn", href: "/learn", icon: "📚" },
   { label: "Polls", href: "/polls", icon: "🗳️" },
-  { label: "Daily", href: "/daily", icon: "🎯" },
+  { label: "Swipe", href: "/daily", icon: "⚡" },
   { label: "Saved", href: "/bookmarks", icon: "🔖" },
   { label: "Opinions", href: "/opinions", icon: "🗒️" },
   { label: "Pulse", href: "/pulse", icon: "⚡" },
@@ -238,7 +238,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
               paddingBottom: "4px",
             }}
           >
-            {NAV_ITEMS.filter(item => !["Pulse", "Saved", "Opinions", "About", "Profile"].includes(item.label)).map(item => {
+              {NAV_ITEMS.filter(item => !["Pulse", "Saved", "Opinions", "About", "Profile", "Daily"].includes(item.label)).map(item => {
               const isActive = active === item.href;
               return (
                 <Link

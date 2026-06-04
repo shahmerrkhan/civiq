@@ -15,7 +15,7 @@ export const learningPaths = pgTable("learning_paths", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   description: text("description"),
-  category: text("category").notNull(), // 'systems' | 'ideologies' | 'figures'
+  category: text("category").notNull(),
   orderIndex: integer("order_index").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -50,13 +50,14 @@ export const contentCards = pgTable("content_cards", {
   publishedAt: timestamp("published_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   deepDive: text("deep_dive"),
+  stat: text("stat"),
 });
 
 export const polls = pgTable("polls", {
   id: uuid("id").primaryKey().defaultRandom(),
   cardId: uuid("card_id").references(() => contentCards.id),
   question: text("question").notNull(),
-  options: jsonb("options").notNull(), // string[]
+  options: jsonb("options").notNull(),
   expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -99,10 +100,10 @@ export const pulseCache = pgTable("pulse_cache", {
 export const dailyQuestions = pgTable("daily_questions", {
   id: uuid("id").primaryKey().defaultRandom(),
   question: text("question").notNull(),
-  options: jsonb("options").notNull(), // string[]
+  options: jsonb("options").notNull(),
   correctIndex: integer("correct_index").notNull(),
   explanation: text("explanation").notNull(),
-  date: text("date").notNull(), // "2025-06-03" format
+  date: text("date").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -118,9 +119,26 @@ export const dailyAnswers = pgTable("daily_answers", {
 export const bookmarks = pgTable("bookmarks", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id").references(() => users.id),
+  cardDbId: text("card_db_id"),
   cardTitle: text("card_title").notNull(),
   cardSummary: text("card_summary").notNull(),
   cardCategory: text("card_category"),
   cardSource: text("card_source"),
   savedAt: timestamp("saved_at").defaultNow(),
+});
+
+export const swipeReactions = pgTable("swipe_reactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").references(() => users.id),
+  cardDbId: text("card_db_id").notNull(),
+  reaction: text("reaction").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userActivity = pgTable("user_activity", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").references(() => users.id),
+  action: text("action").notNull(),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow(),
 });

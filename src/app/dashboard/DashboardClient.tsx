@@ -135,11 +135,37 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          style={{ marginBottom: "32px" }}
+          style={{ marginBottom: "20px" }}
         >
           <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>Ontario Feed</div>
           <div style={{ fontSize: "14px", color: "#444" }}>What's happening in your province today</div>
         </motion.div>
+
+        <Link href="/daily" style={{ textDecoration: "none", display: "block", marginBottom: "24px" }}>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "14px 18px", borderRadius: "14px",
+              background: "linear-gradient(135deg, rgba(245,166,35,0.1) 0%, rgba(245,166,35,0.04) 100%)",
+              border: "1px solid rgba(245,166,35,0.2)",
+              cursor: "pointer",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ fontSize: "20px" }}>⚡</span>
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: "800", color: "#f5a623", marginBottom: "2px" }}>Swipe Mode</div>
+                <div style={{ fontSize: "12px", color: "#555" }}>Read stories faster — swipe up through your feed</div>
+              </div>
+            </div>
+            <div style={{ fontSize: "18px", color: "#f5a623" }}>→</div>
+          </motion.div>
+        </Link>
 
         {til && (
           <motion.div

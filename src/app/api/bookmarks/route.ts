@@ -1,9 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { bookmarks } from "@/db/schema";
+import { bookmarks, userActivity } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { BookmarkSchema } from "@/lib/schemas";
 
 export async function GET() {
   const { userId } = await auth();
@@ -22,12 +21,10 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const body = await req.json();
-    const parsed = BookmarkSchema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
-    const { cardTitle, cardSummary, cardCategory, cardSource } = parsed.data;
+  const body = await req.json();
+  const { cardTitle, cardSummary, cardCategory, cardSource, cardDbId } = body;
+  if (!cardTitle || !cardSummary) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-  // Toggle — if already bookmarked remove it
   const existing = await db
     .select()
     .from(bookmarks)
@@ -39,13 +36,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ bookmarked: false });
   }
 
-  await (db.insert(bookmarks) as any).values({
+  await db.insert(bookmarks).values({
     userId,
+    cardDbId: cardDbId ?? null,
     cardTitle,
     cardSummary,
-    cardCategory: cardCategory || null,
-    cardSource: cardSource || null,
+    cardCategory: cardCategory ?? null,
+    cardSource: cardSource ?? null,
   });
+
+  // Track activity
+  await db.insert(userActivity).values({
+    userId,
+    action: "bookmark",
+    meta: { cardTitle, cardCategory },
+  }).catch(() => {});
 
   return NextResponse.json({ bookmarked: true });
 }

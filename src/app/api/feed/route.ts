@@ -2,63 +2,35 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { db } from "@/db";
 import { contentCards } from "@/db/schema";
-import { eq, gte } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
-function getTodayStart() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
 export const revalidate = 0;
 
-export async function GET() {
-  try {
-    await auth();
+const CARDS_PER_PAGE = 10;
+const MIN_POOL = 20; // keep at least this many cards in DB at all times
 
-    // Return today's already-saved cards if they exist
-    const existing = await db
-      .select()
-      .from(contentCards)
-      .where(gte(contentCards.publishedAt, getTodayStart()));
-
-    if (existing.length >= 6) {
-      const cards = existing.map((c, i) => ({
-        id: i + 1,
-        dbId: c.id,
-        title: c.title,
-        summary: c.summary,
-        source: c.sourceName ?? "Civiq",
-        category: c.category ?? "Ontario",
-        time: timeAgo(c.publishedAt),
-        perspectives: c.perspectives ?? { left: "", centre: "", right: "" },
-        deepdive: c.deepDive ?? "",
-      }));
-      return NextResponse.json({ cards });
-    }
-
-    // Generate fresh cards with Groq
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      max_tokens: 3500,
-      messages: [
-        {
-          role: "user",
-          content: `Generate 6 current Ontario political news cards for young Canadians (16-25). Each must be about a real, recent Ontario or Canadian political issue — housing, healthcare, education, transit, environment, or economy.
+async function generateAndSave(count: number) {
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    max_tokens: 6000,
+    messages: [{
+      role: "user",
+      content: `Generate ${count} current Ontario political news cards for young Canadians (16-25). Cover a variety of these categories: Housing, Healthcare, Education, Environment, Economy, Infrastructure. Each must feel like a real, specific issue — not generic.
 
 Return ONLY valid JSON, no markdown, no backticks:
 {
   "cards": [
     {
       "title": "Short punchy headline, max 12 words",
-      "summary": "2-3 sentence plain-English summary of the issue. What happened, why it matters to young Ontarians.",
-      "source": "CBC / TVO / Toronto Star / Globe and Mail / Ontario Legislature",
+      "summary": "2-3 sentence plain-English summary. What happened, why it matters to young Ontarians.",
+      "source": "CBC | TVO | Toronto Star | Globe and Mail | Ontario Legislature",
       "category": "Housing | Healthcare | Education | Environment | Economy | Infrastructure",
+      "stat": "One specific surprising stat or data point relevant to this issue. Under 20 words.",
       "perspectives": {
-        "left": "2-3 sentences on the progressive/NDP/Green perspective on this issue.",
+        "left": "2-3 sentences on the progressive/NDP/Green perspective.",
         "centre": "2-3 sentences on the centrist/Liberal perspective.",
         "right": "2-3 sentences on the conservative/PC perspective."
       },
@@ -67,96 +39,122 @@ Return ONLY valid JSON, no markdown, no backticks:
   ]
 }
 
-Make them genuinely interesting and relevant. No generic or vague topics.`,
-        },
-      ],
-    });
+Make each card genuinely interesting. Vary the categories. No duplicates.`,
+    }],
+  });
 
-    const raw = completion.choices[0]?.message?.content ?? "";
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error("No JSON in response");
+  const raw = completion.choices[0]?.message?.content ?? "";
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error("No JSON in response");
 
-    let jsonStr = match[0];
-    // If Groq truncated mid-response, close the JSON safely
-    try {
-      JSON.parse(jsonStr);
-    } catch {
-      // Try to salvage partial JSON by closing open structures
-      const lastGoodCard = jsonStr.lastIndexOf('"},');
-      if (lastGoodCard > 0) {
-        jsonStr = jsonStr.substring(0, lastGoodCard + 2) + "]}";
-      } else {
-        throw new Error("JSON too malformed to salvage");
+  let jsonStr = match[0];
+  try {
+    JSON.parse(jsonStr);
+  } catch {
+    const lastGood = jsonStr.lastIndexOf('"},');
+    if (lastGood > 0) jsonStr = jsonStr.substring(0, lastGood + 2) + "]}";
+    else throw new Error("JSON too malformed");
+  }
+
+  const parsed = JSON.parse(jsonStr);
+  const generated = parsed.cards as {
+    title: string; summary: string; source: string; category: string;
+    stat: string; perspectives: { left: string; centre: string; right: string }; deepdive: string;
+  }[];
+
+  const inserted = await db.insert(contentCards).values(
+    generated.map(c => ({
+      title: c.title,
+      summary: c.summary,
+      sourceName: c.source,
+      category: c.category,
+      stat: c.stat,
+      perspectives: c.perspectives,
+      deepDive: c.deepdive,
+      approved: true,
+      publishedAt: new Date(),
+    }))
+  ).returning();
+
+  return inserted;
+}
+
+export async function GET(req: Request) {
+  try {
+    await auth();
+
+    const { searchParams } = new URL(req.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
+    const limit = Math.min(20, parseInt(searchParams.get("limit") ?? String(CARDS_PER_PAGE)));
+    const offset = (page - 1) * limit;
+
+    // Count total approved cards
+    const allCards = await db
+      .select()
+      .from(contentCards)
+      .where(eq(contentCards.approved, true))
+      .orderBy(desc(contentCards.publishedAt));
+
+    // If pool is running low, generate more in background
+    if (allCards.length < MIN_POOL) {
+      try {
+        await generateAndSave(MIN_POOL - allCards.length);
+        // Refetch after generating
+        const refreshed = await db
+          .select()
+          .from(contentCards)
+          .where(eq(contentCards.approved, true))
+          .orderBy(desc(contentCards.publishedAt));
+        const slice = refreshed.slice(offset, offset + limit);
+        return NextResponse.json({ cards: formatCards(slice), total: refreshed.length, page, hasMore: offset + limit < refreshed.length });
+      } catch (genErr) {
+        console.error("Generation failed:", genErr);
       }
     }
 
-    const parsed = JSON.parse(jsonStr);
-    const generated = parsed.cards as {
-      title: string;
-      summary: string;
-      source: string;
-      category: string;
-      perspectives: { left: string; centre: string; right: string };
-      deepdive: string;
-    }[];
+    const slice = allCards.slice(offset, offset + limit);
 
-    // Persist to DB so opinions/bookmarks have a stable reference
-    const inserted = await db
-      .insert(contentCards)
-      .values(
-        generated.map((c) => ({
-          title: c.title,
-          summary: c.summary,
-          sourceName: c.source,
-          category: c.category,
-          perspectives: c.perspectives,
-          deepDive: c.deepdive,
-          approved: true,
-          publishedAt: new Date(),
-        }))
-      )
-      .returning();
+    // If we're near the end of what we have, trigger background generation
+    if (offset + limit >= allCards.length - 5) {
+      generateAndSave(10).catch(console.error);
+    }
 
-    const cards = inserted.map((c, i) => ({
-      id: i + 1,
-      dbId: c.id,
-      title: c.title,
-      summary: c.summary,
-      source: c.sourceName ?? "Civiq",
-      category: c.category ?? "Ontario",
-      time: "Just now",
-      perspectives: c.perspectives ?? { left: "", centre: "", right: "" },
-      deepdive: c.deepDive ?? "",
-    }));
+    return NextResponse.json({
+      cards: formatCards(slice),
+      total: allCards.length,
+      page,
+      hasMore: offset + limit < allCards.length,
+    });
 
-    return NextResponse.json({ cards });
   } catch (err) {
     console.error("Feed error:", err);
-    // Fallback: return whatever cards exist in DB even if old
     try {
       const fallback = await db
         .select()
         .from(contentCards)
-        .where(eq(contentCards.approved, true));
-
+        .where(eq(contentCards.approved, true))
+        .orderBy(desc(contentCards.publishedAt));
       if (fallback.length > 0) {
-        const cards = fallback.slice(0, 6).map((c, i) => ({
-          id: i + 1,
-          dbId: c.id,
-          title: c.title,
-          summary: c.summary,
-          source: c.sourceName ?? "Civiq",
-          category: c.category ?? "Ontario",
-          time: timeAgo(c.publishedAt),
-          perspectives: c.perspectives ?? { left: "", centre: "", right: "" },
-          deepdive: c.deepDive ?? "",
-        }));
-        return NextResponse.json({ cards });
+        return NextResponse.json({ cards: formatCards(fallback.slice(0, 10)), total: fallback.length, page: 1, hasMore: false });
       }
     } catch {}
-
     return NextResponse.json({ error: "Could not load feed" }, { status: 500 });
   }
+}
+
+function formatCards(cards: typeof contentCards.$inferSelect[]) {
+  return cards.map((c, i) => ({
+    id: i + 1,
+    dbId: c.id,
+    title: c.title,
+    summary: c.summary,
+    source: c.sourceName ?? "Civiq",
+    category: c.category ?? "Ontario",
+    time: timeAgo(c.publishedAt),
+    stat: c.stat ?? null,
+    perspectives: (c.perspectives as { left: string; centre: string; right: string }) ?? { left: "", centre: "", right: "" },
+    deepdive: c.deepDive ?? "",
+  }));
 }
 
 function timeAgo(date: Date | null) {
