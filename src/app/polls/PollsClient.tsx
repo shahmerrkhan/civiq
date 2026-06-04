@@ -33,7 +33,8 @@ export default function PollsClient({
   );
   const [optimisticCounts, setOptimisticCounts] = useState<any[]>(voteCounts);
   const [loading, setLoading] = useState<string | null>(null);
-
+  const [justVoted, setJustVoted] = useState<string | null>(null);
+  
   const getOptionsWithCounts = (pollId: string, options: string[]) => {
     return options.map((opt: string, idx: number) => {
       const relevant = optimisticCounts.filter((c) => c.pollId === pollId && c.optionIndex === idx);
@@ -65,13 +66,15 @@ export default function PollsClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pollId, optionIndex }),
       });
+      setJustVoted(pollId);
+      setTimeout(() => setJustVoted(null), 4000);
     } catch {}
     setLoading(null);
   };
 
   return (
     <AppLayout active="/polls">
-      <div style={{ padding: "40px 48px", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
+      <div style={{ padding: "clamp(20px, 5vw, 40px) clamp(16px, 4vw, 48px)", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
 
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ marginBottom: "8px" }}>
           <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px" }}>Polls</div>
@@ -202,8 +205,8 @@ export default function PollsClient({
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               transition={{ delay: 0.5 }}
-                              style={{ position: "relative", marginTop: "8px", display: "flex", gap: "10px", flexWrap: "wrap" }}
-                            >
+                              style={{ position: "relative", marginTop: "10px", display: "flex", gap: "8px", flexWrap: "wrap", paddingTop: "8px", borderTop: "1px solid rgba(255,255,255,0.04)" }}
+                              >
                               {[
                                 { key: "Left", color: "#60a5fa" },
                                 { key: "Centre", color: "#a78bfa" },
@@ -211,11 +214,12 @@ export default function PollsClient({
                               ].map(({ key, color }) =>
                                 opt.byLeaning[key] > 0 ? (
                                   <span key={key} style={{
-                                    fontSize: "10px", fontWeight: "600",
+                                    fontSize: "11px", fontWeight: "700",
                                     color, backgroundColor: `${color}15`,
-                                    padding: "2px 8px", borderRadius: "100px",
+                                    padding: "3px 10px", borderRadius: "100px",
+                                    border: `1px solid ${color}25`,
                                   }}>
-                                    {key}: {opt.byLeaning[key]}
+                                    {key} · {opt.byLeaning[key]}
                                   </span>
                                 ) : null
                               )}
@@ -226,8 +230,49 @@ export default function PollsClient({
                     })}
                   </div>
 
+                    <AnimatePresence>
+                    {justVoted === poll.id && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        style={{
+                          marginTop: "14px", padding: "12px 16px",
+                          borderRadius: "12px",
+                          backgroundColor: "rgba(245,166,35,0.06)",
+                          border: "1px solid rgba(245,166,35,0.15)",
+                          display: "flex", alignItems: "center",
+                          justifyContent: "space-between", gap: "12px",
+                        }}
+                      >
+                        <span style={{ fontSize: "13px", color: "#888" }}>See how Ontario thinks?</span>
+                        <button
+                          onClick={() => {
+                            if (navigator.share) {
+                              navigator.share({
+                                title: "Civiq Poll",
+                                text: `I just voted on "${poll.question}" on Civiq. Check it out:`,
+                                url: "https://civiq.ca/polls",
+                              }).catch(() => {});
+                            }
+                          }}
+                          style={{
+                            backgroundColor: "#f5a623", color: "#000",
+                            border: "none", borderRadius: "8px",
+                            padding: "6px 14px", fontSize: "12px",
+                            fontWeight: "700", cursor: "pointer",
+                            fontFamily: "'DM Sans', sans-serif",
+                            flexShrink: 0,
+                          }}
+                        >
+                          Share 🔗
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div style={{ marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: "12px", color: "#333", fontWeight: "500" }}>
+'                    <span style={{ fontSize: "12px", color: "#333", fontWeight: "500" }}>
                       {totalVotes} {totalVotes === 1 ? "vote" : "votes"}
                     </span>
                     {isExpired && (
