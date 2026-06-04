@@ -28,7 +28,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+      <ClerkProvider
+  localization={{
+    unstable__errors: {
+      form_password_pwned: "This password has shown up in a known data breach. Pick something unique to you and try again.",
+    },
+  }}
+>
       <html lang="en" data-scroll-behavior="smooth">
         <head>
           <link rel="manifest" href="/manifest.json" />
