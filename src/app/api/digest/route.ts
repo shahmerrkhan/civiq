@@ -13,16 +13,17 @@ export async function POST(req: Request) {
 
     const users = await sql`SELECT email FROM users WHERE email != '' AND onboarding_complete = true`;
 
-    const cached = await sql`
-      SELECT content FROM feed_cache
-      ORDER BY created_at DESC
-      LIMIT 1
+const recentCards = await sql`
+      SELECT title, summary, category, perspectives
+      FROM content_cards
+      WHERE approved = true
+      ORDER BY published_at DESC
+      LIMIT 3
     `;
 
-    if (!cached[0]) return NextResponse.json({ error: "No feed content" }, { status: 404 });
+    if (!recentCards.length) return NextResponse.json({ error: "No feed content" }, { status: 404 });
 
-    const cards = cached[0].content as any[];
-    const top3 = cards.slice(0, 3);
+    const top3 = recentCards;
 
     const html = `
       <!DOCTYPE html>

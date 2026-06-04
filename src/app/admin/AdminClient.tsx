@@ -41,7 +41,24 @@ export default function AdminClient({ cards: initial, polls }: { cards: Card[]; 
   });
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [sendingDigest, setSendingDigest] = useState(false);
+  const [digestMsg, setDigestMsg] = useState("");
 
+  const handleSendDigest = async () => {
+    setSendingDigest(true);
+    const res = await fetch("/api/digest", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || ""}`,
+      },
+    });
+    const data = await res.json();
+    setDigestMsg(data.sent ? `✓ Sent to ${data.sent} users` : "Failed — check console");
+    setSendingDigest(false);
+    setTimeout(() => setDigestMsg(""), 4000);
+  };
+  
   const pending = cards.filter(c => !c.approved);
   const approved = cards.filter(c => c.approved);
 
@@ -298,10 +315,29 @@ export default function AdminClient({ cards: initial, polls }: { cards: Card[]; 
           transition={{ duration: 0.4 }}
           style={{ marginBottom: "28px" }}
         >
-          <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>Admin</div>
-          <div style={{ fontSize: "14px", color: "#444" }}>
-            {pending.length} pending · {approved.length} live
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+          <div>
+            <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>Admin</div>
+            <div style={{ fontSize: "14px", color: "#444" }}>
+              {pending.length} pending · {approved.length} live
+            </div>
           </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
+            <motion.button
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              onClick={handleSendDigest}
+              disabled={sendingDigest}
+              style={{
+                padding: "9px 18px", borderRadius: "10px",
+                border: "1px solid rgba(245,166,35,0.3)",
+                backgroundColor: "rgba(245,166,35,0.08)", color: "#f5a623",
+                fontSize: "13px", fontWeight: "700", cursor: sendingDigest ? "not-allowed" : "pointer",
+                fontFamily: "'DM Sans', sans-serif", opacity: sendingDigest ? 0.6 : 1,
+              }}
+            >{sendingDigest ? "Sending..." : "📧 Send weekly digest"}</motion.button>
+            {digestMsg && <div style={{ fontSize: "12px", color: "#4ade80" }}>{digestMsg}</div>}
+          </div>
+        </div>
         </motion.div>
 
         {/* Tabs */}
