@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 const QUESTIONS = [
   {
@@ -105,241 +106,395 @@ const QUESTIONS = [
   },
 ];
 
+const TOPICS = [
+  { id: "housing", label: "Housing", emoji: "🏠" },
+  { id: "healthcare", label: "Healthcare", emoji: "🏥" },
+  { id: "education", label: "Education", emoji: "📚" },
+  { id: "environment", label: "Environment", emoji: "🌿" },
+  { id: "economy", label: "Economy", emoji: "💰" },
+  { id: "infrastructure", label: "Infrastructure", emoji: "🚇" },
+];
+
 function getLabel(x: number, y: number) {
-  if (x < -0.15 && y < -0.15) return { label: "Left Libertarian", color: "#4ade80" };
-  if (x < -0.15 && y >= -0.15) return { label: "Left Leaning", color: "#60a5fa" };
-  if (x > 0.15 && y < -0.15) return { label: "Right Libertarian", color: "#f59e0b" };
-  if (x > 0.15 && y >= -0.15) return { label: "Right Leaning", color: "#f87171" };
-  if (x < -0.05) return { label: "Centre Left", color: "#818cf8" };
-  if (x > 0.05) return { label: "Centre Right", color: "#fb923c" };
-  return { label: "Centrist", color: "#a78bfa" };
+  if (x < -0.15 && y < -0.15) return { label: "Left Libertarian", color: "#4ade80", desc: "You value personal freedom and progressive economics." };
+  if (x < -0.15 && y >= -0.15) return { label: "Left Leaning", color: "#60a5fa", desc: "You lean toward collective solutions and social equity." };
+  if (x > 0.15 && y < -0.15) return { label: "Right Libertarian", color: "#f59e0b", desc: "You value personal freedom and free market economics." };
+  if (x > 0.15 && y >= -0.15) return { label: "Right Leaning", color: "#f87171", desc: "You lean toward traditional values and market solutions." };
+  if (x < -0.05) return { label: "Centre Left", color: "#818cf8", desc: "You support moderate progressive policies." };
+  if (x > 0.05) return { label: "Centre Right", color: "#fb923c", desc: "You support moderate conservative policies." };
+  return { label: "Centrist", color: "#a78bfa", desc: "You weigh issues individually rather than along party lines." };
 }
+
+type Stage = "welcome" | "quiz" | "topics" | "result";
 
 export default function Onboarding() {
   const router = useRouter();
-    const [started, setStarted] = useState(false);
-const [step, setStep] = useState(0);
+  const [stage, setStage] = useState<Stage>("welcome");
+  const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<{ x: number; y: number }[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-  const [done, setDone] = useState(false);
   const [result, setResult] = useState<{ x: number; y: number } | null>(null);
+  const [direction, setDirection] = useState(1);
 
-  const progress = (step / QUESTIONS.length) * 100;
+  const progress = stage === "quiz" ? ((step + 1) / QUESTIONS.length) * 100 : stage === "topics" ? 100 : 0;
   const current = QUESTIONS[step];
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (selected === null) return;
     const newAnswers = [...answers, current.options[selected].value];
+    setAnswers(newAnswers);
+    setDirection(1);
 
     if (step < QUESTIONS.length - 1) {
-      setAnswers(newAnswers);
       setSelected(null);
       setStep(step + 1);
     } else {
-      setSaving(true);
-      const avg = newAnswers.reduce(
-        (acc, cur) => ({ x: acc.x + cur.x, y: acc.y + cur.y }),
-        { x: 0, y: 0 }
-      );
-      const final = {
-        x: avg.x / newAnswers.length,
-        y: avg.y / newAnswers.length,
-      };
-      setResult(final);
-
-      await fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ compassPosition: final }),
-      });
-
-      setSaving(false);
-      setDone(true);
+      setStage("topics");
+      setSelected(null);
     }
   };
 
-  const styles: Record<string, any> = {
-      root: {
-      minHeight: "100vh",
-      backgroundColor: "#06060c",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'DM Sans', sans-serif",
-      color: "#fff",
-      padding: "24px",
-    },
-    container: {
-      width: "100%",
-      maxWidth: "600px",
-    },
-    progressBar: {
-      width: "100%",
-      height: "3px",
-      backgroundColor: "rgba(255,255,255,0.06)",
-      borderRadius: "10px",
-      marginBottom: "48px",
-      overflow: "hidden",
-    },
-    progressFill: {
-      height: "100%",
-      width: `${progress}%`,
-      backgroundColor: "#f5a623",
-      borderRadius: "10px",
-      transition: "width 0.4s ease",
-    },
-    step: {
-      fontSize: "12px",
-      color: "#444",
-      fontWeight: "600",
-      letterSpacing: "0.08em",
-      textTransform: "uppercase",
-      marginBottom: "16px",
-    },
-    question: {
-      fontSize: "clamp(22px, 4vw, 30px)",
-      fontWeight: "700",
-      lineHeight: "1.3",
-      letterSpacing: "-0.5px",
-      marginBottom: "36px",
-      color: "#ffffff",
-    },
-    options: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "12px",
-    },
-    option: (isSelected: boolean) => ({
-      padding: "18px 22px",
-      borderRadius: "12px",
-      border: isSelected ? "1px solid #f5a623" : "1px solid rgba(255,255,255,0.07)",
-      backgroundColor: isSelected ? "rgba(245,166,35,0.08)" : "rgba(255,255,255,0.02)",
-      cursor: "pointer",
-      fontSize: "15px",
-      fontWeight: "500",
-      color: isSelected ? "#f5a623" : "#aaa",
-      transition: "all 0.2s ease",
-      textAlign: "left",
-    }),
-    nextBtn: {
-      marginTop: "28px",
-      width: "100%",
-      padding: "16px",
-      borderRadius: "10px",
-      backgroundColor: selected !== null ? "#f5a623" : "rgba(255,255,255,0.04)",
-      color: selected !== null ? "#000" : "#333",
-      fontWeight: "700",
-      fontSize: "15px",
-      border: "none",
-      cursor: selected !== null ? "pointer" : "not-allowed",
-      transition: "all 0.2s ease",
-      fontFamily: "'DM Sans', sans-serif",
-    },
-    resultBox: {
-      textAlign: "center",
-      animation: "fadeUp 0.6s ease forwards",
-    },
-    resultLabel: (color: string): React.CSSProperties => ({
-      fontSize: "36px",
-      fontWeight: "800",
-      color,
-      letterSpacing: "-1px",
-      marginBottom: "12px",
-    }),
-    resultSub: {
-      fontSize: "16px",
-      color: "#555",
-      marginBottom: "40px",
-      lineHeight: "1.6",
-    },
-    dashBtn: {
-      backgroundColor: "#f5a623",
-      color: "#000",
-      padding: "16px 40px",
-      borderRadius: "10px",
-      fontWeight: "700",
-      fontSize: "15px",
-      border: "none",
-      cursor: "pointer",
-      fontFamily: "'DM Sans', sans-serif",
-    },
+  const toggleTopic = (id: string) => {
+    setSelectedTopics(prev =>
+      prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]
+    );
   };
 
-  if (done && result) {
-    const { label, color } = getLabel(result.x, result.y);
+  const handleFinish = async () => {
+    setSaving(true);
+    const avg = answers.reduce(
+      (acc, cur) => ({ x: acc.x + cur.x, y: acc.y + cur.y }),
+      { x: 0, y: 0 }
+    );
+    const final = {
+      x: avg.x / answers.length,
+      y: avg.y / answers.length,
+    };
+    setResult(final);
+
+    await fetch("/api/onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        compassPosition: final,
+        topics: selectedTopics,
+      }),
+    });
+
+    setSaving(false);
+    setStage("result");
+  };
+
+  const base = {
+    minHeight: "100vh",
+    backgroundColor: "#06060c",
+    display: "flex" as const,
+    flexDirection: "column" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    fontFamily: "'DM Sans', sans-serif",
+    color: "#fff",
+    padding: "24px",
+  };
+
+  // WELCOME
+  if (stage === "welcome") {
     return (
       <>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap'); * { margin:0; padding:0; box-sizing:border-box; } @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }`}</style>
-        <div style={styles.root}>
-          <div style={{ ...styles.container, ...styles.resultBox }}>
-            <p style={{ fontSize: "13px", color: "#444", marginBottom: "24px", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase" }}>Your political compass</p>
-            <div style={styles.resultLabel(color)}>{label}</div>
-            <p style={styles.resultSub}>This is just a starting point. Your feed and learning path will reflect this — but you can always explore every perspective on Civiq.</p>
-            <button style={styles.dashBtn} onClick={() => router.push("/dashboard")}>Go to my dashboard</button>
-          </div>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@900&display=swap');
+          * { margin:0; padding:0; box-sizing:border-box; }
+        `}</style>
+        <div style={base}>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{ width: "100%", maxWidth: "520px", textAlign: "center" }}
+          >
+            <div style={{ fontSize: "11px", color: "#f5a623", fontWeight: "700", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "24px" }}>
+              Welcome to Civiq
+            </div>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(32px, 6vw, 52px)", fontWeight: "900", letterSpacing: "-1.5px", marginBottom: "20px", lineHeight: "1.1", color: "#f0ede6" }}>
+              Know where<br />you stand.
+            </h1>
+            <p style={{ fontSize: "16px", color: "#555", lineHeight: "1.7", marginBottom: "12px", maxWidth: "400px", margin: "0 auto 12px" }}>
+              10 questions about real Ontario issues. No right or wrong answers — this helps us personalize your feed.
+            </p>
+            <p style={{ fontSize: "13px", color: "#333", marginBottom: "40px" }}>Takes about 2 minutes.</p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "320px", margin: "0 auto" }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{ backgroundColor: "#f5a623", color: "#000", padding: "16px", borderRadius: "12px", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                onClick={() => setStage("quiz")}
+              >
+                Start the quiz
+              </motion.button>
+              <button
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#333", fontFamily: "'DM Sans', sans-serif", padding: "8px" }}
+                onClick={async () => {
+                  await fetch("/api/onboarding", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ compassPosition: { x: 0, y: 0 }, topics: [] }),
+                  });
+                  router.push("/dashboard");
+                }}
+              >
+                Skip for now
+              </button>
+            </div>
+          </motion.div>
         </div>
       </>
     );
   }
-if (!started) {
-  return (
-    <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap'); * { margin:0; padding:0; box-sizing:border-box; } @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }`}</style>
-      <div style={styles.root}>
-        <div style={{ ...styles.container, textAlign: "center", animation: "fadeUp 0.6s ease forwards" }}>
-          <p style={{ fontSize: "13px", color: "#f5a623", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "24px" }}>Welcome to Civiq</p>
-          <h1 style={{ fontSize: "clamp(32px, 5vw, 48px)", fontWeight: "800", letterSpacing: "-1.5px", marginBottom: "20px", lineHeight: "1.1" }}>Let's figure out where you stand</h1>
-          <p style={{ fontSize: "16px", color: "#555", lineHeight: "1.7", marginBottom: "16px", maxWidth: "440px", margin: "0 auto 16px" }}>
-            10 quick questions about real Ontario issues. No wrong answers — this just helps us personalize your feed.
-          </p>
-          <p style={{ fontSize: "13px", color: "#333", marginBottom: "48px" }}>Takes about 2 minutes. You can always change this later.</p>
-          <button
-            style={{ backgroundColor: "#f5a623", color: "#000", padding: "16px 40px", borderRadius: "10px", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
-            onClick={() => setStarted(true)}
-          >
-            Start the quiz
-          </button>
-          <p style={{ marginTop: "16px", fontSize: "13px", color: "#333" }}>or <span style={{ color: "#f5a623", cursor: "pointer", textDecoration: "underline" }} onClick={async () => {
-  await fetch("/api/onboarding", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ compassPosition: { x: 0, y: 0 } }),
-  });
-  router.push("/dashboard");
-}}>skip for now
-        </span></p>
-        </div>
-      </div>
-    </>
-  );
-}
 
+  // RESULT
+  if (stage === "result" && result) {
+    const { label, color, desc } = getLabel(result.x, result.y);
+    return (
+      <>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@900&display=swap');
+          * { margin:0; padding:0; box-sizing:border-box; }
+        `}</style>
+        <div style={base}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            style={{ width: "100%", maxWidth: "520px", textAlign: "center" }}
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              style={{ fontSize: "56px", marginBottom: "24px" }}
+            >
+              🎯
+            </motion.div>
+            <div style={{ fontSize: "11px", color: "#444", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "16px" }}>
+              Your political compass
+            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              style={{ fontSize: "clamp(28px, 6vw, 42px)", fontWeight: "800", color, letterSpacing: "-1px", marginBottom: "12px" }}
+            >
+              {label}
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              style={{ fontSize: "15px", color: "#555", lineHeight: "1.7", marginBottom: "40px", maxWidth: "380px", margin: "0 auto 40px" }}
+            >
+              {desc} Your feed will reflect this — but you'll always see every perspective on Civiq.
+            </motion.p>
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              style={{ backgroundColor: "#f5a623", color: "#000", padding: "16px 48px", borderRadius: "12px", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+              onClick={() => router.push("/dashboard")}
+            >
+              Go to my feed →
+            </motion.button>
+          </motion.div>
+        </div>
+      </>
+    );
+  }
+
+  // TOPICS
+  if (stage === "topics") {
+    return (
+      <>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+          * { margin:0; padding:0; box-sizing:border-box; }
+        `}</style>
+        <div style={base}>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ width: "100%", maxWidth: "520px" }}
+          >
+            <div style={{ fontSize: "11px", color: "#f5a623", fontWeight: "700", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "16px" }}>
+              Almost done
+            </div>
+            <h2 style={{ fontSize: "clamp(22px, 4vw, 30px)", fontWeight: "800", letterSpacing: "-0.5px", marginBottom: "10px" }}>
+              What issues matter most to you?
+            </h2>
+            <p style={{ fontSize: "14px", color: "#444", marginBottom: "32px", lineHeight: "1.6" }}>
+              Pick as many as you want. We'll prioritize these in your feed.
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "32px" }}>
+              {TOPICS.map((topic, i) => {
+                const isSelected = selectedTopics.includes(topic.id);
+                return (
+                  <motion.button
+                    key={topic.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => toggleTopic(topic.id)}
+                    style={{
+                      padding: "18px 16px",
+                      borderRadius: "14px",
+                      border: isSelected ? "1px solid #f5a623" : "1px solid rgba(255,255,255,0.08)",
+                      backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "rgba(255,255,255,0.02)",
+                      cursor: "pointer",
+                      display: "flex", alignItems: "center", gap: "12px",
+                      fontFamily: "'DM Sans', sans-serif",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <span style={{ fontSize: "22px" }}>{topic.emoji}</span>
+                    <span style={{ fontSize: "14px", fontWeight: "600", color: isSelected ? "#f5a623" : "#888" }}>{topic.label}</span>
+                    {isSelected && <span style={{ marginLeft: "auto", fontSize: "14px" }}>✓</span>}
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={handleFinish}
+              disabled={saving}
+              style={{
+                width: "100%", padding: "16px", borderRadius: "12px",
+                backgroundColor: "#f5a623", color: "#000",
+                fontWeight: "700", fontSize: "15px", border: "none",
+                cursor: saving ? "not-allowed" : "pointer",
+                fontFamily: "'DM Sans', sans-serif",
+                opacity: saving ? 0.7 : 1,
+              }}
+            >
+              {saving ? "Setting up your feed..." : "See my results →"}
+            </motion.button>
+
+            <button
+              onClick={handleFinish}
+              disabled={saving}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#333", fontFamily: "'DM Sans', sans-serif", padding: "12px", width: "100%", marginTop: "4px" }}
+            >
+              Skip topic selection
+            </button>
+          </motion.div>
+        </div>
+      </>
+    );
+  }
+
+  // QUIZ
   return (
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap'); * { margin:0; padding:0; box-sizing:border-box; } @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }`}</style>
-      <div style={styles.root}>
-        <div style={styles.container}>
-          <div style={styles.progressBar}>
-            <div style={styles.progressFill} />
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
+      `}</style>
+      <div style={base}>
+        <div style={{ width: "100%", maxWidth: "560px" }}>
+          {/* Progress */}
+          <div style={{ marginBottom: "40px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <div style={{ fontSize: "12px", color: "#444", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Question {step + 1} of {QUESTIONS.length}
+              </div>
+              <div style={{ fontSize: "12px", color: "#333" }}>{Math.round(progress)}%</div>
+            </div>
+            <div style={{ width: "100%", height: "3px", backgroundColor: "rgba(255,255,255,0.06)", borderRadius: "10px", overflow: "hidden" }}>
+              <motion.div
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                style={{ height: "100%", backgroundColor: "#f5a623", borderRadius: "10px" }}
+              />
+            </div>
           </div>
-          <p style={styles.step}>Question {step + 1} of {QUESTIONS.length}</p>
-          <p style={styles.question}>{current.question}</p>
-          <div style={styles.options}>
-            {current.options.map((opt, i) => (
-              <button
-                key={i}
-                style={styles.option(selected === i)}
-                onClick={() => setSelected(i)}
-              >
-                {opt.text}
-              </button>
-            ))}
-          </div>
-          <button style={styles.nextBtn} onClick={handleNext} disabled={selected === null || saving}>
-            {saving ? "Saving..." : step === QUESTIONS.length - 1 ? "See my result" : "Next"}
-          </button>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: direction * 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: direction * -30 }}
+              transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              <p style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: "700", lineHeight: "1.35", letterSpacing: "-0.5px", marginBottom: "28px", color: "#f0ede6" }}>
+                {current.question}
+              </p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {current.options.map((opt, i) => {
+                  const isSelected = selected === i;
+                  return (
+                    <motion.button
+                      key={i}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => setSelected(i)}
+                      style={{
+                        padding: "16px 20px",
+                        borderRadius: "12px",
+                        border: isSelected ? "1px solid #f5a623" : "1px solid rgba(255,255,255,0.07)",
+                        backgroundColor: isSelected ? "rgba(245,166,35,0.08)" : "rgba(255,255,255,0.02)",
+                        cursor: "pointer",
+                        fontSize: "15px",
+                        fontWeight: "500",
+                        color: isSelected ? "#f5a623" : "#aaa",
+                        transition: "all 0.15s ease",
+                        textAlign: "left",
+                        fontFamily: "'DM Sans', sans-serif",
+                        display: "flex", alignItems: "center", gap: "12px",
+                      }}
+                    >
+                      <span style={{
+                        width: "24px", height: "24px", borderRadius: "50%", flexShrink: 0,
+                        border: isSelected ? "1px solid #f5a623" : "1px solid rgba(255,255,255,0.1)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: "11px", fontWeight: "700",
+                        color: isSelected ? "#f5a623" : "#444",
+                        backgroundColor: isSelected ? "rgba(245,166,35,0.15)" : "transparent",
+                      }}>
+                        {isSelected ? "✓" : String.fromCharCode(65 + i)}
+                      </span>
+                      {opt.text}
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          <motion.button
+            whileHover={selected !== null ? { scale: 1.01 } : {}}
+            whileTap={selected !== null ? { scale: 0.99 } : {}}
+            onClick={handleNext}
+            disabled={selected === null}
+            style={{
+              marginTop: "24px", width: "100%", padding: "16px",
+              borderRadius: "12px", border: "none",
+              backgroundColor: selected !== null ? "#f5a623" : "rgba(255,255,255,0.04)",
+              color: selected !== null ? "#000" : "#333",
+              fontWeight: "700", fontSize: "15px",
+              cursor: selected !== null ? "pointer" : "not-allowed",
+              transition: "all 0.2s ease",
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            {step === QUESTIONS.length - 1 ? "See my result →" : "Next →"}
+          </motion.button>
         </div>
       </div>
     </>
