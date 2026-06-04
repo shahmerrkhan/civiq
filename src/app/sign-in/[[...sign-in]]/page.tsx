@@ -32,11 +32,6 @@ export default function SignInPage() {
       <div style={{ width: "100%", maxWidth: "480px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
         <SignIn
           forceRedirectUrl="/dashboard"
-          localization={{
-            unstable__errors: {
-              form_password_pwned: "This password has shown up in a known data breach. Pick something unique to you and try again.",
-            },
-          }}
           appearance={{
             elements: {
               headerTitle: { display: "none" },
