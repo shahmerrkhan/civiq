@@ -320,11 +320,38 @@ export default function Learn() {
                 transition={{ delay: pi * 0.08, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 style={{ marginBottom: "40px" }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-                  <span style={{ fontSize: "20px" }}>{path.icon}</span>
-                  <span style={{ fontSize: "16px", fontWeight: "700", color: path.color }}>{path.category}</span>
-                  <span style={{ fontSize: "12px", color: "#333" }}>{path.modules.length} modules</span>
-                </div>
+                {(() => {
+                  const totalInCategory = PATHS.find(p => p.category === path.category)?.modules.length ?? path.modules.length;
+                  const completedInCategory = PATHS.find(p => p.category === path.category)?.modules.filter(m => completed.has(m.slug)).length ?? 0;
+                  const pct = Math.round((completedInCategory / totalInCategory) * 100);
+                  const allDone = completedInCategory === totalInCategory;
+                  return (
+                    <div style={{ marginBottom: "16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "20px" }}>{path.icon}</span>
+                        <span style={{ fontSize: "16px", fontWeight: "700", color: path.color }}>{path.category}</span>
+                        <span style={{ fontSize: "12px", color: "#333" }}>{totalInCategory} modules</span>
+                        {allDone && (
+                          <motion.span
+                            initial={{ scale: 0 }} animate={{ scale: 1 }}
+                            style={{ fontSize: "11px", fontWeight: "700", color: "#4ade80", backgroundColor: "#4ade8015", border: "1px solid #4ade8030", padding: "2px 8px", borderRadius: "100px" }}
+                          >Complete 🎉</motion.span>
+                        )}
+                        <span style={{ fontSize: "12px", color: allDone ? "#4ade80" : "#444", marginLeft: "auto", fontWeight: "600" }}>
+                          {completedInCategory}/{totalInCategory}
+                        </span>
+                      </div>
+                      <div style={{ height: "3px", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "100px", overflow: "hidden" }}>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                          style={{ height: "100%", backgroundColor: allDone ? "#4ade80" : path.color, borderRadius: "100px" }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
                 {path.modules.map((mod, i) => (
                   <motion.div
                     key={mod.slug}
