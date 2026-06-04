@@ -55,6 +55,9 @@ export default function SignUpPage() {
                 borderColor: "rgba(255,255,255,0.15)",
                 color: "#f0ede6",
               },
+              formFieldSuccessText: { color: "#4caf50" },
+              formFieldHintText: { color: "#aaa" },
+              formFieldErrorText: { color: "#ff6b6b" },
               otpCodeFieldInput: {
                 backgroundColor: "#242424",
                 borderColor: "rgba(255,255,255,0.2)",
