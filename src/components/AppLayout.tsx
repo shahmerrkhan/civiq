@@ -286,24 +286,23 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                     padding: "6px 12px",
                     position: "relative",
                     minWidth: "52px",
+                    overflow: "visible",
                   }}
                 >
+                  <span style={{ fontSize: "18px" }}>{item.icon}</span>
+                  <span>{item.label}</span>
                   {isActive && (
                     <motion.div
                       layoutId="mobileActiveNav"
                       style={{
-                        position: "absolute",
-                        top: "-1px", left: "50%",
-                        transform: "translateX(-50%)",
                         width: "24px", height: "2px",
-                        borderRadius: "0 0 4px 4px",
+                        borderRadius: "2px",
                         backgroundColor: "#f5a623",
+                        marginTop: "2px",
                       }}
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
-                  <span style={{ fontSize: "18px" }}>{item.icon}</span>
-                  <span>{item.label}</span>
                 </Link>
               );
             })}

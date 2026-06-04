@@ -287,58 +287,68 @@ export default function SwipeClient() {
           <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(255,255,255,0.03)", borderRadius: "20px", zIndex: 10, pointerEvents: "none", transition: "opacity 0.15s ease" }} />
         )}
 
-        {showShare && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              position: "absolute", bottom: "90px", left: "16px", right: "16px",
-              backgroundColor: "#0f0f18",
-              border: "1px solid rgba(245,166,35,0.25)",
-              borderRadius: "16px", padding: "16px 18px",
-              zIndex: 20, display: "flex", alignItems: "center",
-              justifyContent: "space-between", gap: "12px",
-            }}
-          >
-            <div>
-              <div style={{ fontSize: "13px", fontWeight: "700", color: "#f0ede6", marginBottom: "2px" }}>
-                🔥 You've read 5 stories
+      <AnimatePresence>
+          {showShare && (
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              style={{
+                position: "fixed",
+                bottom: "84px",
+                left: "12px", right: "12px",
+                backgroundColor: "#0f0f18",
+                border: "1px solid rgba(245,166,35,0.3)",
+                borderRadius: "18px",
+                padding: "16px 18px",
+                zIndex: 100,
+                display: "flex", alignItems: "center",
+                justifyContent: "space-between", gap: "12px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: "13px", fontWeight: "700", color: "#f0ede6", marginBottom: "3px" }}>
+                  🔥 You've read 5 stories
+                </div>
+                <div style={{ fontSize: "11px", color: "#555", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  Share with friends and grow the movement
+                </div>
               </div>
-              <div style={{ fontSize: "11px", color: "#555" }}>
-                Share your streak with friends
+              <div style={{ display: "flex", gap: "8px", flexShrink: 0, alignItems: "center" }}>
+                <button
+                  onClick={() => setShowShare(false)}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: "#444", fontFamily: "'DM Sans', sans-serif", padding: "4px" }}
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={() => {
+                    setShowShare(false);
+                    if (navigator.share) {
+                      navigator.share({
+                        title: "Civiq",
+                        text: `I just read today's Ontario feed on Civiq 🔥 Stay informed:`,
+                        url: "https://civiq.ca",
+                      }).catch(() => {});
+                    }
+                  }}
+                  style={{
+                    backgroundColor: "#f5a623", color: "#000",
+                    border: "none", borderRadius: "10px",
+                    padding: "8px 16px", fontSize: "12px",
+                    fontWeight: "700", cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Share 🔗
+                </button>
               </div>
-            </div>
-            <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-              <button
-                onClick={() => setShowShare(false)}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: "#444", fontFamily: "'DM Sans', sans-serif" }}
-              >
-                Skip
-              </button>
-              <button
-                onClick={() => {
-                  setShowShare(false);
-                  if (navigator.share) {
-                    navigator.share({
-                      title: "Civiq",
-                      text: `I just read today's Ontario feed on Civiq 🔥 Stay informed: civiq.ca`,
-                      url: "https://civiq.ca",
-                    }).catch(() => {});
-                  }
-                }}
-                style={{
-                  backgroundColor: "#f5a623", color: "#000",
-                  border: "none", borderRadius: "8px",
-                  padding: "7px 14px", fontSize: "12px",
-                  fontWeight: "700", cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
-              >
-                Share
-              </button>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
         {/* Progress dots + counter */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", padding: "0 2px" }}>
           <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
