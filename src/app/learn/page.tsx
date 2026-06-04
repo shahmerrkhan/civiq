@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 
@@ -222,6 +222,16 @@ export default function Learn() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [completed, setCompleted] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    fetch("/api/progress")
+      .then(r => r.json())
+      .then(data => {
+        if (data.slugs) setCompleted(new Set(data.slugs));
+      })
+      .catch(() => {});
+  }, []);
 
   const filters = ["All", "Systems", "Ideologies", "Figures", "Canada & World", "Issues", "Economy", "History"];
 
@@ -336,14 +346,27 @@ export default function Learn() {
                     <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
                       <div style={{
                         width: "30px", height: "30px", borderRadius: "50%",
-                        border: `2px solid ${path.color}30`,
-                        backgroundColor: `${path.color}10`,
+                        border: completed.has(mod.slug) ? "2px solid #4ade80" : `2px solid ${path.color}30`,
+                        backgroundColor: completed.has(mod.slug) ? "#4ade8015" : `${path.color}10`,
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "13px", color: path.color, fontWeight: "700", flexShrink: 0,
-                      }}>{i + 1}</div>
+                        fontSize: "13px", color: completed.has(mod.slug) ? "#4ade80" : path.color, fontWeight: "700", flexShrink: 0,
+                      }}>{completed.has(mod.slug) ? "✓" : i + 1}</div>
                       <span style={{ fontSize: "14px", fontWeight: "600", color: "#ccc" }}>{mod.title}</span>
                     </div>
-                    <span style={{ fontSize: "12px", color: "#333", whiteSpace: "nowrap" }}>{mod.minutes} min</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      {completed.has(mod.slug) && (
+                        <motion.div
+                          initial={{ scale: 0 }} animate={{ scale: 1 }}
+                          style={{
+                            width: "20px", height: "20px", borderRadius: "50%",
+                            backgroundColor: "#4ade8020", border: "1px solid #4ade8060",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: "11px", flexShrink: 0,
+                          }}
+                        >✓</motion.div>
+                      )}
+                      <span style={{ fontSize: "12px", color: "#333", whiteSpace: "nowrap" }}>{mod.minutes} min</span>
+                    </div>
                   </motion.div>
                 ))}
               </motion.div>

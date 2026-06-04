@@ -4,6 +4,18 @@ import { userProgress, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+export async function GET() {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ slugs: [] });
+
+  const rows = await db
+    .select({ moduleSlug: userProgress.moduleSlug })
+    .from(userProgress)
+    .where(eq(userProgress.userId, userId));
+
+  return NextResponse.json({ slugs: rows.map(r => r.moduleSlug).filter(Boolean) });
+}
+
 export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
