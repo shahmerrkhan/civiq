@@ -67,15 +67,46 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       .catch(() => {});
   }, []);
 
-  if (!mounted) return null;
-
+  if (!mounted) return (
+    <div style={{
+      minHeight: "100vh",
+      backgroundColor: "#06060c",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: "'DM Sans', sans-serif",
+      gap: "16px",
+    }}>
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+        style={{
+          width: "32px", height: "32px",
+          border: "2px solid rgba(245,166,35,0.15)",
+          borderTopColor: "#f5a623",
+          borderRadius: "50%",
+        }}
+      />
+      <motion.div
+        animate={{ opacity: [0.3, 0.7, 0.3] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+        style={{ fontSize: "11px", color: "#333", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase" }}
+      >
+        Civiq
+      </motion.div>
+    </div>
+  );
+  
   return (
     <>
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        .nav-link { transition: all 0.2s ease; }
+        .nav-link { transition: color 0.15s ease, background-color 0.15s ease; will-change: color, background-color; }
         .nav-link:hover { color: #aaa !important; background-color: rgba(255,255,255,0.05) !important; }
+        * { -webkit-tap-highlight-color: transparent; }
+        button { touch-action: manipulation; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 10px; }
@@ -186,7 +217,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                 </div>
               )}
               <ClerkLoaded>
-                <UserButton />
+                <UserButton appearance={{ baseTheme: undefined, variables: { colorBackground: "#0f0f18", colorText: "#f0ede6", colorInputBackground: "#1e1e1e", colorInputText: "#f0ede6" } }} />
               </ClerkLoaded>
             </div>
           </div>
@@ -232,7 +263,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                   </div>
                 )}
                 <ClerkLoaded>
-                  <UserButton />
+                <UserButton appearance={{ baseTheme: undefined, variables: { colorBackground: "#0f0f18", colorText: "#f0ede6", colorInputBackground: "#1e1e1e", colorInputText: "#f0ede6" } }} />
                 </ClerkLoaded>
               </div>
             </div>

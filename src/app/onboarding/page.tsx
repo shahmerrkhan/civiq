@@ -10,8 +10,8 @@ const QUESTIONS = [
     options: [
       { text: "Corporate subsidies", value: { x: -1, y: 0 } },
       { text: "Public services like transit", value: { x: 1, y: 0 } },
-      { text: "Military and police budgets", value: { x: -0.5, y: -1 } },
-      { text: "Foreign aid", value: { x: 0.5, y: 0 } },
+      { text: "Police budgets", value: { x: -0.5, y: -1 } },
+      { text: "Parks and recreational centres", value: { x: 0.5, y: 0 } },
     ],
   },
   {
@@ -127,7 +127,12 @@ function getLabel(x: number, y: number) {
 
 type Stage = "welcome" | "quiz" | "topics" | "result";
 
-export default function Onboarding() {
+  export default function OnboardingClient() {
+  useEffect(() => {
+    if (localStorage.getItem("civiq_onboarding_done") === "true") {
+      router.push("/dashboard");
+    }
+  }, []);
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("welcome");
   const [step, setStep] = useState(0);
@@ -242,6 +247,7 @@ export default function Onboarding() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ compassPosition: { x: 0, y: 0 }, topics: [] }),
                   });
+                  localStorage.setItem("civiq_onboarding_done", "true");
                   router.push("/dashboard");
                 }}
               >

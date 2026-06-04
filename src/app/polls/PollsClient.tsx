@@ -252,7 +252,7 @@ export default function PollsClient({
                               navigator.share({
                                 title: "Civiq Poll",
                                 text: `I just voted on "${poll.question}" on Civiq. Check it out:`,
-                                url: "https://civiq.ca/polls",
+                                url: "https://civiq-sooty.vercel.app/polls",
                               }).catch(() => {});
                             }
                           }}

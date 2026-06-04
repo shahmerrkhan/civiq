@@ -141,7 +141,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
           <div style={{ fontSize: "14px", color: "#444" }}>What's happening in your province today</div>
         </motion.div>
 
-        <Link href="/daily" style={{ textDecoration: "none", display: "block", marginBottom: "24px" }}>
+        <Link href="/daily" style={{ textDecoration: "none", display: "block", marginBottom: "16px" }}>
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -150,47 +150,26 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
             whileTap={{ scale: 0.99 }}
             style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "14px 18px", borderRadius: "14px",
-              background: "linear-gradient(135deg, rgba(245,166,35,0.1) 0%, rgba(245,166,35,0.04) 100%)",
-              border: "1px solid rgba(245,166,35,0.2)",
+              padding: "10px 14px", borderRadius: "10px",
+              background: "rgba(245,166,35,0.05)",
+              border: "1px solid rgba(245,166,35,0.12)",
               cursor: "pointer",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <span style={{ fontSize: "20px" }}>⚡</span>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: "800", color: "#f5a623", marginBottom: "2px" }}>Swipe Mode</div>
-                <div style={{ fontSize: "12px", color: "#555" }}>Read stories faster — swipe up through your feed</div>
-              </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "14px" }}>⚡</span>
+              <div style={{ fontSize: "12px", fontWeight: "700", color: "#f5a623" }}>Swipe Mode</div>
+              <div style={{ fontSize: "12px", color: "#444" }}>— read faster</div>
             </div>
-            <div style={{ fontSize: "18px", color: "#f5a623" }}>→</div>
+            <div style={{ fontSize: "13px", color: "#444" }}>→</div>
           </motion.div>
         </Link>
-
-        {til && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.4 }}
-            style={{
-              marginBottom: "24px", padding: "16px 20px",
-              backgroundColor: "rgba(245,166,35,0.05)",
-              border: "1px solid rgba(245,166,35,0.15)",
-              borderRadius: "14px",
-            }}
-          >
-            <div style={{ fontSize: "10px", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", color: "#f5a623", marginBottom: "8px" }}>
-              💡 Today I Learned
-            </div>
-            <div style={{ fontSize: "14px", color: "#ccc", lineHeight: "1.7" }}>{til}</div>
-          </motion.div>
-        )}
 
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
-          style={{ display: "flex", gap: "8px", marginBottom: "28px", overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none", paddingBottom: "4px" }}
+            style={{ display: "flex", gap: "8px", marginBottom: "16px", overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none", paddingBottom: "4px" }}
           >
           {filters.map((f, i) => (
             <motion.button
@@ -248,7 +227,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
                     border: `1px solid ${expanded ? "rgba(245,166,35,0.25)" : "rgba(255,255,255,0.06)"}`,
                     borderRadius: "18px",
                     padding: "clamp(16px, 4vw, 24px)",
-                    marginBottom: "14px",
+                    marginBottom: "10px",
                     cursor: "pointer",
                     transition: "background-color 0.2s ease, border-color 0.2s ease",
                     boxShadow: expanded ? `0 0 40px ${color}10` : "none",
@@ -266,7 +245,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
                     }}>{card.category}</span>
                   </div>
 
-                  <div style={{ fontSize: "14px", color: "#666", lineHeight: "1.7", marginBottom: "16px" }}>
+                  <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.6", marginBottom: "12px" }}>
                     {card.summary}
                   </div>
 

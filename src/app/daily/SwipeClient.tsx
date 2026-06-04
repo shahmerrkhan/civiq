@@ -330,7 +330,7 @@ export default function SwipeClient() {
                       navigator.share({
                         title: "Civiq",
                         text: `I just read today's Ontario feed on Civiq 🔥 Stay informed:`,
-                        url: "https://civiq.ca",
+                        url: "https://civiq-sooty.vercel.app",
                       }).catch(() => {});
                     }
                   }}
