@@ -57,6 +57,14 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
 const [explainLoading, setExplainLoading] = useState<number | null>(null);
   const [bookmarked, setBookmarked] = useState<Record<number, boolean>>({});
   const [bookmarkLoading, setBookmarkLoading] = useState<number | null>(null);
+  const [til, setTil] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/til")
+      .then(r => r.json())
+      .then(data => { if (data.til) setTil(data.til); })
+      .catch(() => {});
+  }, []);
 
   const handleBookmark = async (card: Card, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -132,6 +140,25 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
           <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>Ontario Feed</div>
           <div style={{ fontSize: "14px", color: "#444" }}>What's happening in your province today</div>
         </motion.div>
+
+        {til && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.4 }}
+            style={{
+              marginBottom: "24px", padding: "16px 20px",
+              backgroundColor: "rgba(245,166,35,0.05)",
+              border: "1px solid rgba(245,166,35,0.15)",
+              borderRadius: "14px",
+            }}
+          >
+            <div style={{ fontSize: "10px", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", color: "#f5a623", marginBottom: "8px" }}>
+              💡 Today I Learned
+            </div>
+            <div style={{ fontSize: "14px", color: "#ccc", lineHeight: "1.7" }}>{til}</div>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0 }}

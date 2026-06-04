@@ -19,25 +19,26 @@ const NAV_ITEMS = [
 
 export default function AppLayout({ children, active }: { children: React.ReactNode; active: string }) {
   const [isMobile, setIsMobile] = useState(false);
-const [mounted, setMounted] = useState(false);
-const [streak, setStreak] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-useEffect(() => {
-  const check = () => setIsMobile(window.innerWidth < 768);
-  check();
-  setMounted(true);
-  window.addEventListener("resize", check);
-  return () => window.removeEventListener("resize", check);
-}, []);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    setMounted(true);
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
-useEffect(() => {
-  fetch("/api/streak")
-    .then(r => r.json())
-    .then(d => setStreak(d.streak || 0))
-    .catch(() => {});
-}, []);
+  useEffect(() => {
+    fetch("/api/streak")
+      .then(r => r.json())
+      .then(d => setStreak(d.streak || 0))
+      .catch(() => {});
+  }, []);
 
-if (!mounted) return null;
+  if (!mounted) return null;
 
   return (
     <>
@@ -45,7 +46,7 @@ if (!mounted) return null;
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         .nav-link { transition: all 0.2s ease; }
-        .nav-link:hover { color: #fff !important; background-color: rgba(255,255,255,0.05) !important; }
+        .nav-link:hover { color: #aaa !important; background-color: rgba(255,255,255,0.05) !important; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 10px; }
@@ -64,6 +65,7 @@ if (!mounted) return null;
         color: "#ffffff",
       }}>
 
+        {/* DESKTOP SIDEBAR */}
         {!isMobile && (
           <div style={{
             width: "220px",
@@ -82,7 +84,7 @@ if (!mounted) return null;
               <Logo size={0.6} />
             </div>
 
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, overflowY: "auto" }}>
               {NAV_ITEMS.map((item, i) => {
                 const isActive = active === item.href;
                 return (
@@ -98,7 +100,7 @@ if (!mounted) return null;
                         borderRadius: "10px",
                         fontSize: "14px",
                         fontWeight: isActive ? "600" : "500",
-                        color: isActive ? "#ffffff" : "#444",
+                        color: isActive ? "#ffffff" : "#777",
                         backgroundColor: isActive ? "rgba(245,166,35,0.1)" : "transparent",
                         textDecoration: "none",
                         marginBottom: "2px",
@@ -150,7 +152,7 @@ if (!mounted) return null;
                   <span style={{ fontSize: "16px" }}>🔥</span>
                   <div>
                     <div style={{ fontSize: "15px", fontWeight: "800", color: "#f5a623", lineHeight: "1" }}>{streak}</div>
-                    <div style={{ fontSize: "10px", color: "#555", marginTop: "2px" }}>day streak</div>
+                    <div style={{ fontSize: "10px", color: "#777", marginTop: "2px" }}>day streak</div>
                   </div>
                 </div>
               )}
@@ -161,6 +163,7 @@ if (!mounted) return null;
           </div>
         )}
 
+        {/* MAIN CONTENT */}
         <div style={{
           flex: 1,
           minWidth: 0,
@@ -171,13 +174,14 @@ if (!mounted) return null;
           flexDirection: "column",
           alignItems: "center",
         }}>
+          {/* MOBILE TOP HEADER */}
           {isMobile && (
             <div style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               padding: "14px 20px",
-              gap: "16px",
+              width: "100%",
               borderBottom: "1px solid rgba(255,255,255,0.05)",
               backgroundColor: "rgba(6,6,12,0.85)",
               position: "sticky",
@@ -186,21 +190,35 @@ if (!mounted) return null;
               backdropFilter: "blur(20px)",
             }}>
               <Logo size={0.5} />
-              <ClerkLoaded>
-                <UserButton />
-              </ClerkLoaded>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                {streak > 0 && (
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: "6px",
+                    padding: "6px 10px", borderRadius: "8px",
+                    backgroundColor: "rgba(245,166,35,0.08)",
+                    border: "1px solid rgba(245,166,35,0.15)",
+                  }}>
+                    <span style={{ fontSize: "14px" }}>🔥</span>
+                    <span style={{ fontSize: "13px", fontWeight: "800", color: "#f5a623" }}>{streak}</span>
+                  </div>
+                )}
+                <ClerkLoaded>
+                  <UserButton />
+                </ClerkLoaded>
+              </div>
             </div>
           )}
 
           <div style={{
             width: "100%",
             maxWidth: "860px",
-            padding: isMobile ? "20px 16px" : "0",
+            padding: isMobile ? "20px 16px" : "32px 24px",
           }}>
             {children}
           </div>
         </div>
 
+        {/* MOBILE BOTTOM NAV */}
         {isMobile && (
           <motion.div
             initial={{ y: 80 }}
@@ -220,7 +238,7 @@ if (!mounted) return null;
               paddingBottom: "4px",
             }}
           >
-              {NAV_ITEMS.filter(item => !["Pulse", "Saved", "Opinions", "About"].includes(item.label)).map(item => {
+            {NAV_ITEMS.filter(item => !["Pulse", "Saved", "Opinions", "About", "Profile"].includes(item.label)).map(item => {
               const isActive = active === item.href;
               return (
                 <Link
@@ -233,7 +251,7 @@ if (!mounted) return null;
                     gap: "3px",
                     fontSize: "10px",
                     fontWeight: "600",
-                    color: isActive ? "#f5a623" : "#333",
+                    color: isActive ? "#f5a623" : "#555",
                     textDecoration: "none",
                     transition: "color 0.2s ease",
                     padding: "6px 12px",
@@ -260,7 +278,74 @@ if (!mounted) return null;
                 </Link>
               );
             })}
+            <button
+              onClick={() => setDrawerOpen(o => !o)}
+              style={{
+                display: "flex", flexDirection: "column", alignItems: "center",
+                gap: "3px", fontSize: "10px", fontWeight: "600",
+                color: drawerOpen ? "#f5a623" : "#555",
+                background: "none", border: "none", cursor: "pointer",
+                padding: "6px 12px", minWidth: "52px",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              <span style={{ fontSize: "18px" }}>☰</span>
+              <span>More</span>
+            </button>
           </motion.div>
+        )}
+
+        {/* MOBILE MORE DRAWER */}
+        {isMobile && (
+          <AnimatePresence>
+            {drawerOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  onClick={() => setDrawerOpen(false)}
+                  style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 40 }}
+                />
+                <motion.div
+                  initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={{
+                    position: "fixed", bottom: "68px", left: 0, right: 0,
+                    backgroundColor: "#0f0f18",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: "20px 20px 0 0",
+                    padding: "20px 16px",
+                    zIndex: 50,
+                  }}
+                >
+                  <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "16px", paddingLeft: "4px" }}>More</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                    {NAV_ITEMS.filter(item => ["Pulse", "Saved", "Opinions", "About", "Profile"].includes(item.label)).map(item => {
+                      const isActive = active === item.href;
+                      return (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          onClick={() => setDrawerOpen(false)}
+                          style={{
+                            display: "flex", alignItems: "center", gap: "10px",
+                            padding: "12px 14px", borderRadius: "12px",
+                            fontSize: "14px", fontWeight: "600",
+                            color: isActive ? "#f5a623" : "#888",
+                            backgroundColor: isActive ? "rgba(245,166,35,0.08)" : "rgba(255,255,255,0.03)",
+                            border: isActive ? "1px solid rgba(245,166,35,0.2)" : "1px solid rgba(255,255,255,0.05)",
+                            textDecoration: "none",
+                          }}
+                        >
+                          <span style={{ fontSize: "18px" }}>{item.icon}</span>
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         )}
       </div>
     </>
