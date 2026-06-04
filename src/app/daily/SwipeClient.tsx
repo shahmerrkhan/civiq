@@ -85,8 +85,17 @@ export default function SwipeClient() {
     }
   }, [index, cards.length, loadingMore, page, fetchCards]);
 
+  const [flash, setFlash] = useState(false);
+
+  const triggerFlash = () => {
+    setFlash(true);
+    setTimeout(() => setFlash(false), 150);
+    if (navigator.vibrate) navigator.vibrate(8);
+  };
+
   const goNext = useCallback(() => {
     if (index < cards.length - 1) {
+      triggerFlash();
       setDirection("up");
       setIndex(i => i + 1);
       setPerspective("centre");
@@ -98,6 +107,7 @@ export default function SwipeClient() {
 
   const goPrev = useCallback(() => {
     if (index > 0) {
+      triggerFlash();
       setDirection("down");
       setIndex(i => i - 1);
       setPerspective("centre");
@@ -132,8 +142,8 @@ export default function SwipeClient() {
     if (!isDragging.current) return;
     const dy = touchStartY.current - e.changedTouches[0].clientY;
     const dx = Math.abs(touchStartX.current - e.changedTouches[0].clientX);
-    if (Math.abs(dy) > 50 && Math.abs(dy) > dx) {
-      if (dy > 0) goNext();
+    if (Math.abs(dy) > 30 && Math.abs(dy) > dx) {
+        if (dy > 0) goNext();
       else goPrev();
     }
   };
@@ -206,6 +216,10 @@ export default function SwipeClient() {
           flex-direction: column;
           overflow: hidden;
           position: relative;
+          -ms-overflow-style: none;
+        }
+        .swipe-container::-webkit-scrollbar { display: none; }
+        .card-inner::-webkit-scrollbar { display: none; }
           user-select: none;
         }
         @media (max-width: 768px) {
@@ -234,7 +248,7 @@ export default function SwipeClient() {
           background: rgba(255,255,255,0.03);
           border: 1px solid rgba(255,255,255,0.06);
           border-radius: 12px;
-          padding: 10px 14px;
+          padding: 8px 10px;
           cursor: pointer;
           font-family: 'DM Sans', sans-serif;
           transition: all 0.2s ease;
@@ -267,11 +281,15 @@ export default function SwipeClient() {
         onTouchEnd={onTouchEnd}
         onWheel={onWheel}
       >
+        {flash && (
+          <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(255,255,255,0.03)", borderRadius: "20px", zIndex: 10, pointerEvents: "none", transition: "opacity 0.15s ease" }} />
+        )}
         {/* Progress dots + counter */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", padding: "0 2px" }}>
-          <div style={{ display: "flex", gap: "5px", alignItems: "center", maxWidth: "200px", overflow: "hidden" }}>
-            {cards.slice(Math.max(0, index - 4), Math.min(cards.length, index + 5)).map((_, i) => {
-              const realI = Math.max(0, index - 4) + i;
+          <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+            {Array.from({ length: Math.min(cards.length, 7) }).map((_, i) => {
+              const start = Math.max(0, Math.min(index - 3, cards.length - 7));
+              const realI = start + i;
               return (
                 <div
                   key={realI}
@@ -281,8 +299,7 @@ export default function SwipeClient() {
             })}
           </div>
           <div style={{ fontSize: "12px", color: "#333", fontWeight: "600" }}>
-            {index + 1} / {cards.length}
-            {loadingMore && <span style={{ marginLeft: "6px", color: "#444" }}>...</span>}
+            {index + 1} / {loadingMore ? "..." : cards.length}
           </div>
         </div>
 
@@ -291,20 +308,23 @@ export default function SwipeClient() {
           <motion.div
             key={card.id}
             custom={direction}
-            initial={{ opacity: 0, y: direction === "up" ? 40 : -40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: direction === "up" ? -40 : 40 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: direction === "up" ? 60 : -60, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: direction === "up" ? -60 : 60, scale: 0.97 }}
+            transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
             style={{
               flex: 1,
               backgroundColor: "#0e0e16",
               border: `1px solid ${color}22`,
               borderRadius: "20px",
-              padding: "24px",
+              padding: "clamp(14px, 3vw, 24px)",
               display: "flex",
               flexDirection: "column",
               gap: "0",
-              overflow: "hidden",
+              overflowY: "auto",
+              overflowX: "hidden",
+              WebkitOverflowScrolling: "touch" as never,
+              scrollbarWidth: "none" as never,
               background: `linear-gradient(145deg, ${bg} 0%, #0e0e16 60%)`,
               boxShadow: `0 0 40px ${color}08`,
             }}
@@ -332,12 +352,12 @@ export default function SwipeClient() {
             </div>
 
             {/* Headline */}
-            <div style={{ fontSize: "clamp(18px, 3vw, 22px)", fontWeight: "800", color: "#f0ede6", lineHeight: "1.3", letterSpacing: "-0.5px", marginBottom: "14px" }}>
-              {card.title}
+            <div style={{ fontSize: "clamp(16px, 3vw, 22px)", fontWeight: "800", color: "#f0ede6", lineHeight: "1.3", letterSpacing: "-0.5px", marginBottom: "10px" }}>
+                  {card.title}
             </div>
 
             {/* Summary */}
-            <div style={{ fontSize: "14px", color: "#666", lineHeight: "1.75", marginBottom: "20px" }}>
+            <div style={{ fontSize: "14px", color: "#666", lineHeight: "1.6", marginBottom: "12px" }}>
               {card.summary}
             </div>
 
@@ -348,15 +368,15 @@ export default function SwipeClient() {
                 backgroundColor: `${color}0d`,
                 border: `1px solid ${color}22`,
                 fontSize: "13px", color: "#888", lineHeight: "1.6",
-                marginBottom: "20px", fontStyle: "italic",
-              }}>
+                marginBottom: "12px", fontStyle: "italic",
+            }}>
                 📊 {card.stat}
               </div>
             )}
 
             {/* Perspectives */}
-            <div style={{ marginBottom: "16px" }}>
-              <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
+            <div style={{ marginBottom: "10px" }}>
+              <div style={{ display: "flex", gap: "6px", marginBottom: "8px" }}>
                 {(["left", "centre", "right"] as const).map(p => (
                   <button
                     key={p}
@@ -404,7 +424,7 @@ export default function SwipeClient() {
             </AnimatePresence>
 
             {/* Source + deep dive */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
               <span style={{ fontSize: "11px", color: "#2a2a2a" }}>via {card.source}</span>
               <button
                 onClick={() => setShowDeepDive(d => !d)}
@@ -415,7 +435,7 @@ export default function SwipeClient() {
             </div>
 
             {/* Reactions */}
-            <div className="swipe-actions" style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+              <div className="swipe-actions" style={{ display: "flex", gap: "6px", marginBottom: "10px" }}>
               {REACTIONS.map(r => (
                 <button
                   key={r.emoji}

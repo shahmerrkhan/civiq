@@ -129,7 +129,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
       `}</style>
-<div style={{ flex: 1, padding: "40px 24px", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
+  <div style={{ flex: 1, padding: "clamp(20px, 5vw, 40px) clamp(16px, 4vw, 24px)", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
 
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -190,8 +190,8 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
-          style={{ display: "flex", gap: "8px", marginBottom: "28px", flexWrap: "wrap" }}
-        >
+          style={{ display: "flex", gap: "8px", marginBottom: "28px", overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none", paddingBottom: "4px" }}
+          >
           {filters.map((f, i) => (
             <motion.button
               key={f}
@@ -247,7 +247,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
                     backgroundColor: expanded ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
                     border: `1px solid ${expanded ? "rgba(245,166,35,0.25)" : "rgba(255,255,255,0.06)"}`,
                     borderRadius: "18px",
-                    padding: "24px",
+                    padding: "clamp(16px, 4vw, 24px)",
                     marginBottom: "14px",
                     cursor: "pointer",
                     transition: "background-color 0.2s ease, border-color 0.2s ease",
@@ -270,7 +270,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
                     {card.summary}
                   </div>
 
-                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", fontSize: "12px", color: "#333" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", fontSize: "12px", color: "#333", flexWrap: "wrap" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <span>{card.source}</span>
                     <span>·</span>

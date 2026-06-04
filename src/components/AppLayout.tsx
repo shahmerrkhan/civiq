@@ -264,7 +264,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                       layoutId="mobileActiveNav"
                       style={{
                         position: "absolute",
-                        top: 0, left: "50%",
+                        top: "-1px", left: "50%",
                         transform: "translateX(-50%)",
                         width: "24px", height: "2px",
                         borderRadius: "0 0 4px 4px",
