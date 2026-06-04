@@ -10,7 +10,9 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 export const revalidate = 0;
 
 const CARDS_PER_PAGE = 10;
-const MIN_POOL = 20; // keep at least this many cards in DB at all times
+const MIN_POOL = 20;
+const MAX_POOL = 100; // never generate if we already have this many
+let isGenerating = false; // in-memory lock to prevent simultaneous generation
 
 async function generateAndSave(count: number) {
   const completion = await groq.chat.completions.create({
@@ -95,28 +97,31 @@ export async function GET(req: Request) {
       .where(eq(contentCards.approved, true))
       .orderBy(desc(contentCards.publishedAt));
 
-    // If pool is running low, generate more in background
-    if (allCards.length < MIN_POOL) {
+    // Only generate if pool is low, we're not already generating, and we haven't hit the max
+    if (allCards.length < MIN_POOL && !isGenerating && allCards.length < MAX_POOL) {
+      isGenerating = true;
       try {
         await generateAndSave(MIN_POOL - allCards.length);
-        // Refetch after generating
         const refreshed = await db
           .select()
           .from(contentCards)
           .where(eq(contentCards.approved, true))
           .orderBy(desc(contentCards.publishedAt));
         const slice = refreshed.slice(offset, offset + limit);
+        isGenerating = false;
         return NextResponse.json({ cards: formatCards(slice), total: refreshed.length, page, hasMore: offset + limit < refreshed.length });
       } catch (genErr) {
         console.error("Generation failed:", genErr);
+        isGenerating = false;
       }
     }
 
     const slice = allCards.slice(offset, offset + limit);
 
-    // If we're near the end of what we have, trigger background generation
-    if (offset + limit >= allCards.length - 5) {
-      generateAndSave(10).catch(console.error);
+    // Only top up in background if genuinely low and not already generating
+    if (allCards.length < MIN_POOL + 10 && !isGenerating && allCards.length < MAX_POOL) {
+      isGenerating = true;
+      generateAndSave(10).catch((e) => { console.error(e); isGenerating = false; }).then(() => { isGenerating = false; });
     }
 
     return NextResponse.json({
