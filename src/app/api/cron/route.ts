@@ -3,12 +3,6 @@ import webpush from "web-push";
 import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
 
-webpush.setVapidDetails(
-  process.env.VAPID_EMAIL!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
-
 const MESSAGES = [
   { title: "Ontario Feed is Live 🗞️", body: "3 new stories just dropped. Swipe through.", url: "/daily" },
   { title: "What's happening in Ontario?", body: "Today's feed is ready. Stay informed.", url: "/daily" },
@@ -19,6 +13,11 @@ const MESSAGES = [
 
 export async function GET(req: Request) {
   try {
+    webpush.setVapidDetails(
+      process.env.VAPID_EMAIL!,
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      process.env.VAPID_PRIVATE_KEY!
+    );
     const authHeader = req.headers.get("authorization");
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
