@@ -43,6 +43,23 @@ export default function AdminClient({ cards: initial, polls }: { cards: Card[]; 
   const [successMsg, setSuccessMsg] = useState("");
   const [sendingDigest, setSendingDigest] = useState(false);
   const [digestMsg, setDigestMsg] = useState("");
+  const [blastForm, setBlastForm] = useState({ title: "", body: "", url: "/daily" });
+  const [sendingBlast, setSendingBlast] = useState(false);
+  const [blastMsg, setBlastMsg] = useState("");
+
+  const handleBlast = async () => {
+    if (!blastForm.title.trim() || !blastForm.body.trim()) return;
+    setSendingBlast(true);
+    const res = await fetch("/api/admin/blast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(blastForm),
+    });
+    const data = await res.json();
+    setBlastMsg(data.sent !== undefined ? `✓ Sent to ${data.sent} devices` : `Failed: ${data.error}`);
+    setSendingBlast(false);
+    setTimeout(() => setBlastMsg(""), 5000);
+  };
 
   const handleSendDigest = async () => {
     setSendingDigest(true);
@@ -338,6 +355,72 @@ export default function AdminClient({ cards: initial, polls }: { cards: Card[]; 
             {digestMsg && <div style={{ fontSize: "12px", color: "#4ade80" }}>{digestMsg}</div>}
           </div>
         </div>
+        </motion.div>
+
+        {/* Manual blast panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          style={{
+            backgroundColor: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(245,166,35,0.15)",
+            borderRadius: "16px",
+            padding: "20px 24px",
+            marginBottom: "28px",
+          }}
+        >
+          <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623", marginBottom: "16px" }}>
+            📣 Send notification blast
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <input
+              value={blastForm.title}
+              onChange={e => setBlastForm(f => ({ ...f, title: e.target.value }))}
+              placeholder="Notification title..."
+              style={inputStyle}
+            />
+            <input
+              value={blastForm.body}
+              onChange={e => setBlastForm(f => ({ ...f, body: e.target.value }))}
+              placeholder="Notification body text..."
+              style={inputStyle}
+            />
+            <input
+              value={blastForm.url}
+              onChange={e => setBlastForm(f => ({ ...f, url: e.target.value }))}
+              placeholder="URL to open (e.g. /daily)"
+              style={inputStyle}
+            />
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={handleBlast}
+                disabled={sendingBlast || !blastForm.title.trim() || !blastForm.body.trim()}
+                style={{
+                  padding: "10px 20px", borderRadius: "10px",
+                  border: "none", backgroundColor: "#f5a623",
+                  color: "#000", fontSize: "13px", fontWeight: "700",
+                  cursor: sendingBlast || !blastForm.title.trim() || !blastForm.body.trim() ? "not-allowed" : "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                  opacity: sendingBlast || !blastForm.title.trim() || !blastForm.body.trim() ? 0.5 : 1,
+                  transition: "opacity 0.2s ease",
+                }}
+              >
+                {sendingBlast ? "Sending..." : "Send to all users"}
+              </motion.button>
+              {blastMsg && (
+                <motion.div
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{ fontSize: "12px", color: blastMsg.startsWith("✓") ? "#4ade80" : "#f87171", fontWeight: "600" }}
+                >
+                  {blastMsg}
+                </motion.div>
+              )}
+            </div>
+          </div>
         </motion.div>
 
         {/* Tabs */}

@@ -4,11 +4,11 @@ import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
 
 const MESSAGES = [
-  { title: "Good morning 🌅", body: "Ontario's morning brief is ready. 2 minutes to stay informed.", url: "/daily" },
-  { title: "Start your day informed 📍", body: "New Ontario stories just dropped. See what's happening.", url: "/daily" },
-  { title: "Your morning Ontario brief", body: "3 issues. Left, centre, and right perspectives. Takes 2 minutes.", url: "/daily" },
-  { title: "Don't break your streak 🔥", body: "Today's stories are live. Keep it going.", url: "/daily" },
-  { title: "Ontario news, no spin ☀️", body: "What's happening in your province this morning.", url: "/daily" },
+  { title: "Evening update 🌙", body: "What developed in Ontario politics today. 2 minutes.", url: "/daily" },
+  { title: "Before you wind down 📰", body: "Today's Ontario digest is ready. Stay in the loop.", url: "/daily" },
+  { title: "Your evening Ontario brief", body: "Catch up on today's stories before tomorrow.", url: "/daily" },
+  { title: "End your day informed 🏛️", body: "See what the left, centre, and right said today.", url: "/daily" },
+  { title: "Daily quiz is live 🧠", body: "Test what you learned today. Takes 60 seconds.", url: "/learn" },
 ];
 
 export async function GET(req: Request) {
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
     if (!subs.length) return NextResponse.json({ sent: 0 });
 
     const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
-    const payload = JSON.stringify({ ...msg, tag: "daily-feed" });
+    const payload = JSON.stringify({ ...msg, tag: "evening-brief" });
 
     const results = await Promise.allSettled(
       subs.map((sub) =>
@@ -40,8 +40,6 @@ export async function GET(req: Request) {
 
     const sent = results.filter((r) => r.status === "fulfilled").length;
     const failed = results.filter((r) => r.status === "rejected").length;
-
-    console.log(`Push cron: ${sent} sent, ${failed} failed`);
     return NextResponse.json({ sent, failed });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
