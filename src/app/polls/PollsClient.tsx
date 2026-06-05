@@ -272,7 +272,7 @@ export default function PollsClient({
                   </AnimatePresence>
 
                   <div style={{ marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-'                    <span style={{ fontSize: "12px", color: "#333", fontWeight: "500" }}>
+                      <span style={{ fontSize: "12px", color: "#333", fontWeight: "500" }}>
                       {totalVotes} {totalVotes === 1 ? "vote" : "votes"}
                     </span>
                     {isExpired && (

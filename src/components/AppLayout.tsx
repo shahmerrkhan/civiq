@@ -28,8 +28,20 @@ export default function AppLayout({ children, active }: { children: React.ReactN
     if (!mounted) return;
     if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
     if (Notification.permission === "granted") return;
-    if (localStorage.getItem("civiq_notif_dismissed") === "true") return;
-    const timer = setTimeout(() => setNotifPrompt(true), 6000);
+
+    const dismissed = localStorage.getItem("civiq_notif_dismissed");
+    if (dismissed && Date.now() < Number(dismissed)) return;
+
+    // track first seen
+    if (!localStorage.getItem("civiq_first_seen")) {
+      localStorage.setItem("civiq_first_seen", String(Date.now()));
+    }
+    const firstSeen = Number(localStorage.getItem("civiq_first_seen"));
+    const isReturningUser = Date.now() - firstSeen > 1000 * 60 * 60 * 24; // been here over a day
+
+    // returning users who haven't subscribed get prompted faster
+    const delay = isReturningUser ? 3000 : 15000;
+    const timer = setTimeout(() => setNotifPrompt(true), delay);
     return () => clearTimeout(timer);
   }, [mounted]);
 
@@ -175,7 +187,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                         borderRadius: "10px",
                         fontSize: "14px",
                         fontWeight: isActive ? "600" : "500",
-                        color: isActive ? "#ffffff" : "#777",
+                        color: isActive ? "#ffffff" : "#888",
                         backgroundColor: isActive ? "rgba(245,166,35,0.1)" : "transparent",
                         textDecoration: "none",
                         marginBottom: "2px",
@@ -232,7 +244,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                 </div>
               )}
               <ClerkLoaded>
-                <UserButton appearance={{ baseTheme: undefined, variables: { colorBackground: "#0f0f18", colorText: "#f0ede6", colorInputBackground: "#1e1e1e", colorInputText: "#f0ede6" } }} />
+              <UserButton appearance={{ baseTheme: undefined, variables: { colorBackground: "#18181f", colorText: "#e8e6e0", colorInputBackground: "#242430", colorInputText: "#e8e6e0", colorNeutral: "#888" } }} />
               </ClerkLoaded>
             </div>
           </div>
@@ -440,16 +452,19 @@ export default function AppLayout({ children, active }: { children: React.ReactN
         >
           <div>
             <div style={{ fontSize: "13px", fontWeight: "700", color: "#f0ede6", marginBottom: "2px" }}>
-              🔔 Stay in the loop
+              🔔 Get your Ontario brief
             </div>
-            <div style={{ fontSize: "11px", color: "#555" }}>
-              Get notified when new Ontario stories drop
+            <div style={{ fontSize: "11px", color: "#666" }}>
+              Morning + evening updates. 2 minutes a day.
             </div>
           </div>
           <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
             <button
-              onClick={() => { setNotifPrompt(false); localStorage.setItem("civiq_notif_dismissed", "true"); }}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: "#444", fontFamily: "'DM Sans', sans-serif" }}
+          onClick={() => {
+        setNotifPrompt(false);
+        localStorage.setItem("civiq_notif_dismissed", String(Date.now() + 1000 * 60 * 60 * 24 * 3));
+      }}
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: "#444", fontFamily: "'DM Sans', sans-serif" }}
             >
               Not now
             </button>

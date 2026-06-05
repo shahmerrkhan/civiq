@@ -126,7 +126,7 @@ function getLabel(x: number, y: number) {
   return { label: "Centrist", color: "#a78bfa", desc: "You weigh issues individually rather than along party lines." };
 }
 
-type Stage = "welcome" | "quiz" | "topics" | "result";
+type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
 
   export default function OnboardingClient() {
   const router = useRouter();
@@ -144,7 +144,47 @@ type Stage = "welcome" | "quiz" | "topics" | "result";
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{ x: number; y: number } | null>(null);
   const [direction, setDirection] = useState(1);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifDone, setNotifDone] = useState(false);
 
+  const handleEnableNotifications = async () => {
+    setNotifLoading(true);
+    try {
+      if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+        goToDashboard();
+        return;
+      }
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") { goToDashboard(); return; }
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!vapidKey) { goToDashboard(); return; }
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: vapidKey,
+      });
+      const subJson = sub.toJSON();
+      await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          endpoint: subJson.endpoint,
+          keys: { p256dh: subJson.keys?.p256dh, auth: subJson.keys?.auth },
+        }),
+      });
+      setNotifDone(true);
+      setTimeout(() => goToDashboard(), 1200);
+    } catch {
+      goToDashboard();
+    }
+    setNotifLoading(false);
+  };
+
+  const goToDashboard = () => {
+    localStorage.setItem("civiq_onboarding_done", "true");
+    router.push("/dashboard");
+  };
+  
   const progress = stage === "quiz" ? ((step + 1) / QUESTIONS.length) * 100 : stage === "topics" ? 100 : 0;
   const current = QUESTIONS[step];
 
@@ -249,8 +289,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result";
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ compassPosition: { x: 0, y: 0 }, topics: [] }),
                   });
-                  localStorage.setItem("civiq_onboarding_done", "true");
-                  router.push("/dashboard");
+                  goToDashboard();
                 }}
               >
                 Skip for now
@@ -312,10 +351,97 @@ type Stage = "welcome" | "quiz" | "topics" | "result";
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               style={{ backgroundColor: "#f5a623", color: "#000", padding: "16px 48px", borderRadius: "12px", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
-              onClick={() => { localStorage.setItem("civiq_onboarding_done", "true"); router.push("/dashboard"); }}
+              onClick={() => setStage("notifications")}
               >
               Go to my feed →
             </motion.button>
+          </motion.div>
+        </div>
+      </>
+    );
+  }
+
+  // NOTIFICATIONS
+  if (stage === "notifications") {
+    return (
+      <>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@900&display=swap');
+          * { margin:0; padding:0; box-sizing:border-box; }
+        `}</style>
+        <div style={base}>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            style={{ width: "100%", maxWidth: "420px", textAlign: "center" }}
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.15, type: "spring", stiffness: 200 }}
+              style={{ fontSize: "56px", marginBottom: "24px" }}
+            >
+              {notifDone ? "✅" : "🔔"}
+            </motion.div>
+
+            {notifDone ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <div style={{ fontSize: "22px", fontWeight: "800", letterSpacing: "-0.5px", marginBottom: "8px", color: "#f0ede6" }}>
+                  You're all set
+                </div>
+                <div style={{ fontSize: "14px", color: "#666", lineHeight: "1.7" }}>
+                  Taking you to your feed...
+                </div>
+              </motion.div>
+            ) : (
+              <>
+                <div style={{ fontSize: "11px", color: "#f5a623", fontWeight: "700", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "16px" }}>
+                  One last thing
+                </div>
+                <h2 style={{ fontSize: "clamp(24px, 5vw, 34px)", fontWeight: "800", letterSpacing: "-0.5px", marginBottom: "16px", lineHeight: "1.15", color: "#f0ede6" }}>
+                  Stay in the loop on Ontario
+                </h2>
+                <p style={{ fontSize: "15px", color: "#666", lineHeight: "1.75", marginBottom: "12px", maxWidth: "360px", margin: "0 auto 12px" }}>
+                  Get a morning brief and evening update — what's happening in your province, no spin.
+                </p>
+                <p style={{ fontSize: "13px", color: "#444", marginBottom: "36px" }}>
+                  Twice a day. Turn off anytime.
+                </p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxWidth: "320px", margin: "0 auto" }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleEnableNotifications}
+                    disabled={notifLoading}
+                    style={{
+                      backgroundColor: "#f5a623", color: "#000",
+                      padding: "16px", borderRadius: "12px",
+                      fontWeight: "700", fontSize: "15px",
+                      border: "none", cursor: notifLoading ? "not-allowed" : "pointer",
+                      fontFamily: "'DM Sans', sans-serif",
+                      opacity: notifLoading ? 0.7 : 1,
+                      transition: "opacity 0.2s ease",
+                    }}
+                  >
+                    {notifLoading ? "Enabling..." : "Enable notifications"}
+                  </motion.button>
+                  <button
+                    onClick={goToDashboard}
+                    disabled={notifLoading}
+                    style={{
+                      background: "none", border: "none",
+                      cursor: "pointer", fontSize: "13px",
+                      color: "#444", fontFamily: "'DM Sans', sans-serif",
+                      padding: "8px",
+                    }}
+                  >
+                    Skip for now
+                  </button>
+                </div>
+              </>
+            )}
           </motion.div>
         </div>
       </>
