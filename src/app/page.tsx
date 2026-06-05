@@ -427,10 +427,10 @@ export default function Home() {
             <div className="nav-links" style={{ display: "flex", gap: "4px", alignItems: "center" }}>
               <a href="#features" className="nav-link-item">Features</a>
               <a href="#about" className="nav-link-item">About</a>
-              <Link href="/sign-in" className="nav-link-item">Sign in</Link>
+              {!isSignedIn && <Link href="/sign-in" className="nav-link-item">Sign in</Link>}
             </div>
-            <Link href="/sign-up" className="btn-amber nav-cta" style={{ padding: "9px 16px", fontSize: "13px", borderRadius: "9px", whiteSpace: "nowrap" }}>
-              Get started →
+            <Link href={isSignedIn ? "/dashboard" : "/sign-up"} className="btn-amber nav-cta" style={{ padding: "9px 16px", fontSize: "13px", borderRadius: "9px", whiteSpace: "nowrap" }}>
+              {isSignedIn ? "Go to dashboard →" : "Get started →"}
             </Link>
           </div>
         </motion.nav>
