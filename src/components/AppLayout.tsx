@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "Polls", href: "/polls", icon: "🗳️" },
   { label: "Swipe", href: "/daily", icon: "⚡" },
   { label: "Debate", href: "/debate", icon: "💬" },
+  { label: "Map", href: "/map", icon: "🗺️" },
   { label: "Saved", href: "/bookmarks", icon: "🔖" },
   { label: "Opinions", href: "/opinions", icon: "🗒️" },
   { label: "Pulse", href: "/pulse", icon: "⚡" },
@@ -104,25 +105,196 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       alignItems: "center",
       justifyContent: "center",
       fontFamily: "'DM Sans', sans-serif",
-      gap: "16px",
+      position: "relative",
+      overflow: "hidden",
     }}>
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-        style={{
-          width: "32px", height: "32px",
-          border: "2px solid rgba(245,166,35,0.15)",
-          borderTopColor: "#f5a623",
-          borderRadius: "50%",
-        }}
-      />
-      <motion.div
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-        style={{ fontSize: "11px", color: "#555", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase" }}
-      >
-        Civiq
-      </motion.div>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;800&family=Playfair+Display:wght@900&display=swap');
+        @keyframes civiq-orb1 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+          50% { transform: translate(40px, -30px) scale(1.15); opacity: 0.3; }
+        }
+        @keyframes civiq-orb2 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+          50% { transform: translate(-30px, 40px) scale(1.1); opacity: 0.7; }
+        }
+        @keyframes civiq-scan {
+          0% { transform: translateY(-100%); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: translateY(200px); opacity: 0; }
+        }
+        @keyframes civiq-bar {
+          0% { width: 0%; opacity: 1; }
+          60% { width: 75%; opacity: 1; }
+          85% { width: 92%; opacity: 1; }
+          100% { width: 100%; opacity: 0; }
+        }
+        @keyframes civiq-word {
+          0% { opacity: 0; transform: translateY(8px) skewY(1deg); filter: blur(4px); }
+          100% { opacity: 1; transform: translateY(0) skewY(0deg); filter: blur(0); }
+        }
+        @keyframes civiq-pulse-ring {
+          0% { transform: scale(0.8); opacity: 0.8; }
+          100% { transform: scale(2.2); opacity: 0; }
+        }
+        @keyframes civiq-dot-blink {
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 1; }
+        }
+        @keyframes civiq-grain {
+          0%, 100% { transform: translate(0, 0); }
+          10% { transform: translate(-2%, -2%); }
+          20% { transform: translate(2%, 1%); }
+          30% { transform: translate(-1%, 3%); }
+          40% { transform: translate(3%, -1%); }
+          50% { transform: translate(-2%, 2%); }
+          60% { transform: translate(1%, -3%); }
+          70% { transform: translate(-3%, 1%); }
+          80% { transform: translate(2%, 2%); }
+          90% { transform: translate(-1%, -2%); }
+        }
+      `}</style>
+
+      {/* Animated background orbs */}
+      <div style={{
+        position: "absolute", width: "600px", height: "600px",
+        borderRadius: "50%", top: "-150px", left: "-150px",
+        background: "radial-gradient(circle, rgba(245,166,35,0.07) 0%, transparent 65%)",
+        animation: "civiq-orb1 12s ease-in-out infinite",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", width: "500px", height: "500px",
+        borderRadius: "50%", bottom: "-100px", right: "-100px",
+        background: "radial-gradient(circle, rgba(96,165,250,0.05) 0%, transparent 65%)",
+        animation: "civiq-orb2 16s ease-in-out infinite",
+        pointerEvents: "none",
+      }} />
+
+      {/* Film grain overlay */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E\")",
+        opacity: 0.4,
+        animation: "civiq-grain 0.5s steps(1) infinite",
+        zIndex: 1,
+      }} />
+
+      {/* Center content */}
+      <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
+
+        {/* Logo lockup */}
+        <div style={{ position: "relative", marginBottom: "32px" }}>
+          {/* Pulse rings */}
+          <div style={{
+            position: "absolute", inset: "-20px",
+            borderRadius: "50%",
+            border: "1px solid rgba(245,166,35,0.15)",
+            animation: "civiq-pulse-ring 2s ease-out infinite",
+          }} />
+          <div style={{
+            position: "absolute", inset: "-20px",
+            borderRadius: "50%",
+            border: "1px solid rgba(245,166,35,0.1)",
+            animation: "civiq-pulse-ring 2s ease-out 0.6s infinite",
+          }} />
+
+          {/* The Q mark — Civiq's logo anchor */}
+          <div style={{
+            width: "72px", height: "72px",
+            borderRadius: "20px",
+            background: "linear-gradient(135deg, rgba(245,166,35,0.15) 0%, rgba(245,166,35,0.05) 100%)",
+            border: "1px solid rgba(245,166,35,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            position: "relative", overflow: "hidden",
+            backdropFilter: "blur(10px)",
+          }}>
+            {/* Scan line */}
+            <div style={{
+              position: "absolute", left: 0, right: 0, height: "2px",
+              background: "linear-gradient(90deg, transparent, rgba(245,166,35,0.8), transparent)",
+              animation: "civiq-scan 2s ease-in-out infinite",
+            }} />
+            <span style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "40px",
+              fontWeight: "900",
+              color: "#f5a623",
+              lineHeight: 1,
+              position: "relative", zIndex: 1,
+            }}>Q</span>
+          </div>
+        </div>
+
+        {/* Wordmark */}
+        <div style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: "42px",
+          fontWeight: "900",
+          letterSpacing: "-2px",
+          color: "#f0ede6",
+          marginBottom: "10px",
+          animation: "civiq-word 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
+        }}>
+          Civiq
+        </div>
+
+        {/* Tagline */}
+        <div style={{
+          fontSize: "11px",
+          fontWeight: "700",
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          color: "#f5a623",
+          opacity: 0,
+          animation: "civiq-word 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards",
+          marginBottom: "48px",
+        }}>
+          Ontario Civic Platform
+        </div>
+
+        {/* Progress bar */}
+        <div style={{
+          width: "160px",
+          height: "2px",
+          backgroundColor: "rgba(255,255,255,0.05)",
+          borderRadius: "10px",
+          overflow: "hidden",
+          marginBottom: "16px",
+        }}>
+          <div style={{
+            height: "100%",
+            backgroundColor: "#f5a623",
+            borderRadius: "10px",
+            animation: "civiq-bar 2.5s cubic-bezier(0.4, 0, 0.2, 1) both",
+            boxShadow: "0 0 8px rgba(245,166,35,0.6)",
+          }} />
+        </div>
+
+        {/* Loading dots */}
+        <div style={{ display: "flex", gap: "6px" }}>
+          {[0, 0.2, 0.4].map((delay, i) => (
+            <div key={i} style={{
+              width: "4px", height: "4px",
+              borderRadius: "50%",
+              backgroundColor: "#f5a623",
+              animation: `civiq-dot-blink 1.2s ease-in-out ${delay}s infinite`,
+            }} />
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom stamp */}
+      <div style={{
+        position: "absolute", bottom: "32px",
+        fontSize: "10px", fontWeight: "600",
+        letterSpacing: "0.1em", textTransform: "uppercase",
+        color: "#222",
+        zIndex: 2,
+      }}>
+        Powered by Civic Clarity Foundation
+      </div>
     </div>
   );
   

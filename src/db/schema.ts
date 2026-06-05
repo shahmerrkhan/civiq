@@ -175,3 +175,12 @@ export const debateMessages = pgTable("debate_messages", {
   steelmanApproved: boolean("steelman_approved"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const regionVotes = pgTable("region_votes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull(),
+  issueId: text("issue_id").notNull(),
+  regionId: text("region_id").notNull(),
+  stance: text("stance").notNull(), // "left", "right", "centre"
+  createdAt: timestamp("created_at").defaultNow(),
+}); 

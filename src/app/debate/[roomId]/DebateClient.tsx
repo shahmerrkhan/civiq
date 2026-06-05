@@ -185,7 +185,7 @@ export default function DebateClient({ roomId, userId }: { roomId: string; userI
   const isWaiting = room.status === "waiting";
 
   return (
-    <AppLayout active="/debate">
+    <AppLayout active="/debate">  
         <style>{`
         .debate-input:focus { outline: none; border-color: rgba(245,166,35,0.4) !important; }
         .debate-input::placeholder { color: #333; }
