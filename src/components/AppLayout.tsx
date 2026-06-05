@@ -110,8 +110,8 @@ export default function AppLayout({ children, active }: { children: React.ReactN
     return () => clearTimeout(min);
   }, [showLoader]);
 
-  if (!mounted || showLoader) return (
-      <div style={{
+  if (showLoader) return (
+    <div style={{
       minHeight: "100vh",
       backgroundColor: "#06060c",
       display: "flex",
@@ -119,25 +119,54 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       alignItems: "center",
       justifyContent: "center",
       fontFamily: "'DM Sans', sans-serif",
-      gap: "16px",
+      position: "relative",
+      overflow: "hidden",
     }}>
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-        style={{
-          width: "32px", height: "32px",
-          border: "2px solid rgba(245,166,35,0.15)",
-          borderTopColor: "#f5a623",
-          borderRadius: "50%",
-        }}
-      />
-      <motion.div
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-        style={{ fontSize: "11px", color: "#555", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase" }}
-      >
-        Civiq
-      </motion.div>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;800&family=Playfair+Display:wght@900&display=swap');
+        @keyframes civiq-orb1 { 0%,100%{transform:translate(0,0) scale(1);opacity:.6} 50%{transform:translate(40px,-30px) scale(1.15);opacity:.3} }
+        @keyframes civiq-orb2 { 0%,100%{transform:translate(0,0) scale(1);opacity:.4} 50%{transform:translate(-30px,40px) scale(1.1);opacity:.7} }
+        @keyframes civiq-scan { 0%{transform:translateY(-100%);opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{transform:translateY(200px);opacity:0} }
+        @keyframes civiq-bar { 0%{width:0%;opacity:1} 60%{width:75%;opacity:1} 85%{width:92%;opacity:1} 100%{width:100%;opacity:0} }
+        @keyframes civiq-word { 0%{opacity:0;transform:translateY(8px);filter:blur(4px)} 100%{opacity:1;transform:translateY(0);filter:blur(0)} }
+        @keyframes civiq-pulse-ring { 0%{transform:scale(0.8);opacity:.8} 100%{transform:scale(2.2);opacity:0} }
+        @keyframes civiq-dot { 0%,100%{opacity:.2} 50%{opacity:1} }
+      `}</style>
+
+      <div style={{ position:"absolute", width:"600px", height:"600px", borderRadius:"50%", top:"-150px", left:"-150px", background:"radial-gradient(circle, rgba(245,166,35,0.07) 0%, transparent 65%)", animation:"civiq-orb1 12s ease-in-out infinite", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", width:"500px", height:"500px", borderRadius:"50%", bottom:"-100px", right:"-100px", background:"radial-gradient(circle, rgba(96,165,250,0.05) 0%, transparent 65%)", animation:"civiq-orb2 16s ease-in-out infinite", pointerEvents:"none" }} />
+
+      <div style={{ position:"relative", zIndex:2, display:"flex", flexDirection:"column", alignItems:"center" }}>
+        <div style={{ position:"relative", marginBottom:"32px" }}>
+          <div style={{ position:"absolute", inset:"-20px", borderRadius:"50%", border:"1px solid rgba(245,166,35,0.15)", animation:"civiq-pulse-ring 2s ease-out infinite" }} />
+          <div style={{ position:"absolute", inset:"-20px", borderRadius:"50%", border:"1px solid rgba(245,166,35,0.1)", animation:"civiq-pulse-ring 2s ease-out 0.6s infinite" }} />
+          <div style={{ width:"72px", height:"72px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(245,166,35,0.15) 0%, rgba(245,166,35,0.05) 100%)", border:"1px solid rgba(245,166,35,0.25)", display:"flex", alignItems:"center", justifyContent:"center", position:"relative", overflow:"hidden", backdropFilter:"blur(10px)" }}>
+            <div style={{ position:"absolute", left:0, right:0, height:"2px", background:"linear-gradient(90deg, transparent, rgba(245,166,35,0.8), transparent)", animation:"civiq-scan 2s ease-in-out infinite" }} />
+            <span style={{ fontFamily:"'Playfair Display', serif", fontSize:"40px", fontWeight:"900", color:"#f5a623", lineHeight:1, position:"relative", zIndex:1 }}>Q</span>
+          </div>
+        </div>
+
+        <div style={{ fontFamily:"'Playfair Display', serif", fontSize:"42px", fontWeight:"900", letterSpacing:"-2px", color:"#f0ede6", marginBottom:"10px", animation:"civiq-word 0.7s cubic-bezier(0.16,1,0.3,1) both" }}>
+          Civiq
+        </div>
+        <div style={{ fontSize:"11px", fontWeight:"700", letterSpacing:"0.16em", textTransform:"uppercase", color:"#f5a623", opacity:0, animation:"civiq-word 0.6s cubic-bezier(0.16,1,0.3,1) 0.3s forwards", marginBottom:"48px" }}>
+          Ontario Civic Platform
+        </div>
+
+        <div style={{ width:"160px", height:"2px", backgroundColor:"rgba(255,255,255,0.05)", borderRadius:"10px", overflow:"hidden", marginBottom:"16px" }}>
+          <div style={{ height:"100%", backgroundColor:"#f5a623", borderRadius:"10px", animation:"civiq-bar 4.5s cubic-bezier(0.4,0,0.2,1) both", boxShadow:"0 0 8px rgba(245,166,35,0.6)" }} />
+        </div>
+
+        <div style={{ display:"flex", gap:"6px" }}>
+          {[0, 0.2, 0.4].map((delay, i) => (
+            <div key={i} style={{ width:"4px", height:"4px", borderRadius:"50%", backgroundColor:"#f5a623", animation:`civiq-dot 1.2s ease-in-out ${delay}s infinite` }} />
+          ))}
+        </div>
+      </div>
+
+      <div style={{ position:"absolute", bottom:"32px", fontSize:"10px", fontWeight:"600", letterSpacing:"0.1em", textTransform:"uppercase", color:"#222", zIndex:2 }}>
+        Powered by Civic Clarity Foundation
+      </div>
     </div>
   );
   
