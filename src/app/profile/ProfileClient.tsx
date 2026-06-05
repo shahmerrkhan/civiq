@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
@@ -51,8 +51,146 @@ export default function ProfileClient({
     ? getLabel(compassPosition.x, compassPosition.y)
     : { label: "Not taken yet", color: "#333" };
 
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [shareReady, setShareReady] = useState(false);
+  const [sharing, setSharing] = useState(false);
+
+  const generateShareCard = async () => {
+    if (skipped) return;
+    setSharing(true);
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1080;
+    const ctx = canvas.getContext("2d")!;
+
+    // background
+    ctx.fillStyle = "#06060c";
+    ctx.fillRect(0, 0, 1080, 1080);
+
+    // subtle grid lines
+    ctx.strokeStyle = "rgba(255,255,255,0.03)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 1080; i += 60) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1080); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(1080, i); ctx.stroke();
+    }
+
+    // amber glow top-left
+    const glow = ctx.createRadialGradient(200, 200, 0, 200, 200, 500);
+    glow.addColorStop(0, "rgba(245,166,35,0.10)");
+    glow.addColorStop(1, "transparent");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, 1080, 1080);
+
+    // top label
+    ctx.fillStyle = "#f5a623";
+    ctx.font = "600 22px sans-serif";
+    ctx.fillText("CIVIQ · POLITICAL COMPASS", 80, 100);
+
+    // divider
+    ctx.strokeStyle = "rgba(245,166,35,0.2)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(80, 120); ctx.lineTo(1000, 120); ctx.stroke();
+
+    // big label
+    ctx.fillStyle = color;
+    ctx.font = "800 112px sans-serif";
+    ctx.fillText(label, 80, 320);
+
+    // sub
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.font = "400 32px sans-serif";
+    ctx.fillText("based on Ontario issues · no spin · no sides", 80, 390);
+
+    // stats row
+    const statsData = [
+      { icon: "🏛️", val: `${civicScore} pts`, sub: "Civic Score" },
+      { icon: "🔥", val: `${streakCount} days`, sub: "Streak" },
+      { icon: "📚", val: `${modulesCompleted}`, sub: "Modules" },
+    ];
+    statsData.forEach((s, i) => {
+      const x = 80 + i * 300;
+      const y = 520;
+      ctx.fillStyle = "rgba(255,255,255,0.04)";
+      ctx.beginPath();
+      ctx.roundRect(x, y, 260, 160, 20);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.07)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y, 260, 160, 20);
+      ctx.stroke();
+      ctx.font = "40px sans-serif";
+      ctx.fillText(s.icon, x + 20, y + 52);
+      ctx.fillStyle = "#fff";
+      ctx.font = "700 36px sans-serif";
+      ctx.fillText(s.val, x + 20, y + 108);
+      ctx.fillStyle = "rgba(255,255,255,0.35)";
+      ctx.font = "400 22px sans-serif";
+      ctx.fillText(s.sub, x + 20, y + 142);
+    });
+
+    // bottom CTA
+    ctx.fillStyle = "rgba(245,166,35,0.12)";
+    ctx.beginPath();
+    ctx.roundRect(80, 760, 920, 100, 16);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(245,166,35,0.25)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(80, 760, 920, 100, 16);
+    ctx.stroke();
+    ctx.fillStyle = "#f5a623";
+    ctx.font = "700 28px sans-serif";
+    ctx.fillText("Where do you stand? civiq.ca", 540, 820);
+    ctx.fillStyle = "rgba(255,255,255,0.2)";
+    ctx.font = "400 22px sans-serif";
+    const textW = ctx.measureText("Where do you stand? civiq.ca").width;
+    ctx.fillText("Where do you stand? civiq.ca", 540 - textW / 2 + 0, 820);
+
+    // actually center it
+    ctx.clearRect(80, 760, 920, 100);
+    ctx.fillStyle = "rgba(245,166,35,0.12)";
+    ctx.beginPath(); ctx.roundRect(80, 760, 920, 100, 16); ctx.fill();
+    ctx.strokeStyle = "rgba(245,166,35,0.25)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(80, 760, 920, 100, 16); ctx.stroke();
+    ctx.fillStyle = "#f5a623";
+    ctx.font = "700 28px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Where do you stand?  ·  civiq.ca", 540, 820);
+
+    // watermark
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    ctx.font = "500 20px sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText("Ontario Civic Platform · Powered by Civic Clarity Foundation", 1000, 990);
+
+    const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/png"));
+    if (!blob) { setSharing(false); return; }
+
+    const file = new File([blob], "civiq-compass.png", { type: "image/png" });
+
+    if (navigator.share && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: `I'm ${label} on Civiq`,
+          text: `I just found out where I stand politically on Ontario issues. Find out where you stand →`,
+          files: [file],
+        });
+      } catch (_) {}
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "civiq-compass.png";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    setSharing(false);
+  };
+
   const [leaderboard, setLeaderboard] = useState<{ userId: string; username: string; streakCount: number; civicScore: number; isCurrentUser: boolean }[]>([]);
-  const [currentUserRank, setCurrentUserRank] = useState<number | null>(null);
+    const [currentUserRank, setCurrentUserRank] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/streak", { method: "POST" });
@@ -178,7 +316,27 @@ const stats = [
                 <div style={{ fontSize: "26px", fontWeight: "800", color, letterSpacing: "-0.5px", marginBottom: "6px" }}>{label}</div>
                 <div style={{ fontSize: "13px", color: "#444" }}>Based on your onboarding quiz</div>
               </div>
-              <Link href="/onboarding" style={{ fontSize: "12px", color: "#444", textDecoration: "none", border: "1px solid rgba(255,255,255,0.08)", padding: "6px 14px", borderRadius: "8px" }}>Retake quiz</Link>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <button
+                  onClick={generateShareCard}
+                  disabled={sharing}
+                  style={{
+                    background: sharing ? "rgba(245,166,35,0.08)" : "rgba(245,166,35,0.12)",
+                    border: "1px solid rgba(245,166,35,0.25)",
+                    borderRadius: "8px",
+                    padding: "6px 14px",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    color: "#f5a623",
+                    cursor: sharing ? "not-allowed" : "pointer",
+                    fontFamily: "'DM Sans', sans-serif",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {sharing ? "Generating..." : "Share result ↗"}
+                </button>
+                <Link href="/onboarding" style={{ fontSize: "12px", color: "#444", textDecoration: "none", border: "1px solid rgba(255,255,255,0.08)", padding: "6px 14px", borderRadius: "8px" }}>Retake quiz</Link>
+              </div>
             </div>
           )}
         </motion.div>
