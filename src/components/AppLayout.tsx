@@ -57,6 +57,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       localStorage.setItem("civiq_notif_dismissed", "false");
       setNotifPrompt(false);
     } catch (e) {
+      console.error("Notification subscribe error:", e);
       setNotifPrompt(false);
     }
   };
