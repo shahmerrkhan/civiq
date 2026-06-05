@@ -266,8 +266,59 @@ export default function Learn() {
 
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} style={{ marginBottom: "28px" }}>
           <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>Learn</div>
-          <div style={{ fontSize: "14px", color: "#444" }}>Flashcard modules on politics, systems, and ideas. · {allModules.length} total</div>
+          <div style={{ fontSize: "14px", color: "#666" }}>Flashcard modules on politics, systems, and ideas. · {allModules.length} total</div>
         </motion.div>
+
+        {(() => {
+          const allSlugs = PATHS.flatMap(p => p.modules.map(m => ({ ...m, category: p.category, color: p.color })));
+          const totalDone = allSlugs.filter(m => completed.has(m.slug)).length;
+          const nextUp = allSlugs.find(m => !completed.has(m.slug));
+          const totalAll = allSlugs.length;
+          const overallPct = totalAll > 0 ? Math.round((totalDone / totalAll) * 100) : 0;
+
+          return totalDone > 0 && nextUp ? (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              style={{ marginBottom: "24px" }}
+            >
+              <div
+                onClick={() => window.location.href = `/learn/${nextUp.slug}`}
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.02)",
+                  border: `1px solid ${nextUp.color}30`,
+                  borderRadius: "16px", padding: "18px 20px",
+                  cursor: "pointer", transition: "border-color 0.2s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                  <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: nextUp.color }}>
+                    Continue learning
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#555", fontWeight: "600" }}>
+                    {totalDone}/{totalAll} done · {overallPct}%
+                  </div>
+                </div>
+                <div style={{ height: "3px", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "100px", overflow: "hidden", marginBottom: "14px" }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${overallPct}%` }}
+                    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ height: "100%", backgroundColor: nextUp.color, borderRadius: "100px" }}
+                  />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ fontSize: "15px", fontWeight: "700", color: "#e8e6e0", marginBottom: "2px" }}>{nextUp.title}</div>
+                    <div style={{ fontSize: "12px", color: "#555" }}>{nextUp.category} · {nextUp.minutes} min</div>
+                  </div>
+                  <div style={{ fontSize: "20px", color: nextUp.color, fontWeight: "700", flexShrink: 0, paddingLeft: "12px" }}>→</div>
+                </div>
+              </div>
+            </motion.div>
+          ) : null;
+        })()}
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
           <input
