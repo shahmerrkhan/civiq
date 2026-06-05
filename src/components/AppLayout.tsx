@@ -244,7 +244,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                 </div>
               )}
               <ClerkLoaded>
-              <UserButton appearance={{ baseTheme: undefined, variables: { colorBackground: "#18181f", colorText: "#e8e6e0", colorInputBackground: "#242430", colorInputText: "#e8e6e0", colorNeutral: "#888" } }} />
+                <UserButton appearance={{ variables: { colorBackground: "#1a1a24", colorText: "#e8e6e0", colorTextSecondary: "#999", colorInputBackground: "#242430", colorInputText: "#e8e6e0", colorNeutral: "#888" }, elements: { userButtonPopoverCard: { backgroundColor: "#1a1a24", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }, userButtonPopoverActionButton: { color: "#ccc" }, userButtonPopoverActionButtonText: { color: "#ccc" }, userButtonPopoverActionButtonIcon: { color: "#888" }, userButtonPopoverFooter: { display: "none" } } }} />
               </ClerkLoaded>
             </div>
           </div>
@@ -290,7 +290,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                   </div>
                 )}
                 <ClerkLoaded>
-                <UserButton appearance={{ baseTheme: undefined, variables: { colorBackground: "#0f0f18", colorText: "#f0ede6", colorInputBackground: "#1e1e1e", colorInputText: "#f0ede6" } }} />
+                <UserButton appearance={{ variables: { colorBackground: "#1a1a24", colorText: "#e8e6e0", colorTextSecondary: "#999", colorInputBackground: "#242430", colorInputText: "#e8e6e0", colorNeutral: "#888" }, elements: { userButtonPopoverCard: { backgroundColor: "#1a1a24", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }, userButtonPopoverActionButton: { color: "#ccc" }, userButtonPopoverActionButtonText: { color: "#ccc" }, userButtonPopoverActionButtonIcon: { color: "#888" }, userButtonPopoverFooter: { display: "none" } } }} />
                 </ClerkLoaded>
               </div>
             </div>

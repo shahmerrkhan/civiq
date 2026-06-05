@@ -34,6 +34,11 @@ const PATHS = [
       { title: "How Auditor Generals Work", minutes: 4, slug: "auditor-general" },
       { title: "What is a Coalition Government?", minutes: 5, slug: "coalition-government" },
       { title: "How Question Period Works", minutes: 4, slug: "question-period" },
+      { title: "What is a By-Election?", minutes: 3, slug: "what-is-by-election" },
+      { title: "How Recalls and Petitions Work", minutes: 4, slug: "recalls-and-petitions" },
+      { title: "What is Parliamentary Privilege?", minutes: 4, slug: "parliamentary-privilege" },
+      { title: "How Police Services Boards Work", minutes: 4, slug: "police-services-boards" },
+      { title: "What is Access to Information?", minutes: 4, slug: "access-to-information" },
     ],
   },
   {
@@ -61,6 +66,12 @@ const PATHS = [
       { title: "What is Classical Liberalism?", minutes: 5, slug: "what-is-classical-liberalism" },
       { title: "What is Christian Democracy?", minutes: 4, slug: "what-is-christian-democracy" },
       { title: "What is Technocracy?", minutes: 4, slug: "what-is-technocracy" },
+      { title: "What is Eco-Socialism?", minutes: 5, slug: "what-is-eco-socialism" },
+      { title: "What is Democratic Socialism?", minutes: 5, slug: "what-is-democratic-socialism" },
+      { title: "What is Paleoconservatism?", minutes: 4, slug: "what-is-paleoconservatism" },
+      { title: "What is Third-Way Politics?", minutes: 4, slug: "what-is-third-way" },
+      { title: "What is Civic Nationalism?", minutes: 4, slug: "what-is-civic-nationalism" },
+      { title: "What is Intersectionality?", minutes: 5, slug: "what-is-intersectionality" },
     ],
   },
   {
@@ -93,6 +104,15 @@ const PATHS = [
       { title: "Rosa Parks and the Civil Rights Movement", minutes: 5, slug: "rosa-parks" },
       { title: "John A. Macdonald: Father and Controversies", minutes: 6, slug: "john-a-macdonald" },
       { title: "Mark Carney and Economic Policy", minutes: 5, slug: "mark-carney" },
+      { title: "Volodymyr Zelensky and Ukraine's Fight", minutes: 6, slug: "zelensky" },
+      { title: "Xi Jinping and Modern China", minutes: 6, slug: "xi-jinping" },
+      { title: "Narendra Modi and Indian Politics", minutes: 6, slug: "narendra-modi" },
+      { title: "Greta Thunberg and Climate Activism", minutes: 5, slug: "greta-thunberg" },
+      { title: "Noam Chomsky: Linguistics and Dissent", minutes: 6, slug: "noam-chomsky" },
+      { title: "Ruth Bader Ginsburg and the Law", minutes: 5, slug: "ruth-bader-ginsburg" },
+      { title: "Emmeline Pankhurst and Suffrage", minutes: 5, slug: "emmeline-pankhurst" },
+      { title: "Frederick Douglass and Abolition", minutes: 5, slug: "frederick-douglass" },
+      { title: "John Diefenbaker and Canadian Conservatism", minutes: 5, slug: "john-diefenbaker" },
     ],
   },
   {
@@ -125,6 +145,15 @@ const PATHS = [
       { title: "The European Union Explained", minutes: 6, slug: "european-union" },
       { title: "What is BRICS?", minutes: 5, slug: "what-is-brics" },
       { title: "North Korea: What's Actually Going On?", minutes: 6, slug: "north-korea" },
+      { title: "Iran's Political System", minutes: 6, slug: "iran-politics" },
+      { title: "The Israeli-Palestinian Conflict: Gaza 2023", minutes: 7, slug: "gaza-2023" },
+      { title: "What is the African Union?", minutes: 5, slug: "african-union" },
+      { title: "Taiwan and the China Threat", minutes: 6, slug: "taiwan-china" },
+      { title: "Canada and the Five Eyes", minutes: 5, slug: "five-eyes" },
+      { title: "What is the WTO?", minutes: 4, slug: "what-is-wto" },
+      { title: "The Rohingya Crisis", minutes: 6, slug: "rohingya-crisis" },
+      { title: "What is ASEAN?", minutes: 4, slug: "what-is-asean" },
+      { title: "Canada's Arctic Sovereignty", minutes: 5, slug: "arctic-sovereignty" },
     ],
   },
   {
@@ -157,6 +186,15 @@ const PATHS = [
       { title: "Misinformation and Democracy", minutes: 5, slug: "misinformation-democracy" },
       { title: "Online Privacy and Surveillance", minutes: 5, slug: "online-privacy" },
       { title: "AI and Political Power", minutes: 5, slug: "ai-and-politics" },
+      { title: "Sex Work Policy in Canada", minutes: 5, slug: "sex-work-policy" },
+      { title: "Vaccine Policy and Mandates", minutes: 5, slug: "vaccine-policy" },
+      { title: "Youth Voting Rights", minutes: 4, slug: "youth-voting-rights" },
+      { title: "The Opioid Crisis in Canada", minutes: 6, slug: "opioid-crisis" },
+      { title: "Disability Rights and Policy", minutes: 5, slug: "disability-rights" },
+      { title: "Mental Health and Public Policy", minutes: 5, slug: "mental-health-policy" },
+      { title: "Animal Rights and the Law", minutes: 4, slug: "animal-rights" },
+      { title: "Nuclear Energy Debate", minutes: 5, slug: "nuclear-energy" },
+      { title: "Child Poverty in Canada", minutes: 5, slug: "child-poverty" },
     ],
   },
   {
@@ -179,6 +217,28 @@ const PATHS = [
       { title: "How Supply Chains Affect Politics", minutes: 5, slug: "supply-chains-politics" },
       { title: "Corporate Tax and Loopholes", minutes: 5, slug: "corporate-tax" },
       { title: "What is Economic Nationalism?", minutes: 5, slug: "economic-nationalism" },
+      { title: "How the Stock Market Works", minutes: 5, slug: "stock-market" },
+      { title: "What is Cryptocurrency?", minutes: 5, slug: "cryptocurrency" },
+      { title: "How Unions Work", minutes: 5, slug: "how-unions-work" },
+      { title: "What is a Carbon Credit?", minutes: 4, slug: "carbon-credits" },
+      { title: "How Pensions Work in Canada", minutes: 5, slug: "pensions-canada" },
+      { title: "What is the Wealth Gap?", minutes: 5, slug: "wealth-gap" },
+      { title: "How Foreign Investment Works", minutes: 5, slug: "foreign-investment" },
+    ],
+  },
+  {
+    category: "Philosophy & Ethics",
+    color: "#38bdf8",
+    icon: "💡",
+    modules: [
+      { title: "What is Democracy?", minutes: 5, slug: "what-is-democracy" },
+      { title: "What is Justice?", minutes: 5, slug: "what-is-justice" },
+      { title: "What are Human Rights?", minutes: 5, slug: "what-are-human-rights" },
+      { title: "Is Civil Disobedience Ever Justified?", minutes: 5, slug: "civil-disobedience" },
+      { title: "What is the Social Contract?", minutes: 5, slug: "social-contract" },
+      { title: "What is Utilitarianism?", minutes: 4, slug: "utilitarianism" },
+      { title: "Ethics of War: When is War Justified?", minutes: 6, slug: "just-war-theory" },
+      { title: "What is Propaganda?", minutes: 5, slug: "what-is-propaganda" },
     ],
   },
   {
@@ -201,6 +261,17 @@ const PATHS = [
       { title: "The Vietnam War and Its Legacy", minutes: 6, slug: "vietnam-war" },
       { title: "The Cuban Missile Crisis", minutes: 5, slug: "cuban-missile-crisis" },
       { title: "How Colonialism Shaped the Modern World", minutes: 7, slug: "colonialism-modern-world" },
+      { title: "The Suffragette Movement", minutes: 5, slug: "suffragette-movement" },
+      { title: "The Great Depression and Its Politics", minutes: 6, slug: "great-depression" },
+      { title: "The Korean War", minutes: 5, slug: "korean-war" },
+      { title: "The Iranian Revolution", minutes: 6, slug: "iranian-revolution" },
+      { title: "The Partition of India", minutes: 6, slug: "partition-of-india" },
+      { title: "The Troubles in Northern Ireland", minutes: 6, slug: "troubles-northern-ireland" },
+      { title: "South Africa After Apartheid", minutes: 5, slug: "south-africa-post-apartheid" },
+      { title: "The Nuremberg Trials", minutes: 5, slug: "nuremberg-trials" },
+      { title: "Tiananmen Square 1989", minutes: 5, slug: "tiananmen-square" },
+      { title: "The Trail of Tears", minutes: 5, slug: "trail-of-tears" },
+      { title: "The Bosnian War and Genocide", minutes: 6, slug: "bosnian-war" },
     ],
   },
 ];
@@ -214,6 +285,7 @@ const filterColors: Record<string, string> = {
   Issues: "#fb923c",
   Economy: "#f472b6",
   History: "#e879f9",
+  "Philosophy & Ethics": "#38bdf8",
 };
 
 const PAGE_SIZE = 20;
@@ -233,8 +305,8 @@ export default function Learn() {
       .catch(() => {});
   }, []);
 
-  const filters = ["All", "Systems", "Ideologies", "Figures", "Canada & World", "Issues", "Economy", "History"];
-
+  const filters = ["All", "Systems", "Ideologies", "Figures", "Canada & World", "Issues", "Economy", "History", "Philosophy & Ethics"];
+  
   const grouped = activeFilter === "All"
     ? PATHS.map(p => ({ ...p, modules: p.modules.filter(m => m.title.toLowerCase().includes(search.toLowerCase())) })).filter(p => p.modules.length > 0)
     : PATHS.filter(p => p.category === activeFilter).map(p => ({ ...p, modules: p.modules.filter(m => m.title.toLowerCase().includes(search.toLowerCase())) })).filter(p => p.modules.length > 0);
@@ -467,21 +539,37 @@ export default function Learn() {
               }}
             >← Prev</motion.button>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-              <motion.button
-                key={p}
-                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                onClick={() => setPage(p)}
-                style={{
-                  width: "36px", height: "36px", borderRadius: "10px",
-                  border: page === p ? "1px solid #f5a623" : "1px solid rgba(255,255,255,0.08)",
-                  backgroundColor: page === p ? "rgba(245,166,35,0.1)" : "transparent",
-                  color: page === p ? "#f5a623" : "#555",
-                  fontSize: "13px", fontWeight: "600", cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
-              >{p}</motion.button>
-            ))}
+            {(() => {
+              const pages: (number | "...")[] = [];
+              if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+              } else {
+                pages.push(1);
+                if (page > 3) pages.push("...");
+                for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+                if (page < totalPages - 2) pages.push("...");
+                pages.push(totalPages);
+              }
+              return pages.map((p, idx) =>
+                p === "..." ? (
+                  <span key={`dots-${idx}`} style={{ color: "#555", fontSize: "13px", padding: "0 4px", lineHeight: "36px" }}>...</span>
+                ) : (
+                  <motion.button
+                    key={p}
+                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                    onClick={() => setPage(p as number)}
+                    style={{
+                      width: "36px", height: "36px", borderRadius: "10px",
+                      border: page === p ? "1px solid #f5a623" : "1px solid rgba(255,255,255,0.08)",
+                      backgroundColor: page === p ? "rgba(245,166,35,0.1)" : "transparent",
+                      color: page === p ? "#f5a623" : "#555",
+                      fontSize: "13px", fontWeight: "600", cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif",
+                    }}
+                  >{p}</motion.button>
+                )
+              );
+            })()}
 
             <motion.button
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
