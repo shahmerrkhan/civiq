@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       title: title.trim(),
       body: body.trim(),
       url: url?.trim() || "/dashboard",
-      tag: "admin-blast",
+        tag: `admin-blast-${Date.now()}`,
     });
 
     const results = await Promise.allSettled(

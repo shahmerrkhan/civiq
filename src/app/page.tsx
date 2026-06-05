@@ -419,7 +419,7 @@ export default function Home() {
           <div style={{ overflow: "hidden", flex: 1 }}>
             <div className="ticker-track">
               {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
-                <span key={i} style={{ padding: "0 28px", fontSize: "10px", fontWeight: "600", letterSpacing: "0.05em", whiteSpace: "nowrap", borderRight: "1px solid rgba(255,255,255,0.04)", color: "#3a3a3a" }}>
+                <span key={i} style={{ padding: "0 28px", fontSize: "10px", fontWeight: "600", letterSpacing: "0.05em", whiteSpace: "nowrap", borderRight: "1px solid rgba(255,255,255,0.04)", color: "#666" }}>
                   {item}
                 </span>
               ))}
@@ -571,8 +571,8 @@ export default function Home() {
               className="scroll-indicator"
               style={{ position: "absolute", bottom: "40px", left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}
             >
-              <div style={{ fontSize: "10px", color: "#2a2a2a", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: "700" }}>Scroll</div>
-              <div style={{ width: "1px", height: "32px", background: "linear-gradient(to bottom, #2a2a2a, transparent)" }} />
+              <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: "700" }}>Scroll</div>
+              <div style={{ width: "1px", height: "32px", background: "linear-gradient(to bottom, #666, transparent)" }} />
             </motion.div>
 
           </div>
@@ -601,7 +601,7 @@ export default function Home() {
                 <span className="pulse-dot" style={{ width: "6px", height: "6px" }} />
                 Today in Ontario
               </div>
-              <div style={{ fontSize: "11px", color: "#2a2a2a", fontWeight: "600" }}>{new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</div>
+              <div style={{ fontSize: "11px", color: "#666", fontWeight: "600" }}>{new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</div>
             </div>
 
             {[
@@ -623,14 +623,14 @@ export default function Home() {
                     color: item.dot, backgroundColor: `${item.dot}18`,
                     padding: "2px 8px", borderRadius: "3px",
                   }}>{item.tag}</span>
-                  <span style={{ fontSize: "11px", color: "#2a2a2a" }}>{item.time}</span>
+                  <span style={{ fontSize: "11px", color: "#666" }}>{item.time}</span>
                 </div>
                 <div style={{ fontSize: "14px", fontWeight: "600", color: "#aaa", lineHeight: "1.5" }}>{item.title}</div>
               </motion.div>
             ))}
 
             <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: "12px", color: "#2a2a2a" }}>Your political position</span>
+              <span style={{ fontSize: "12px", color: "#666" }}>Your political position</span>
               <Link href="/sign-up" style={{ fontSize: "12px", fontWeight: "700", color: "#f5a623", textDecoration: "none" }}>Take the quiz →</Link>
             </div>
           </motion.div>
@@ -652,7 +652,7 @@ export default function Home() {
                   <div className="stat-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: "44px", fontWeight: "900", letterSpacing: "-1.5px", lineHeight: "1", marginBottom: "8px" }}>
                     <span className="shimmer-text">{s.num}</span>
                   </div>
-                  <div style={{ fontSize: "12px", color: "#333", fontWeight: "600", letterSpacing: "0.04em" }}>{s.label}</div>
+                  <div style={{ fontSize: "12px", color: "#555", fontWeight: "600", letterSpacing: "0.04em" }}>{s.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -709,7 +709,7 @@ export default function Home() {
             <blockquote style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(18px, 2.5vw, 26px)", fontWeight: "700", color: "#888", lineHeight: "1.6", letterSpacing: "-0.3px", marginBottom: "24px", fontStyle: "italic" }}>
               What is the first part of politics? Education. The second? Education. And the third? Education.
             </blockquote>
-            <cite style={{ fontSize: "11px", color: "#333", fontStyle: "normal", fontWeight: "800", letterSpacing: "0.12em", textTransform: "uppercase" }}>Jules Michelet</cite>
+            <cite style={{ fontSize: "11px", color: "#555", fontStyle: "normal", fontWeight: "800", letterSpacing: "0.12em", textTransform: "uppercase" }}>Jules Michelet</cite>
           </motion.div>
         </div>
 
@@ -717,13 +717,13 @@ export default function Home() {
         <div id="about" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(6,6,12,0.95)", padding: "28px 20px", position: "relative", zIndex: 5 }}>
           <div style={{ maxWidth: "1160px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "14px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-              <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.1em", color: "#2a2a2a", textTransform: "uppercase" }}>In partnership with</div>
+              <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.1em", color: "#666", textTransform: "uppercase" }}>In partnership with</div>
               <a href="https://www.civicclarityfoundation.org" target="_blank" rel="noopener noreferrer"
                 style={{ fontSize: "14px", fontWeight: "700", color: "#e8e6e0", borderLeft: "2px solid #f5a623", paddingLeft: "12px", textDecoration: "none" }}>
                 Civic Clarity Foundation ↗
               </a>
             </div>
-            <div style={{ fontSize: "13px", color: "#333", lineHeight: "1.7" }}>
+            <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7" }}>
               A non-partisan, youth-focused think tank committed to governmental transparency, accountability, and meaningful youth inclusion in democracy.
             </div>
           </div>
@@ -790,13 +790,13 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
             >
-              <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.12em", textTransform: "uppercase", color: "#2a2a2a", marginBottom: "24px" }}>Ready?</div>
+              <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.12em", textTransform: "uppercase", color: "#666", marginBottom: "24px" }}>Ready?</div>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(36px, 5vw, 64px)", fontWeight: "900", letterSpacing: "-2px", color: "#f0ede6", marginBottom: "20px", lineHeight: "1.06" }}>
                 Your province.<br />
                 Your politics.<br />
                 <span className="shimmer-text">Your ground.</span>
               </h2>
-              <p style={{ fontSize: "16px", color: "#333", marginBottom: "48px", lineHeight: "1.8", maxWidth: "420px", margin: "0 auto 48px" }}>
+              <p style={{ fontSize: "16px", color: "#555", marginBottom: "48px", lineHeight: "1.8", maxWidth: "420px", margin: "0 auto 48px" }}>
                 No algorithm. No outrage bait. Just the information you need to form your own view.
               </p>
               <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>

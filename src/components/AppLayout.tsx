@@ -118,7 +118,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       <motion.div
         animate={{ opacity: [0.3, 0.7, 0.3] }}
         transition={{ duration: 1.5, repeat: Infinity }}
-        style={{ fontSize: "11px", color: "#333", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase" }}
+        style={{ fontSize: "11px", color: "#555", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase" }}
       >
         Civiq
       </motion.div>

@@ -76,7 +76,7 @@ export default function OpinionsClient({ opinions }: { opinions: Opinion[] }) {
           >
             <div style={{ fontSize: "48px", marginBottom: "16px" }}>🗒️</div>
             <div style={{ fontSize: "16px", color: "#555", marginBottom: "8px" }}>Nothing here yet</div>
-            <div style={{ fontSize: "13px", color: "#333", marginBottom: "28px" }}>
+            <div style={{ fontSize: "13px", color: "#555", marginBottom: "28px" }}>
               Open any issue from the feed and log what you think about it.
             </div>
             <Link
@@ -180,7 +180,7 @@ export default function OpinionsClient({ opinions }: { opinions: Opinion[] }) {
                                 {op.cardCategory}
                               </span>
                             )}
-                            <span style={{ fontSize: "11px", color: "#333" }}>
+                            <span style={{ fontSize: "11px", color: "#555" }}>
                               {timeAgo(op.createdAt)}
                             </span>
                           </div>
@@ -196,7 +196,7 @@ export default function OpinionsClient({ opinions }: { opinions: Opinion[] }) {
                         </div>
                         <motion.span
                           animate={{ rotate: isExpanded ? 180 : 0 }}
-                          style={{ fontSize: "12px", color: "#333", flexShrink: 0, marginTop: "2px" }}
+                          style={{ fontSize: "12px", color: "#555", flexShrink: 0, marginTop: "2px" }}
                         >
                           ▼
                         </motion.span>
@@ -228,7 +228,7 @@ export default function OpinionsClient({ opinions }: { opinions: Opinion[] }) {
                             <div style={{ marginBottom: "16px" }}>
                               <div style={{
                                 fontSize: "10px",
-                                color: "#333",
+                                color: "#555",
                                 fontWeight: "700",
                                 letterSpacing: "0.08em",
                                 textTransform: "uppercase",

@@ -359,7 +359,7 @@ export default function Learn() {
         <AnimatePresence mode="wait">
           <motion.div key={activeFilter + search + page}>
             {paginatedGrouped.length === 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: "center", padding: "60px 20px", color: "#333", fontSize: "14px" }}>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: "center", padding: "60px 20px", color: "#555", fontSize: "14px" }}>
                 No modules found{search ? ` for "${search}"` : ""}.
               </motion.div>
             )}
@@ -381,7 +381,7 @@ export default function Learn() {
                       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
                         <span style={{ fontSize: "20px" }}>{path.icon}</span>
                         <span style={{ fontSize: "16px", fontWeight: "700", color: path.color }}>{path.category}</span>
-                        <span style={{ fontSize: "12px", color: "#333" }}>{totalInCategory} modules</span>
+                        <span style={{ fontSize: "12px", color: "#555" }}>{totalInCategory} modules</span>
                         {allDone && (
                           <motion.span
                             initial={{ scale: 0 }} animate={{ scale: 1 }}
@@ -443,7 +443,7 @@ export default function Learn() {
                           }}
                         >✓</motion.div>
                       )}
-                      <span style={{ fontSize: "12px", color: "#333", whiteSpace: "nowrap" }}>{mod.minutes} min</span>
+                      <span style={{ fontSize: "12px", color: "#555", whiteSpace: "nowrap" }}>{mod.minutes} min</span>
                     </div>
                   </motion.div>
                 ))}
@@ -461,7 +461,7 @@ export default function Learn() {
               style={{
                 padding: "8px 16px", borderRadius: "10px",
                 border: "1px solid rgba(255,255,255,0.08)",
-                backgroundColor: "transparent", color: page === 1 ? "#333" : "#aaa",
+                backgroundColor: "transparent", color: page === 1 ? "#555" : "#aaa",
                 fontSize: "13px", fontWeight: "600", cursor: page === 1 ? "default" : "pointer",
                 fontFamily: "'DM Sans', sans-serif",
               }}
@@ -490,7 +490,7 @@ export default function Learn() {
               style={{
                 padding: "8px 16px", borderRadius: "10px",
                 border: "1px solid rgba(255,255,255,0.08)",
-                backgroundColor: "transparent", color: page === totalPages ? "#333" : "#aaa",
+                backgroundColor: "transparent", color: page === totalPages ? "#555" : "#aaa",
                 fontSize: "13px", fontWeight: "600", cursor: page === totalPages ? "default" : "pointer",
                 fontFamily: "'DM Sans', sans-serif",
               }}

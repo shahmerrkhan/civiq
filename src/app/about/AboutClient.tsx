@@ -130,7 +130,7 @@ export default function AboutClient({ isSignedIn }: { isSignedIn: boolean }) {
                   The institution. Credibility, government partnerships, national advocacy, and content integrity oversight. CCF ensures Civiq stays genuinely non-partisan.
                 </div>
               </div>
-              <div style={{ fontSize: "18px", color: "#333", textAlign: "center" as const, padding: "0 4px" }}>|</div>
+              <div style={{ fontSize: "18px", color: "#555", textAlign: "center" as const, padding: "0 4px" }}>|</div>
               <div style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "14px", padding: "22px" }}>
                 <div style={{ fontSize: "22px", marginBottom: "10px" }}>📱</div>
                 <div style={{ fontSize: "15px", fontWeight: "800", marginBottom: "6px", letterSpacing: "-0.3px" }}>Civiq</div>

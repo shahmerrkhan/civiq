@@ -85,7 +85,7 @@ const [error, setError] = useState(false);
           <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>
             Today's Ontario Question
           </div>
-          <div style={{ fontSize: "13px", color: "#444" }}>
+          <div style={{ fontSize: "13px", color: "#666" }}>
             {new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </div>
         </motion.div>
@@ -215,7 +215,7 @@ const [error, setError] = useState(false);
                     width: "100%", padding: "16px",
                     borderRadius: "14px", border: "none",
                     backgroundColor: selected !== null ? "#f5a623" : "rgba(255,255,255,0.04)",
-                    color: selected !== null ? "#000" : "#333",
+                    color: selected !== null ? "#000" : "#555",
                     fontSize: "15px", fontWeight: "700",
                     cursor: selected !== null ? "pointer" : "not-allowed",
                     fontFamily: "'DM Sans', sans-serif",
@@ -252,7 +252,7 @@ const [error, setError] = useState(false);
                   <div style={{ fontSize: "14px", color: "#888", lineHeight: "1.7" }}>
                     {result.explanation}
                   </div>
-                  <div style={{ marginTop: "14px", fontSize: "12px", color: "#444" }}>
+                    <div style={{ marginTop: "14px", fontSize: "12px", color: "#666" }}>
                     {totalAnswers} {totalAnswers === 1 ? "person has" : "people have"} answered today
                   </div>
                 </motion.div>
@@ -264,7 +264,7 @@ const [error, setError] = useState(false);
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                style={{ marginTop: "16px", textAlign: "center", fontSize: "13px", color: "#333" }}
+                style={{ marginTop: "16px", textAlign: "center", fontSize: "13px", color: "#555" }}
               >
                 Come back tomorrow for a new question
               </motion.div>

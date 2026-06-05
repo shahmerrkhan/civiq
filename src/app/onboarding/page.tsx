@@ -270,7 +270,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
             <p style={{ fontSize: "16px", color: "#555", lineHeight: "1.7", marginBottom: "12px", maxWidth: "400px", margin: "0 auto 12px" }}>
               10 questions about real Ontario issues. No right or wrong answers — this helps us personalize your feed.
             </p>
-            <p style={{ fontSize: "13px", color: "#333", marginBottom: "40px" }}>Takes about 2 minutes.</p>
+            <p style={{ fontSize: "13px", color: "#555", marginBottom: "40px" }}>Takes about 2 minutes.</p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "320px", margin: "0 auto" }}>
               <motion.button
@@ -282,7 +282,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
                 Start the quiz
               </motion.button>
               <button
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#333", fontFamily: "'DM Sans', sans-serif", padding: "8px" }}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#555", fontFamily: "'DM Sans', sans-serif", padding: "8px" }}
                 onClick={async () => {
                   await fetch("/api/onboarding", {
                     method: "POST",
@@ -522,7 +522,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
             <button
               onClick={handleFinish}
               disabled={saving}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#333", fontFamily: "'DM Sans', sans-serif", padding: "12px", width: "100%", marginTop: "4px" }}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#555", fontFamily: "'DM Sans', sans-serif", padding: "12px", width: "100%", marginTop: "4px" }}
             >
               Skip topic selection
             </button>
@@ -547,7 +547,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               <div style={{ fontSize: "12px", color: "#444", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 Question {step + 1} of {QUESTIONS.length}
               </div>
-              <div style={{ fontSize: "12px", color: "#333" }}>{Math.round(progress)}%</div>
+              <div style={{ fontSize: "12px", color: "#555" }}>{Math.round(progress)}%</div>
             </div>
             <div style={{ width: "100%", height: "3px", backgroundColor: "rgba(255,255,255,0.06)", borderRadius: "10px", overflow: "hidden" }}>
               <motion.div
@@ -620,7 +620,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               marginTop: "24px", width: "100%", padding: "16px",
               borderRadius: "12px", border: "none",
               backgroundColor: selected !== null ? "#f5a623" : "rgba(255,255,255,0.04)",
-              color: selected !== null ? "#000" : "#333",
+              color: selected !== null ? "#000" : "#555",
               fontWeight: "700", fontSize: "15px",
               cursor: selected !== null ? "pointer" : "not-allowed",
               transition: "all 0.2s ease",

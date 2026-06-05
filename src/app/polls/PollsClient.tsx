@@ -84,7 +84,7 @@ export default function PollsClient({
         </motion.div>
 
         {polls.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "#333", fontSize: "15px" }}>
+          <div style={{ textAlign: "center", padding: "80px 0", color: "#555", fontSize: "15px" }}>
             No polls yet. Check back soon.
           </div>
         ) : (
@@ -272,7 +272,7 @@ export default function PollsClient({
                   </AnimatePresence>
 
                   <div style={{ marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: "12px", color: "#333", fontWeight: "500" }}>
+                      <span style={{ fontSize: "12px", color: "#555", fontWeight: "500" }}>
                       {totalVotes} {totalVotes === 1 ? "vote" : "votes"}
                     </span>
                     {isExpired && (

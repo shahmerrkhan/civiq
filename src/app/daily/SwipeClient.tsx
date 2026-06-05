@@ -188,7 +188,7 @@ export default function SwipeClient() {
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             style={{ width: "28px", height: "28px", border: "2px solid rgba(245,166,35,0.2)", borderTopColor: "#f5a623", borderRadius: "50%" }}
           />
-          <div style={{ fontSize: "13px", color: "#444" }}>Loading feed...</div>
+          <div style={{ fontSize: "13px", color: "#666" }}>Loading feed...</div>
         </div>
       </AppLayout>
     );
@@ -237,7 +237,7 @@ export default function SwipeClient() {
           font-weight: 600;
           border: 1px solid rgba(255,255,255,0.08);
           background: transparent;
-          color: #444;
+          color: #777;
           cursor: pointer;
           font-family: 'DM Sans', sans-serif;
           transition: all 0.2s ease;
@@ -363,7 +363,7 @@ export default function SwipeClient() {
               );
             })}
           </div>
-          <div style={{ fontSize: "12px", color: "#333", fontWeight: "600" }}>
+          <div style={{ fontSize: "12px", color: "#666", fontWeight: "600" }}>
             {index + 1} / {loadingMore ? "..." : cards.length}
           </div>
         </div>
@@ -404,7 +404,7 @@ export default function SwipeClient() {
                 }}>
                   {card.category.toUpperCase()}
                 </span>
-                <span style={{ fontSize: "11px", color: "#333" }}>{card.time}</span>
+                <span style={{ fontSize: "11px", color: "#666" }}>{card.time}</span>
               </div>
               <div style={{ display: "flex", gap: "8px" }}>
                 <button
@@ -490,7 +490,7 @@ export default function SwipeClient() {
 
             {/* Source + deep dive */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-              <span style={{ fontSize: "11px", color: "#2a2a2a" }}>via {card.source} · <span style={{ color: "#333" }}>{Math.floor(Math.random() * 180) + 40} reading now</span></span>
+              <span style={{ fontSize: "11px", color: "#666" }}>via {card.source} · <span style={{ color: "#777" }}>{Math.floor(Math.random() * 180) + 40} reading now</span></span>
               <button
                 onClick={() => setShowDeepDive(d => !d)}
                 style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "#f5a623", fontWeight: "700", fontFamily: "'DM Sans', sans-serif" }}
@@ -512,7 +512,7 @@ export default function SwipeClient() {
                   }}
                 >
                   <span style={{ fontSize: "18px" }}>{r.emoji}</span>
-                  <span style={{ fontSize: "10px", color: "#444", fontWeight: "600" }}>{r.label}</span>
+                  <span style={{ fontSize: "10px", color: "#777", fontWeight: "600" }}>{r.label}</span>
                 </button>
               ))}
             </div>
@@ -522,11 +522,11 @@ export default function SwipeClient() {
               <button
                 onClick={goPrev}
                 disabled={index === 0}
-                style={{ background: "none", border: "none", cursor: index === 0 ? "default" : "pointer", fontSize: "12px", color: index === 0 ? "#222" : "#555", fontFamily: "'DM Sans', sans-serif", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}
+                style={{ background: "none", border: "none", cursor: index === 0 ? "default" : "pointer", fontSize: "12px", color: index === 0 ? "#555" : "#777", fontFamily: "'DM Sans', sans-serif", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}
               >
                 ↑ Previous
               </button>
-              <div style={{ fontSize: "10px", color: "#222", letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: "10px", color: "#555", letterSpacing: "0.06em" }}>
                 SWIPE OR SCROLL
               </div>
               <button

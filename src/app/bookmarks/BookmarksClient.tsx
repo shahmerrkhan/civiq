@@ -62,7 +62,7 @@ export default function BookmarksClient({ bookmarks: initial }: {
           >
             <div style={{ fontSize: "48px", marginBottom: "16px" }}>🏷️</div>
             <div style={{ fontSize: "16px", color: "#555", marginBottom: "8px" }}>No saved articles yet</div>
-            <div style={{ fontSize: "13px", color: "#333" }}>Tap the bookmark icon on any feed card to save it here.</div>
+            <div style={{ fontSize: "13px", color: "#555" }}>Tap the bookmark icon on any feed card to save it here.</div>
           </motion.div>
         )}
 
@@ -93,7 +93,7 @@ export default function BookmarksClient({ bookmarks: initial }: {
                         padding: "2px 8px", borderRadius: "100px",
                         letterSpacing: "0.05em", textTransform: "uppercase",
                       }}>{bookmark.cardCategory}</span>
-                      <span style={{ fontSize: "12px", color: "#333" }}>{timeAgo(bookmark.savedAt)}</span>
+                      <span style={{ fontSize: "12px", color: "#555" }}>{timeAgo(bookmark.savedAt)}</span>
                     </div>
                     <div style={{ fontSize: "16px", fontWeight: "700", letterSpacing: "-0.2px", marginBottom: "8px", lineHeight: "1.4" }}>
                       {bookmark.cardTitle}
@@ -109,7 +109,7 @@ export default function BookmarksClient({ bookmarks: initial }: {
                     disabled={removing === bookmark.id}
                     style={{
                       background: "none", border: "none",
-                      color: "#333", fontSize: "18px",
+                      color: "#555", fontSize: "18px",
                       cursor: "pointer", flexShrink: 0,
                       opacity: removing === bookmark.id ? 0.5 : 1,
                     }}
@@ -118,7 +118,7 @@ export default function BookmarksClient({ bookmarks: initial }: {
                   </motion.button>
                 </div>
                 {bookmark.cardSource && (
-                  <div style={{ fontSize: "12px", color: "#333" }}>{bookmark.cardSource}</div>
+                  <div style={{ fontSize: "12px", color: "#555" }}>{bookmark.cardSource}</div>
                 )}
               </motion.div>
             );

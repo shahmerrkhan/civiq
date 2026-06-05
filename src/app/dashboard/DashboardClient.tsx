@@ -201,7 +201,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
 
         {loading && (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <div style={{ fontSize: "13px", color: "#333", marginBottom: "4px" }}>Generating today's Ontario feed...</div>
+            <div style={{ fontSize: "13px", color: "#555", marginBottom: "4px" }}>Generating today's Ontario feed...</div>
             {[1, 2, 3].map(i => (
               <div key={i} className="skeleton" style={{ height: "160px", borderRadius: "16px" }} />
             ))}
@@ -253,7 +253,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
                     {card.summary}
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", fontSize: "12px", color: "#333", flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", fontSize: "12px", color: "#555", flexWrap: "wrap" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <span>{card.source}</span>
                     <span>·</span>

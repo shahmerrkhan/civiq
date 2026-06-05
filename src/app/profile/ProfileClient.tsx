@@ -49,7 +49,7 @@ export default function ProfileClient({
   const skipped = !compassPosition || (compassPosition.x === 0 && compassPosition.y === 0);
   const { label, color } = compassPosition
     ? getLabel(compassPosition.x, compassPosition.y)
-    : { label: "Not taken yet", color: "#333" };
+    : { label: "Not taken yet", color: "#555" };
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
   const [shareReady, setShareReady] = useState(false);
@@ -260,7 +260,7 @@ const stats = [
               <div style={{ fontSize: "42px", fontWeight: "800", color: scoreColor, letterSpacing: "-2px", lineHeight: 1 }}>{civicScore}</div>
               <div style={{ fontSize: "14px", color: scoreColor, fontWeight: "600" }}>{scoreLabel}</div>
             </div>
-            <div style={{ fontSize: "12px", color: "#333", marginTop: "8px" }}>
+            <div style={{ fontSize: "12px", color: "#555", marginTop: "8px" }}>
               +20 per module · +10 per poll · +15 per opinion · +25 daily correct
             </div>
           </div>
@@ -355,7 +355,7 @@ const stats = [
           </div>
 
           {leaderboard.length === 0 ? (
-            <div style={{ fontSize: "13px", color: "#333", textAlign: "center", padding: "20px 0" }}>Loading...</div>
+            <div style={{ fontSize: "13px", color: "#555", textAlign: "center", padding: "20px 0" }}>Loading...</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {leaderboard.slice(0, 10).map((u, i) => {
@@ -406,7 +406,7 @@ const stats = [
             <div style={{ textAlign: "center", padding: "32px 0" }}>
               <div style={{ fontSize: "32px", marginBottom: "12px" }}>💬</div>
               <div style={{ fontSize: "15px", color: "#555", marginBottom: "8px" }}>No opinions logged yet</div>
-              <div style={{ fontSize: "13px", color: "#333" }}>When you read a feed card and log your take, it shows up here.</div>
+              <div style={{ fontSize: "13px", color: "#555" }}>When you read a feed card and log your take, it shows up here.</div>
             </div>
           ) : (
             <div style={{ position: "relative" }}>

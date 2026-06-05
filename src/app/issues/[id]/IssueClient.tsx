@@ -195,7 +195,7 @@ export default function IssueClient({ card, polls, userVotes, userOpinion, userI
                       );
                     })}
                   </div>
-                  <div style={{ marginTop: "12px", fontSize: "12px", color: "#333" }}>{totalVotes} {totalVotes === 1 ? "vote" : "votes"}</div>
+                  <div style={{ marginTop: "12px", fontSize: "12px", color: "#555" }}>{totalVotes} {totalVotes === 1 ? "vote" : "votes"}</div>
                 </div>
               );
             })}

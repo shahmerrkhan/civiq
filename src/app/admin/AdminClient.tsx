@@ -198,7 +198,7 @@ export default function AdminClient({ cards: initial, polls }: { cards: Card[]; 
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          style={{ textAlign: "center", padding: "60px 0", color: "#333", fontSize: "14px" }}
+          style={{ textAlign: "center", padding: "60px 0", color: "#555", fontSize: "14px" }}
         >
           {showUnapprove ? "No approved cards yet." : "Nothing pending — you're all clear."}
         </motion.div>
