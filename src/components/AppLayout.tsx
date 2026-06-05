@@ -58,6 +58,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       setNotifPrompt(false);
     } catch (e) {
       console.error("Notification subscribe error:", e);
+      alert("Error: " + String(e));
       setNotifPrompt(false);
     }
   };
