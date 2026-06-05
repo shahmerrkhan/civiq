@@ -415,9 +415,9 @@ export default function AppLayout({ children, active }: { children: React.ReactN
             )}
           </AnimatePresence>
         )}
-</div>
+      </div>
 
-        {notifPrompt && (
+      {notifPrompt && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
