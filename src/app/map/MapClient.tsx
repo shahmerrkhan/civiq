@@ -67,7 +67,16 @@ export default function MapClient() {
     setLoading(true);
     fetch(`/api/region-votes?issueId=${issueId}`)
       .then(r => r.json())
-      .then(d => { setByRegion(d.byRegion || {}); setLoading(false); });
+      .then(d => {
+        setByRegion(d.byRegion || {});
+        if (d.userVote) {
+          setVoted(v => ({ ...v, [issueId]: true }));
+          setUserRegion(d.userVote.regionId);
+          setUserStance(d.userVote.stance);
+          setSelectedRegion(d.userVote.regionId);
+        }
+        setLoading(false);
+      });
   }, [issueId]);
 
   const handleVote = async () => {

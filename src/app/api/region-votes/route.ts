@@ -27,7 +27,21 @@ export async function GET(req: Request) {
     byRegion[row.regionId].total += row.count;
   }
 
-  return NextResponse.json({ byRegion });
+  // Check if current user already voted on this issue
+  let userVote = null;
+  const { userId } = await auth();
+  if (userId) {
+    const existing = await db
+      .select()
+      .from(regionVotes)
+      .where(and(eq(regionVotes.userId, userId), eq(regionVotes.issueId, issueId)))
+      .limit(1);
+    if (existing[0]) {
+      userVote = { regionId: existing[0].regionId, stance: existing[0].stance };
+    }
+  }
+
+  return NextResponse.json({ byRegion, userVote });
 }
 
 export async function POST(req: Request) {
