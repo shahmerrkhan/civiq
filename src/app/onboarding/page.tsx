@@ -129,12 +129,13 @@ function getLabel(x: number, y: number) {
 type Stage = "welcome" | "quiz" | "topics" | "result";
 
   export default function OnboardingClient() {
+  const router = useRouter();
+
   useEffect(() => {
     if (localStorage.getItem("civiq_onboarding_done") === "true") {
       router.push("/dashboard");
     }
   }, []);
-  const router = useRouter();
   const [stage, setStage] = useState<Stage>("welcome");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<{ x: number; y: number }[]>([]);
@@ -311,8 +312,8 @@ type Stage = "welcome" | "quiz" | "topics" | "result";
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               style={{ backgroundColor: "#f5a623", color: "#000", padding: "16px 48px", borderRadius: "12px", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
-              onClick={() => router.push("/dashboard")}
-            >
+              onClick={() => { localStorage.setItem("civiq_onboarding_done", "true"); router.push("/dashboard"); }}
+              >
               Go to my feed →
             </motion.button>
           </motion.div>

@@ -38,9 +38,15 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       const reg = await navigator.serviceWorker.register("/sw.js");
       const permission = await Notification.requestPermission();
       if (permission !== "granted") { setNotifPrompt(false); return; }
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!vapidKey) {
+        alert("VAPID key missing — check Vercel env vars");
+        setNotifPrompt(false);
+        return;
+      }
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        applicationServerKey: vapidKey,
       });
       const subJson = sub.toJSON();
       await fetch("/api/push/subscribe", {
@@ -57,8 +63,6 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       localStorage.setItem("civiq_notif_dismissed", "false");
       setNotifPrompt(false);
     } catch (e) {
-      console.error("Notification subscribe error:", e);
-      alert("Error: " + String(e));
       setNotifPrompt(false);
     }
   };

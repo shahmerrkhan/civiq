@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Logo from "@/components/Logo";
+import { useAuth } from "@clerk/nextjs";
 
 const TICKER_ITEMS = [
   "Ontario Bill 212 · Education Funding",
@@ -140,6 +141,7 @@ function AppSplash({ onDone }: { onDone: () => void }) {
 }
 
 export default function Home() {
+  const { isSignedIn } = useAuth();
   const [isPWA, setIsPWA] = useState(false);
   const [splashDone, setSplashDone] = useState(false);
   const [wordIndex, setWordIndex] = useState(0);
@@ -513,7 +515,7 @@ export default function Home() {
               className="cta-row"
               style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", marginBottom: showIOSHint ? "20px" : "0" }}
             >
-              <Link href="/sign-up" className="btn-amber">Start for free →</Link>
+              <Link href={isSignedIn ? "/dashboard" : "/sign-up"} className="btn-amber">Start for free →</Link>
               <Link href="/learn" className="btn-ghost">Explore modules</Link>
               {showInstall && (
                 <motion.button
@@ -734,7 +736,7 @@ export default function Home() {
                 No algorithm. No outrage bait. Just the information you need to form your own view.
               </p>
               <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-                <Link href="/sign-up" className="btn-amber">Start for free →</Link>
+                <Link href={isSignedIn ? "/dashboard" : "/sign-up"} className="btn-amber">Start for free →</Link>
                 <Link href="/learn" className="btn-ghost">Explore modules</Link>
               </div>
             </motion.div>
