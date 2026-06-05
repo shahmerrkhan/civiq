@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from 'react';
+import ShareCard from "./ShareCard";
 
 const QUESTIONS = [
   {
@@ -344,13 +345,15 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
             >
               {desc} Your feed will reflect this — but you'll always see every perspective on Civiq.
             </motion.p>
+            <ShareCard label={label} />
+
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.7 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              style={{ backgroundColor: "#f5a623", color: "#000", padding: "16px 48px", borderRadius: "12px", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+              style={{ marginTop: "24px", backgroundColor: "#f5a623", color: "#000", padding: "16px 48px", borderRadius: "12px", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
               onClick={() => setStage("notifications")}
               >
               Go to my feed →
