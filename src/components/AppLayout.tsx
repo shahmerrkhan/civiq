@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { label: "Learn", href: "/learn", icon: "📚" },
   { label: "Polls", href: "/polls", icon: "🗳️" },
   { label: "Swipe", href: "/daily", icon: "⚡" },
+  { label: "Debate", href: "/debate", icon: "💬" },
   { label: "Saved", href: "/bookmarks", icon: "🔖" },
   { label: "Opinions", href: "/opinions", icon: "🗒️" },
   { label: "Pulse", href: "/pulse", icon: "⚡" },

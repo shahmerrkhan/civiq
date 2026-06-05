@@ -59,6 +59,31 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
   const [bookmarked, setBookmarked] = useState<Record<number, boolean>>({});
   const [bookmarkLoading, setBookmarkLoading] = useState<number | null>(null);
   const [til, setTil] = useState<string | null>(null);
+  const [discussLoading, setDiscussLoading] = useState<number | null>(null);
+  
+  const handleDiscuss = async (card: Card) => {
+    setDiscussLoading(card.id);
+    try {
+      const compassLabel = compassPosition
+        ? (compassPosition.x < -0.2 ? "left" : compassPosition.x > 0.2 ? "right" : "centre")
+        : "centre";
+      const res = await fetch("/api/debate/rooms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cardDbId: card.dbId ?? String(card.id),
+          cardTitle: card.title,
+          cardSummary: card.summary,
+          userLeaning: compassLabel,
+        }),
+      });
+      const data = await res.json();
+      if (data.room) {
+        window.location.href = `/debate/${data.room.id}`;
+      }
+    } catch {}
+    setDiscussLoading(null);
+  };
 
   useEffect(() => {
     fetch("/api/til")
@@ -378,6 +403,22 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
                               }}
                             >
                               {explainLoading === card.id ? "Explaining..." : explainCard === card.id && explainText[card.id] ? "Hide explanation" : "🧠 Explain this"}
+                            </motion.button>
+
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={(e) => { e.stopPropagation(); handleDiscuss(card); }}
+                              style={{
+                                fontSize: "12px", color: "#34d399",
+                                backgroundColor: "rgba(52,211,153,0.06)",
+                                border: "1px solid rgba(52,211,153,0.15)",
+                                padding: "7px 16px", borderRadius: "8px",
+                                cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                                fontWeight: "600",
+                              }}
+                            >
+                              {discussLoading === card.id ? "Matching..." : "⚡ Discuss"}
                             </motion.button>
                           </div>
 

@@ -151,3 +151,27 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   auth: text("auth").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const debateRooms = pgTable("debate_rooms", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  cardDbId: text("card_db_id").notNull(),
+  cardTitle: text("card_title").notNull(),
+  cardSummary: text("card_summary").notNull(),
+  userAId: text("user_a_id").references(() => users.id),
+  userBId: text("user_b_id").references(() => users.id),
+  userALeaning: text("user_a_leaning"),
+  userBLeaning: text("user_b_leaning"),
+  status: text("status").default("waiting"), // waiting | active | closed
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const debateMessages = pgTable("debate_messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  roomId: uuid("room_id").references(() => debateRooms.id),
+  userId: text("user_id").references(() => users.id),
+  type: text("type").notNull(), // steelman | argument
+  content: text("content").notNull(),
+  steelmanApproved: boolean("steelman_approved"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
