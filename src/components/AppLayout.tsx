@@ -25,12 +25,13 @@ export default function AppLayout({ children, active }: { children: React.ReactN
   const [notifPrompt, setNotifPrompt] = useState(false);
 
   useEffect(() => {
-    if (!isMobile) return;
+    if (!mounted) return;
     if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
-    if (Notification.permission === "default") {
-      setTimeout(() => setNotifPrompt(true), 5000);
-    }
-  }, [isMobile]);
+    if (Notification.permission === "granted") return;
+    if (localStorage.getItem("civiq_notif_dismissed") === "true") return;
+    const timer = setTimeout(() => setNotifPrompt(true), 6000);
+    return () => clearTimeout(timer);
+  }, [mounted]);
 
   const enableNotifications = async () => {
     try {
@@ -41,11 +42,19 @@ export default function AppLayout({ children, active }: { children: React.ReactN
         userVisibleOnly: true,
         applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
       });
+      const subJson = sub.toJSON();
       await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sub),
+        body: JSON.stringify({
+          endpoint: subJson.endpoint,
+          keys: {
+            p256dh: subJson.keys?.p256dh,
+            auth: subJson.keys?.auth,
+          },
+        }),
       });
+      localStorage.setItem("civiq_notif_dismissed", "false");
       setNotifPrompt(false);
     } catch (e) {
       setNotifPrompt(false);
@@ -408,7 +417,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
         )}
 </div>
 
-      {isMobile && notifPrompt && (
+        {notifPrompt && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -433,7 +442,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
           </div>
           <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
             <button
-              onClick={() => setNotifPrompt(false)}
+              onClick={() => { setNotifPrompt(false); localStorage.setItem("civiq_notif_dismissed", "true"); }}
               style={{ background: "none", border: "none", cursor: "pointer", fontSize: "11px", color: "#444", fontFamily: "'DM Sans', sans-serif" }}
             >
               Not now
