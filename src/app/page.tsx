@@ -57,6 +57,17 @@ const FEATURES = [
   },
 ];
 
+const ISSUE_OF_WEEK = {
+  tag: "THIS WEEK",
+  title: "Ontario's new housing bill strips municipal zoning powers",
+  summary: "Bill 185 lets developers bypass local planning rules to fast-track housing. Supporters say it's necessary to hit 1.5M homes by 2031. Critics say it guts community input and will worsen infrastructure gaps.",
+  perspectives: [
+    { side: "Conservative", color: "#60a5fa", view: "Cutting red tape is the only way to fix the housing crisis at scale. Municipalities have delayed development for decades." },
+    { side: "Liberal / NDP", color: "#a78bfa", view: "Removing community oversight hands power to developers with no accountability. Affordability isn't guaranteed." },
+    { side: "Non-partisan", color: "#34d399", view: "The tradeoff is real: speed vs. local democracy. Ontario needs both supply and accountability mechanisms." },
+  ],
+};
+
 // PWA splash screen — shown only when launched from home screen
 function AppSplash({ onDone }: { onDone: () => void }) {
   useEffect(() => {
@@ -364,6 +375,7 @@ export default function Home() {
           .nav-links { display: none !important; }
           .footer-inner { flex-direction: column !important; text-align: center; gap: 8px !important; }
           .final-cta-section { padding: 72px 20px !important; }
+          .perspectives-grid { grid-template-columns: 1fr !important; }
           }
 
         @media (min-width: 641px) and (max-width: 1024px) {
@@ -714,6 +726,58 @@ export default function Home() {
             <div style={{ fontSize: "13px", color: "#333", lineHeight: "1.7" }}>
               A non-partisan, youth-focused think tank committed to governmental transparency, accountability, and meaningful youth inclusion in democracy.
             </div>
+          </div>
+        </div>
+
+        {/* ISSUE OF THE WEEK */}
+        <div style={{ position: "relative", zIndex: 5, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="section-inner" style={{ maxWidth: "1160px", margin: "0 auto", padding: "80px 48px" }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+                <span className="pulse-dot" />
+                <span style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.12em", textTransform: "uppercase", color: "#f5a623" }}>{ISSUE_OF_WEEK.tag}</span>
+              </div>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(22px, 3vw, 36px)", fontWeight: "900", color: "#f0ede6", letterSpacing: "-0.5px", lineHeight: "1.2", marginBottom: "14px", maxWidth: "680px" }}>
+                {ISSUE_OF_WEEK.title}
+              </h2>
+              <p style={{ fontSize: "14px", color: "#555", lineHeight: "1.8", maxWidth: "600px", marginBottom: "36px" }}>
+                {ISSUE_OF_WEEK.summary}
+              </p>
+
+              <div className="perspectives-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "36px" }}>
+                {ISSUE_OF_WEEK.perspectives.map((p, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.08, duration: 0.5 }}
+                    style={{
+                      padding: "20px",
+                      borderRadius: "14px",
+                      backgroundColor: `${p.color}08`,
+                      border: `1px solid ${p.color}22`,
+                    }}
+                  >
+                    <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.1em", textTransform: "uppercase", color: p.color, marginBottom: "10px" }}>{p.side}</div>
+                    <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7" }}>{p.view}</div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <Link
+                href={isSignedIn ? "/dashboard" : "/sign-up"}
+                className="btn-amber"
+                style={{ fontSize: "14px", padding: "13px 28px" }}
+              >
+                {isSignedIn ? "Read full breakdown →" : "Sign up to read more →"}
+              </Link>
+            </motion.div>
           </div>
         </div>
 

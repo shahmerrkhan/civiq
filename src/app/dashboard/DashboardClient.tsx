@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
+import StreakBadge from "@/components/StreakBadge";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Infrastructure: "#60a5fa",
@@ -137,7 +138,10 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
           transition={{ duration: 0.4 }}
           style={{ marginBottom: "20px" }}
         >
-          <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>Ontario Feed</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px", marginBottom: "4px" }}>
+            <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px" }}>Ontario Feed</div>
+            <StreakBadge />
+          </div>
           <div style={{ fontSize: "14px", color: "#444" }}>What's happening in your province today</div>
         </motion.div>
 
