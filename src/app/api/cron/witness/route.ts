@@ -10,6 +10,19 @@ function getWeekStart() {
   return monday.toISOString().split("T")[0];
 }
 
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, label = "operation"): Promise<T> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      console.error(`${label} failed (attempt ${attempt}/${retries}):`, err);
+      if (attempt === retries) throw err;
+      await new Promise(r => setTimeout(r, 1000 * attempt));
+    }
+  }
+  throw new Error(`${label} exhausted retries`);
+}
+
 export async function GET(req: NextRequest) {
   const secret = req.headers.get("x-cron-secret");
   if (secret !== process.env.CRON_SECRET) {
@@ -17,11 +30,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    await resolveExpiredWitnessEvents();
+    await withRetry(() => resolveExpiredWitnessEvents(), 3, "resolveExpiredWitnessEvents");
     const weekStart = getWeekStart();
-    const events = await generateWeeklyWitnessEvents(weekStart);
-    return NextResponse.json({ success: true, eventsGenerated: events.length });
+    const events = await withRetry(() => generateWeeklyWitnessEvents(weekStart), 3, "generateWeeklyWitnessEvents");
+    console.log(`Witness cron: resolved expired + generated ${events.length} events for ${weekStart}`);
+    return NextResponse.json({ success: true, eventsGenerated: events.length, weekStart });
   } catch (err) {
+    console.error("Witness cron failed after retries:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }

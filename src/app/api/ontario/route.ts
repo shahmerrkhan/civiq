@@ -15,29 +15,24 @@ export async function GET() {
   const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  // XP
-  const activityRows = await db.select().from(userActivity).where(eq(userActivity.userId, userId));
-  const xp = activityRows.reduce((sum, r) => sum + ((r.meta as any)?.xp ?? 0), 0);
+  // Run all independent queries in parallel
+  const [
+    activityRows, opinions, votes, progress,
+    savedBookmarks, joinedCircles, followed, watches,
+  ] = await Promise.all([
+    db.select().from(userActivity).where(eq(userActivity.userId, userId)),
+    db.select().from(userOpinions).where(eq(userOpinions.userId, userId)).orderBy(desc(userOpinions.createdAt)).limit(5),
+    db.select().from(pollVotes).where(eq(pollVotes.userId, userId)),
+    db.select().from(userProgress).where(eq(userProgress.userId, userId)),
+    db.select().from(bookmarks).where(eq(bookmarks.userId, userId)),
+    db.select({ id: circleMembers.id, leaning: circleMembers.leaning, joinedAt: circleMembers.joinedAt, title: circles.title, emoji: circles.emoji, category: circles.category, slug: circles.slug })
+      .from(circleMembers).innerJoin(circles, eq(circleMembers.circleId, circles.id)).where(eq(circleMembers.userId, userId)),
+    db.select({ id: storylineFollows.id, title: storylines.title, status: storylines.status, category: storylines.category, slug: storylines.slug })
+      .from(storylineFollows).innerJoin(storylines, eq(storylineFollows.storylineId, storylines.id)).where(eq(storylineFollows.userId, userId)).limit(5),
+    db.select({ id: witnessWatches.id, watchedAt: witnessWatches.watchedAt, title: witnessEvents.title, status: witnessEvents.status, category: witnessEvents.category })
+      .from(witnessWatches).innerJoin(witnessEvents, eq(witnessWatches.eventId, witnessEvents.id)).where(eq(witnessWatches.userId, userId)).orderBy(desc(witnessWatches.watchedAt)).limit(5),
+  ]);
 
-  // Action breakdown
-  const actionCounts: Record<string, number> = {};
-  for (const row of activityRows) {
-    actionCounts[row.action] = (actionCounts[row.action] ?? 0) + 1;
-  }
-
-  // Opinions
-  const opinions = await db.select().from(userOpinions)
-    .where(eq(userOpinions.userId, userId))
-    .orderBy(desc(userOpinions.createdAt))
-    .limit(5);
-
-  // Polls voted
-  const votes = await db.select().from(pollVotes).where(eq(pollVotes.userId, userId));
-
-  // Modules completed
-  const progress = await db.select().from(userProgress)
-    .where(eq(userProgress.userId, userId));
-  const modulesCompleted = progress.filter(p => p.completed).length;
 
   // Forecast predictions
   const predictions = await db.select({
@@ -59,49 +54,6 @@ export async function GET() {
   const forecastCorrect = predictions.filter(p => p.status === "resolved" && p.outcome === p.prediction).length;
   const forecastTotal = predictions.filter(p => p.status === "resolved").length;
 
-  // Witness watches
-  const watches = await db.select({
-    id: witnessWatches.id,
-    watchedAt: witnessWatches.watchedAt,
-    title: witnessEvents.title,
-    status: witnessEvents.status,
-    category: witnessEvents.category,
-  })
-    .from(witnessWatches)
-    .innerJoin(witnessEvents, eq(witnessWatches.eventId, witnessEvents.id))
-    .where(eq(witnessWatches.userId, userId))
-    .orderBy(desc(witnessWatches.watchedAt))
-    .limit(5);
-
-  // Circles joined
-  const joinedCircles = await db.select({
-    id: circleMembers.id,
-    leaning: circleMembers.leaning,
-    joinedAt: circleMembers.joinedAt,
-    title: circles.title,
-    emoji: circles.emoji,
-    category: circles.category,
-    slug: circles.slug,
-  })
-    .from(circleMembers)
-    .innerJoin(circles, eq(circleMembers.circleId, circles.id))
-    .where(eq(circleMembers.userId, userId));
-
-  // Storylines followed
-  const followed = await db.select({
-    id: storylineFollows.id,
-    title: storylines.title,
-    status: storylines.status,
-    category: storylines.category,
-    slug: storylines.slug,
-  })
-    .from(storylineFollows)
-    .innerJoin(storylines, eq(storylineFollows.storylineId, storylines.id))
-    .where(eq(storylineFollows.userId, userId))
-    .limit(5);
-
-  // Bookmarks count
-  const savedBookmarks = await db.select().from(bookmarks).where(eq(bookmarks.userId, userId));
 
   // Top engaged category from activity meta
   const categoryCount: Record<string, number> = {};

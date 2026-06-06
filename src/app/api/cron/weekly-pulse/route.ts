@@ -2,6 +2,24 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+async function sendWithRetry(sub: typeof pushSubscriptions.$inferSelect, payload: string, retries = 2): Promise<"ok" | "dead" | "failed"> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      await webpush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+        payload
+      );
+      return "ok";
+    } catch (err: any) {
+      if (err?.statusCode === 410 || err?.statusCode === 404) return "dead";
+      if (attempt === retries) return "failed";
+      await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+    }
+  }
+  return "failed";
+}
 
 export async function GET(req: Request) {
   try {
@@ -26,20 +44,28 @@ export async function GET(req: Request) {
       tag: "weekly-pulse",
     });
 
-    const results = await Promise.allSettled(
-      subs.map((sub) =>
-        webpush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          payload
-        )
-      )
-    );
+    const BATCH_SIZE = 50;
+    let sent = 0, failed = 0;
+    const deadIds: string[] = [];
 
-    const sent = results.filter(r => r.status === "fulfilled").length;
-    const failed = results.filter(r => r.status === "rejected").length;
-    console.log(`Weekly pulse cron: ${sent} sent, ${failed} failed`);
-    return NextResponse.json({ sent, failed });
+    for (let i = 0; i < subs.length; i += BATCH_SIZE) {
+      const batch = subs.slice(i, i + BATCH_SIZE);
+      const results = await Promise.all(batch.map(sub => sendWithRetry(sub, payload)));
+      for (let j = 0; j < results.length; j++) {
+        if (results[j] === "ok") sent++;
+        else if (results[j] === "dead") deadIds.push(batch[j].id);
+        else failed++;
+      }
+    }
+
+    if (deadIds.length > 0) {
+      await Promise.all(deadIds.map(id => db.delete(pushSubscriptions).where(eq(pushSubscriptions.id, id))));
+    }
+
+    console.log(`Weekly pulse cron: ${sent} sent, ${failed} failed, ${deadIds.length} cleaned`);
+    return NextResponse.json({ sent, failed, cleaned: deadIds.length });
   } catch (err) {
+    console.error("Weekly pulse cron error:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
