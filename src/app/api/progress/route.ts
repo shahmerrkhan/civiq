@@ -5,11 +5,6 @@ import { eq, and, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { ProgressSchema } from "@/lib/schemas";
 
-
-const parsed = ProgressSchema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: "Missing slug" }, { status: 400 });
-  const { slug } = parsed.data;
-
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ slugs: [] });
