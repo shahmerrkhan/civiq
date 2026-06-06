@@ -15,7 +15,6 @@ export async function GET() {
   const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  // Run all independent queries in parallel
   const [
     activityRows, opinions, votes, progress,
     savedBookmarks, joinedCircles, followed, watches,
@@ -33,8 +32,15 @@ export async function GET() {
       .from(witnessWatches).innerJoin(witnessEvents, eq(witnessWatches.eventId, witnessEvents.id)).where(eq(witnessWatches.userId, userId)).orderBy(desc(witnessWatches.watchedAt)).limit(5),
   ]);
 
+  const xp = activityRows.reduce((sum, r) => sum + ((r.meta as any)?.xp ?? 0), 0);
 
-  // Forecast predictions
+  const actionCounts: Record<string, number> = {};
+  for (const row of activityRows) {
+    actionCounts[row.action] = (actionCounts[row.action] ?? 0) + 1;
+  }
+
+  const modulesCompleted = progress.filter(p => p.completed).length;
+
   const predictions = await db.select({
     id: forecastPredictions.id,
     prediction: forecastPredictions.prediction,
@@ -54,14 +60,12 @@ export async function GET() {
   const forecastCorrect = predictions.filter(p => p.status === "resolved" && p.outcome === p.prediction).length;
   const forecastTotal = predictions.filter(p => p.status === "resolved").length;
 
-
-  // Top engaged category from activity meta
   const categoryCount: Record<string, number> = {};
   for (const row of activityRows) {
     const cat = (row.meta as any)?.category;
     if (cat) categoryCount[cat] = (categoryCount[cat] ?? 0) + 1;
   }
-  const topCategory = Object.entries(categoryCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  const topCategory = Object.entries(categoryCount).sort((a, b) => b - a)?. ?? null;
 
   return NextResponse.json({
     user: {
