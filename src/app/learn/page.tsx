@@ -287,8 +287,7 @@ const filterColors: Record<string, string> = {
   History: "#e879f9",
   "Philosophy & Ethics": "#38bdf8",
 };
-
-const PAGE_SIZE = 20;
+const GROUPS_PER_PAGE = 3;
 
 export default function Learn() {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -306,21 +305,15 @@ export default function Learn() {
   }, []);
 
   const filters = ["All", "Systems", "Ideologies", "Figures", "Canada & World", "Issues", "Economy", "History", "Philosophy & Ethics"];
-  
+
   const grouped = activeFilter === "All"
     ? PATHS.map(p => ({ ...p, modules: p.modules.filter(m => m.title.toLowerCase().includes(search.toLowerCase())) })).filter(p => p.modules.length > 0)
     : PATHS.filter(p => p.category === activeFilter).map(p => ({ ...p, modules: p.modules.filter(m => m.title.toLowerCase().includes(search.toLowerCase())) })).filter(p => p.modules.length > 0);
 
-  // flatten all modules for pagination
+  // paginate by whole category groups, not flat modules
   const allModules = grouped.flatMap(p => p.modules.map(m => ({ ...m, category: p.category, color: p.color, icon: p.icon })));
-  const totalPages = Math.ceil(allModules.length / PAGE_SIZE);
-  const paginated = allModules.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  // re-group paginated modules by category
-  const paginatedGrouped = grouped.map(p => ({
-    ...p,
-    modules: paginated.filter(m => m.category === p.category),
-  })).filter(p => p.modules.length > 0);
+  const totalPages = Math.ceil(grouped.length / GROUPS_PER_PAGE);
+  const paginatedGrouped = grouped.slice((page - 1) * GROUPS_PER_PAGE, page * GROUPS_PER_PAGE);
 
   const handleFilterChange = (f: string) => {
     setActiveFilter(f);
@@ -331,7 +324,7 @@ export default function Learn() {
     setSearch(val);
     setPage(1);
   };
-
+  
   return (
     <AppLayout active="/learn">
       <div style={{ padding: "24px 20px", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>

@@ -704,7 +704,7 @@ export default function Home() {
               </h2>
             </motion.div>
 
-              <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "14px" }}>
+              <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "14px" }}>lea
               {FEATURES.map((f, i) => (
                 <motion.div
                   key={f.title}
