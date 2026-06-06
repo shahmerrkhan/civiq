@@ -1,11 +1,14 @@
 import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
+import { ExplainSchema } from "@/lib/schemas";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
 export async function POST(req: Request) {
-  const { title, summary } = await req.json();
-  if (!title || !summary) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  const body = await req.json().catch(() => null);
+  const parsed = ExplainSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  const { title, summary } = parsed.data;
 
   try {
     const completion = await groq.chat.completions.create({

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import Groq from "groq-sdk";
+import { SteelmanSchema } from "@/lib/schemas";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
@@ -9,8 +10,11 @@ export async function POST(req: Request) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { content, cardTitle, opposingLeaning } = await req.json();
-
+    const body = await req.json().catch(() => null);
+    const parsed = SteelmanSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    const { content, cardTitle, opposingLeaning } = parsed.data;
+    
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       max_tokens: 200,

@@ -3,6 +3,10 @@ import { db } from "@/db";
 import { userProgress, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { ProgressSchema } from "@/lib/schemas";const body = await req.json().catch(() => null);
+  const parsed = ProgressSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Missing slug" }, { status: 400 });
+  const { slug } = parsed.data;
 
 export async function GET() {
   const { userId } = await auth();
@@ -20,8 +24,10 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { slug } = await req.json();
-  if (!slug) return NextResponse.json({ error: "Missing slug" }, { status: 400 });
+  const body = await req.json().catch(() => null);
+  const parsed = ProgressSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Missing slug" }, { status: 400 });
+  const { slug } = parsed.data;
 
   const existing = await db.select().from(userProgress).where(
     and(eq(userProgress.userId, userId), eq(userProgress.moduleSlug, slug))

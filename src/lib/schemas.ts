@@ -1,30 +1,107 @@
 import { z } from "zod";
 
+// Already used
 export const OnboardingSchema = z.object({
   compassPosition: z.object({
-    x: z.number().min(-1).max(1),
-    y: z.number().min(-1).max(1),
+    x: z.number(),
+    y: z.number(),
   }),
 });
 
-export const VoteSchema = z.object({
-  pollId: z.string().uuid(),
-  optionIndex: z.number().int().min(0).max(10),
-});
-
 export const OpinionSchema = z.object({
-  cardId: z.string().min(1).max(100),
-  opinion: z.string().min(1).max(2000).trim(),
+  cardId: z.string().uuid(),
+  opinion: z.string().min(1).max(2000),
 });
 
-export const BookmarkSchema = z.object({
-  cardTitle: z.string().min(1).max(500),
-  cardSummary: z.string().max(2000).optional(),
-  cardCategory: z.string().max(100).optional(),
-  cardSource: z.string().max(200).optional(),
+export const VoteSchema = z.object({
+  pollId: z.string(),
+  optionIndex: z.number().int().min(0),
 });
 
 export const DailyAnswerSchema = z.object({
   questionId: z.string().uuid(),
   answerIndex: z.number().int().min(0).max(3),
+});
+
+// New ones below
+
+export const BookmarkSchema = z.object({
+  cardTitle: z.string().min(1).max(500),
+  cardSummary: z.string().min(1).max(2000),
+  cardCategory: z.string().max(100).optional(),
+  cardSource: z.string().max(200).optional(),
+  cardDbId: z.string().optional(),
+});
+
+export const ReactionSchema = z.object({
+  cardDbId: z.string().min(1),
+  reaction: z.enum(["fire", "thinking", "disagree", "bookmark"]),
+});
+
+export const RegionVoteSchema = z.object({
+  issueId: z.string().min(1),
+  regionId: z.string().min(1),
+  stance: z.enum(["left", "right", "centre"]),
+});
+
+export const DebateMessageSchema = z.object({
+  roomId: z.string().uuid(),
+  type: z.enum(["steelman", "argument"]),
+  content: z.string().min(20).max(3000),
+  steelmanApproved: z.boolean().optional(),
+});
+
+export const DebateRoomSchema = z.object({
+  cardDbId: z.string().min(1),
+  cardTitle: z.string().min(1).max(500),
+  cardSummary: z.string().min(1).max(2000),
+  userLeaning: z.enum(["Left", "Centre", "Right"]).optional(),
+});
+
+export const SteelmanSchema = z.object({
+  content: z.string().min(20).max(3000),
+  cardTitle: z.string().min(1).max(500),
+  opposingLeaning: z.string().min(1),
+});
+
+export const ExplainSchema = z.object({
+  title: z.string().min(1).max(500),
+  summary: z.string().min(1).max(2000),
+});
+
+export const StorylineOpinionSchema = z.object({
+  storylineId: z.string().uuid(),
+  chapterId: z.string().uuid().optional(),
+  opinion: z.string().min(1).max(2000),
+});
+
+export const StorylineFollowSchema = z.object({
+  storylineId: z.string().uuid(),
+});
+
+export const PushSubscribeSchema = z.object({
+  endpoint: z.string().url(),
+  keys: z.object({
+    p256dh: z.string().min(1),
+    auth: z.string().min(1),
+  }),
+});
+
+export const AdminBlastSchema = z.object({
+  title: z.string().min(1).max(200),
+  body: z.string().min(1).max(500),
+  url: z.string().optional(),
+});
+
+export const AdminCardPatchSchema = z.object({
+  id: z.string().uuid(),
+  approved: z.boolean(),
+});
+
+export const AdminCardDeleteSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const ProgressSchema = z.object({
+  slug: z.string().min(1).max(200),
 });

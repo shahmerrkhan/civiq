@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { storylines, storylineChapters } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import Groq from "groq-sdk";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+import { groqWithTimeout } from "@/lib/groq";
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
@@ -35,8 +33,8 @@ export async function GET(req: Request) {
 
       const today = new Date().toISOString().slice(0, 10);
 
-      const res = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        const res = await groqWithTimeout({
+         model: "llama-3.3-70b-versatile",
         messages: [{
           role: "user",
           content: `You are a non-partisan Ontario political journalist writing for young Canadians aged 16-25.

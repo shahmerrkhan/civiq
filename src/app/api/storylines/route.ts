@@ -4,9 +4,11 @@ import { storylines, storylineChapters, storylineFollows, storylineOpinions } fr
 import { eq, desc, sql, and } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 
-export async function GET() {
-  const { userId } = await auth();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+let cachedStorylines: { data: unknown; cachedAt: number } | null = null;
+
+async function fetchAllStorylines() {
   const allStorylines = await db
     .select()
     .from(storylines)
@@ -25,6 +27,35 @@ export async function GET() {
         .from(storylineFollows)
         .where(eq(storylineFollows.storylineId, s.id));
 
+      return {
+        ...s,
+        chapters,
+        chapterCount: chapters.length,
+        latestChapter: chapters[0] ?? null,
+        followers: Number(followCount[0]?.count ?? 0),
+      };
+    })
+  );
+
+  return enriched;
+}
+
+export async function GET() {
+  const { userId } = await auth();
+
+  const now = Date.now();
+
+  // Refresh cache if stale or empty
+  if (!cachedStorylines || now - cachedStorylines.cachedAt > CACHE_TTL_MS) {
+    const fresh = await fetchAllStorylines();
+    cachedStorylines = { data: fresh, cachedAt: now };
+  }
+
+  const baseStorylines = cachedStorylines.data as Awaited<ReturnType<typeof fetchAllStorylines>>;
+
+  // Per-user data (following/opinions) still fetched fresh — can't cache these
+  const enriched = await Promise.all(
+    baseStorylines.map(async (s) => {
       let isFollowing = false;
       let myOpinion = null;
 
@@ -45,15 +76,7 @@ export async function GET() {
         myOpinion = op[0]?.opinion ?? null;
       }
 
-      return {
-        ...s,
-        chapters,
-        chapterCount: chapters.length,
-        latestChapter: chapters[0] ?? null,
-        followers: Number(followCount[0]?.count ?? 0),
-        isFollowing,
-        myOpinion,
-      };
+      return { ...s, isFollowing, myOpinion };
     })
   );
 

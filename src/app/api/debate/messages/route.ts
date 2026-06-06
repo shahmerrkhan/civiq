@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db, sql } from "@/db";
 import { debateMessages } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { DebateMessageSchema } from "@/lib/schemas";
 
 export async function GET(req: Request) {
   try {
@@ -27,11 +28,10 @@ export async function POST(req: Request) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { roomId, type, content, steelmanApproved } = await req.json();
-
-    if (!content || content.trim().length < 20) {
-      return NextResponse.json({ error: "Message too short" }, { status: 400 });
-    }
+    const body = await req.json().catch(() => null);
+    const parsed = DebateMessageSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    const { roomId, type, content, steelmanApproved } = parsed.data;
 
     // Check room exists and user belongs to it
     const room = await sql`SELECT * FROM debate_rooms WHERE id = ${roomId}`;

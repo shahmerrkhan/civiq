@@ -3,16 +3,17 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { PushSubscribeSchema } from "@/lib/schemas";
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { endpoint, keys } = await req.json();
-    if (!endpoint || !keys?.p256dh || !keys?.auth) {
-      return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
-    }
+    const body = await req.json().catch(() => null);
+    const parsed = PushSubscribeSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
+    const { endpoint, keys } = parsed.data;
 
     await db
       .insert(pushSubscriptions)

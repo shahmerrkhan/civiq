@@ -3,14 +3,18 @@ import { auth } from "@clerk/nextjs/server";
 import { db, sql } from "@/db";
 import { debateRooms } from "@/db/schema";
 import { eq, and, or, isNull } from "drizzle-orm";
+import { DebateRoomSchema } from "@/lib/schemas";
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { cardDbId, cardTitle, cardSummary, userLeaning } = await req.json();
-
+    const body = await req.json().catch(() => null);
+    const parsed = DebateRoomSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    const { cardDbId, cardTitle, cardSummary, userLeaning } = parsed.data;
+    
     // Check if user already has an active room for this card
     const existing = await db.select().from(debateRooms).where(
       and(

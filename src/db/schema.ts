@@ -218,3 +218,28 @@ export const regionVotes = pgTable("region_votes", {
   stance: text("stance").notNull(), // "left", "right", "centre"
   createdAt: timestamp("created_at").defaultNow(),
 }); 
+
+export const civicChallenges = pgTable("civic_challenges", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  weekStart: text("week_start").notNull(), // "2025-06-02" (Monday date)
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(), // "read" | "learn" | "vote" | "opinion"
+  xpReward: integer("xp_reward").notNull().default(50),
+  targetId: text("target_id"), // optional — cardId, moduleSlug, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const civicChallengeCompletions = pgTable("civic_challenge_completions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").references(() => users.id),
+  challengeId: uuid("challenge_id").references(() => civicChallenges.id),
+  completedAt: timestamp("completed_at").defaultNow(),
+});
+
+export const civicChallengeStreaks = pgTable("civic_challenge_streaks", {
+  userId: text("user_id").primaryKey().references(() => users.id),
+  currentStreak: integer("current_streak").notNull().default(0),
+  lastCompletedWeek: text("last_completed_week"), // "2025-06-02"
+  updatedAt: timestamp("updated_at").defaultNow(),
+});

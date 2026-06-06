@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { bookmarks, userActivity } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { BookmarkSchema } from "@/lib/schemas";
 
 export async function GET() {
   const { userId } = await auth();
@@ -21,9 +22,10 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
-  const { cardTitle, cardSummary, cardCategory, cardSource, cardDbId } = body;
-  if (!cardTitle || !cardSummary) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  const body = await req.json().catch(() => null);
+  const parsed = BookmarkSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+  const { cardTitle, cardSummary, cardCategory, cardSource, cardDbId } = parsed.data;
 
   const existing = await db
     .select()

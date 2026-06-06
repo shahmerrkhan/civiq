@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { storylines, storylineChapters } from "@/db/schema";
-import Groq from "groq-sdk";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+import { groqWithTimeout } from "@/lib/groq";
 
 const STORYLINE_TOPICS = [
   { title: "Ontario's Municipal Zoning Overhaul", slug: "municipal-zoning-bill-185", status: "active", category: "Housing" },
@@ -14,7 +12,7 @@ const STORYLINE_TOPICS = [
 ];
 
 async function generateStoryline(topic: typeof STORYLINE_TOPICS[0]) {
-  const res = await groq.chat.completions.create({
+    const res = await groqWithTimeout({
     model: "llama-3.3-70b-versatile",
     messages: [{
       role: "user",
