@@ -243,7 +243,6 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
             <motion.button
               key={f}
               onClick={() => setActiveFilter(f)}
-              whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               style={{
                 padding: "7px 18px",
@@ -288,7 +287,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ delay: i * 0.07, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                  whileHover={typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches ? { y: -2, transition: { duration: 0.2 } } : {}}
                   onClick={() => { setActiveCard(expanded ? null : card.id); setShowDeepDive(null); }}
                   style={{
                     backgroundColor: expanded ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",

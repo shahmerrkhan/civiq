@@ -138,8 +138,8 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: [0.2, 0.5, 0.2], y: 0 }}
-            transition={{ delay: i * 0.12, duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.12, duration: 0.4 }}
             style={{
               height: i === 0 ? "320px" : "48px",
               backgroundColor: "rgba(255,255,255,0.04)",
@@ -290,8 +290,8 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
               <motion.div
                 animate={{ rotateY: flipped ? 180 : 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                style={{ position: "relative", height: "380px", transformStyle: "preserve-3d" }}
-              >
+                style={{ position: "relative", height: "380px", transformStyle: "preserve-3d", willChange: "transform" }}
+                >
                 {/* Front */}
                 <motion.div
                   style={{
@@ -300,7 +300,7 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
                     WebkitBackfaceVisibility: "hidden",
                     backgroundColor: "rgba(255,255,255,0.03)",
                     border: `1px solid ${TYPE_COLORS[card.type] || "#f5a623"}30`,
-                    borderRadius: "20px", padding: "36px",
+                    borderRadius: "20px", padding: "clamp(20px, 5vw, 36px)",
                     display: "flex", flexDirection: "column", justifyContent: "space-between",
                   }}
                 >
@@ -333,13 +333,9 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
                     {card.front}
                   </motion.div>
 
-                  <motion.div
-                    animate={{ opacity: [0.3, 0.7, 0.3] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ fontSize: "12px", color: "#444" }}
-                  >
+                  <div style={{ fontSize: "12px", color: "#444" }}>
                     Tap to reveal
-                  </motion.div>
+                  </div>
                 </motion.div>
 
                 {/* Back */}

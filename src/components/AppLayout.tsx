@@ -107,7 +107,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
     const min = setTimeout(() => {
       sessionStorage.setItem("civiq_loaded", "true");
       setShowLoader(false);
-    }, 5000);
+    }, 2500);
     return () => clearTimeout(min);
   }, [showLoader]);
 
@@ -179,7 +179,9 @@ export default function AppLayout({ children, active }: { children: React.ReactN
         .nav-link { transition: color 0.15s ease, background-color 0.15s ease; will-change: color, background-color; }
         .nav-link:hover { color: #aaa !important; background-color: rgba(255,255,255,0.05) !important; }
         * { -webkit-tap-highlight-color: transparent; }
-        button { touch-action: manipulation; }
+        button, a { touch-action: manipulation; }
+        html, body { overscroll-behavior-y: none; }
+        input, textarea, select { font-size: 16px; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 10px; }
@@ -302,10 +304,13 @@ export default function AppLayout({ children, active }: { children: React.ReactN
           minWidth: 0,
           paddingBottom: isMobile ? "72px" : "0",
           overflowY: "auto",
+          overflowX: "hidden",
           animation: "fadeIn 0.3s ease",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          WebkitOverflowScrolling: "touch",
+          transform: "translateZ(0)",
         }}>
           {/* MOBILE TOP HEADER */}
           {isMobile && (
@@ -353,15 +358,12 @@ export default function AppLayout({ children, active }: { children: React.ReactN
 
         {/* MOBILE BOTTOM NAV */}
         {isMobile && (
-          <motion.div
-            initial={{ y: 80 }}
-            animate={{ y: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          <div
             style={{
               position: "fixed",
               bottom: 0, left: 0, right: 0,
               height: "68px",
-              backgroundColor: "rgba(6,6,12,0.92)",
+              backgroundColor: "rgba(6,6,12,0.95)",
               borderTop: "1px solid rgba(255,255,255,0.06)",
               display: "flex",
               alignItems: "center",
@@ -371,7 +373,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
               paddingBottom: "4px",
             }}
           >
-              {NAV_ITEMS.filter(item => !["Pulse", "Saved", "Opinions", "About", "Profile", "Daily"].includes(item.label)).map(item => {
+              {NAV_ITEMS.filter(item => !["Pulse", "Saved", "Opinions", "About", "Profile", "Daily", "Map", "Stories"].includes(item.label)).map(item => {
               const isActive = active === item.href;
               return (
                 <Link
@@ -424,7 +426,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
               <span style={{ fontSize: "18px" }}>☰</span>
               <span>More</span>
             </button>
-          </motion.div>
+          </div>
         )}
 
         {/* MOBILE MORE DRAWER */}
@@ -451,7 +453,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                 >
                   <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "16px", paddingLeft: "4px" }}>More</div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                    {NAV_ITEMS.filter(item => ["Pulse", "Saved", "Opinions", "About", "Profile"].includes(item.label)).map(item => {
+                    {NAV_ITEMS.filter(item => ["Map", "Stories", "Pulse", "Saved", "Opinions", "About", "Profile"].includes(item.label)).map(item => {
                       const isActive = active === item.href;
                       return (
                         <Link

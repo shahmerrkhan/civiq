@@ -58,6 +58,7 @@ export default function ProfileClient({
   const generateShareCard = async () => {
     if (skipped) return;
     setSharing(true);
+    await new Promise(r => setTimeout(r, 50)); // yield to UI before blocking canvas work
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
     canvas.height = 1080;
@@ -279,9 +280,9 @@ const stats = [
             <motion.div
               key={stat.label}
               className="stat-card"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + i * 0.07 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: i * 0.05 }}
               style={{
                 backgroundColor: "rgba(255,255,255,0.02)",
                 border: "1px solid rgba(255,255,255,0.06)",
@@ -416,7 +417,7 @@ const stats = [
                   key={op.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + i * 0.06 }}
+                  transition={{ delay: i * 0.04 }}
                   style={{ display: "flex", gap: "20px", marginBottom: "24px", position: "relative" }}
                 >
                   <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#a78bfa", border: "2px solid #06060c", flexShrink: 0, marginTop: "3px", position: "relative", zIndex: 1 }} />
