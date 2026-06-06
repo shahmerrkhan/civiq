@@ -85,10 +85,9 @@ export default function ChallengesClient() {
     <AppLayout active="/challenges">
       <div style={{
         minHeight: "100vh",
-        backgroundColor: "#06060c",
         fontFamily: "'DM Sans', sans-serif",
         paddingBottom: "100px",
-      }}>
+        }}>
         <div style={{ maxWidth: "600px", margin: "0 auto", padding: "24px 16px" }}>
 
           {/* Header */}

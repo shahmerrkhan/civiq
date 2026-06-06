@@ -11,6 +11,7 @@ const isProtectedRoute = createRouteMatcher([
   "/bookmarks(.*)",
   "/opinions(.*)",
   "/pulse(.*)",
+  "/challenges(.*)",
 ]);
 
 // In-memory rate limit store (resets on cold start — good enough for edge)
