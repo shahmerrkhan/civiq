@@ -7,6 +7,7 @@ import Logo from "@/components/Logo";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/dashboard", icon: "🏠" },
+  { label: "Challenges", href: "/challenges", icon: "🎯" },
   { label: "Learn", href: "/learn", icon: "📚" },
   { label: "Polls", href: "/polls", icon: "🗳️" },
   { label: "Swipe", href: "/daily", icon: "⚡" },
