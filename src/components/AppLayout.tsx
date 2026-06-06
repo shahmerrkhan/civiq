@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { label: "Debate", href: "/debate", icon: "💬", tour: "debate" },
   { label: "Map", href: "/map", icon: "🗺️" },
   { href: "/storylines", icon: "📖", label: "Stories", tour: "storylines" },
+  { label: "Forecast", href: "/forecast", icon: "🔮" },
   { label: "Saved", href: "/bookmarks", icon: "🔖" },
   { label: "Opinions", href: "/opinions", icon: "🗒️" },
   { label: "Pulse", href: "/pulse", icon: "⚡" },

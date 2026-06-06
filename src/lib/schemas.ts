@@ -102,6 +102,12 @@ export const AdminCardDeleteSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const ForecastPredictSchema = z.object({
+  questionId: z.string().uuid(),
+  prediction: z.boolean(),
+  confidence: z.number().int().min(50).max(100),
+});
+
 export const ProgressSchema = z.object({
   slug: z.string().min(1).max(200),
 });

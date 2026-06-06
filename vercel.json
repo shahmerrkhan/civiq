@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/storylines",
       "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/forecast/cron",
+      "schedule": "0 8 * * 1"
     }
   ]
 }

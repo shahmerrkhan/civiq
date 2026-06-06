@@ -236,6 +236,37 @@ export const civicChallengeCompletions = pgTable("civic_challenge_completions", 
   challengeId: uuid("challenge_id").references(() => civicChallenges.id),
   completedAt: timestamp("completed_at").defaultNow(),
 });
+export const forecastQuestions = pgTable("forecast_questions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  question: text("question").notNull(),
+  context: text("context").notNull(),           // 2-3 sentence background
+  category: text("category").notNull(),
+  closesAt: timestamp("closes_at").notNull(),   // when voting locks
+  resolvesAt: timestamp("resolves_at").notNull(), // when Groq checks outcome
+  status: text("status").notNull().default("open"), // 'open' | 'closed' | 'resolved'
+  outcome: boolean("outcome"),                  // true = Yes happened, false = No
+  outcomeExplanation: text("outcome_explanation"),
+  weekStart: text("week_start").notNull(),      // "2025-06-09"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const forecastPredictions = pgTable("forecast_predictions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").references(() => users.id),
+  questionId: uuid("question_id").references(() => forecastQuestions.id),
+  prediction: boolean("prediction").notNull(), // true = Yes, false = No
+  confidence: integer("confidence").notNull(), // 50–100
+  pointsEarned: integer("points_earned"),      // null until resolved
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const forecastLeaderboard = pgTable("forecast_leaderboard", {
+  userId: text("user_id").primaryKey().references(() => users.id),
+  totalPoints: integer("total_points").notNull().default(0),
+  totalPredictions: integer("total_predictions").notNull().default(0),
+  correctPredictions: integer("correct_predictions").notNull().default(0),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 export const civicChallengeStreaks = pgTable("civic_challenge_streaks", {
   userId: text("user_id").primaryKey().references(() => users.id),
