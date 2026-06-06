@@ -219,7 +219,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
           </Link>
         )}
 
-        <Link href="/daily" style={{ textDecoration: "none", display: "block", marginBottom: "16px" }}>
+        <Link href="/daily" style={{ textDecoration: "none", display: "block", marginBottom: "8px" }}>
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -242,6 +242,35 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
             <div style={{ fontSize: "13px", color: "#444" }}>→</div>
           </motion.div>
         </Link>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "16px" }}>
+          {[
+            { href: "/witness", icon: "⏳", label: "Witness", sub: "live countdowns", color: "#f87171" },
+            { href: "/forecast", icon: "🔮", label: "Forecast", sub: "predict outcomes", color: "#a78bfa" },
+            { href: "/circles", icon: "🔵", label: "Circles", sub: "join the debate", color: "#60a5fa" },
+          ].map((item, i) => (
+            <Link key={item.href} href={item.href} style={{ textDecoration: "none" }}>
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12 + i * 0.05 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  padding: "12px 8px", borderRadius: "12px", textAlign: "center",
+                  background: `${item.color}08`,
+                  border: `1px solid ${item.color}20`,
+                  cursor: "pointer", gap: "4px",
+                }}
+              >
+                <span style={{ fontSize: "18px" }}>{item.icon}</span>
+                <div style={{ fontSize: "11px", fontWeight: "700", color: item.color }}>{item.label}</div>
+                <div style={{ fontSize: "10px", color: "#333" }}>{item.sub}</div>
+              </motion.div>
+            </Link>
+          ))}
+        </div>
 
         <motion.div
           initial={{ opacity: 0 }}

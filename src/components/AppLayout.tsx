@@ -11,10 +11,13 @@ const NAV_ITEMS = [
   { label: "Learn", href: "/learn", icon: "📚", tour: "learn" },
   { label: "Polls", href: "/polls", icon: "🗳️" },
   { label: "Swipe", href: "/daily", icon: "⚡" },
+  { label: "Circles", href: "/circles", icon: "🔵" },
   { label: "Debate", href: "/debate", icon: "💬", tour: "debate" },
   { label: "Map", href: "/map", icon: "🗺️" },
   { href: "/storylines", icon: "📖", label: "Stories", tour: "storylines" },
   { label: "Forecast", href: "/forecast", icon: "🔮" },
+  { label: "Witness", href: "/witness", icon: "⏳" },
+  { label: "My Ontario", href: "/ontario", icon: "🍁" },
   { label: "Saved", href: "/bookmarks", icon: "🔖" },
   { label: "Opinions", href: "/opinions", icon: "🗒️" },
   { label: "Pulse", href: "/pulse", icon: "⚡" },
@@ -455,7 +458,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                 >
                   <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "16px", paddingLeft: "4px" }}>More</div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                    {NAV_ITEMS.filter(item => ["Map", "Stories", "Pulse", "Saved", "Opinions", "About", "Profile", "Challenges"].includes(item.label)).map(item => {
+                    {NAV_ITEMS.filter(item => ["Map", "Stories", "Circles", "Pulse", "Saved", "Opinions", "About", "Profile", "Challenges"].includes(item.label)).map(item => {
                       const isActive = active === item.href;
                       return (
                         <Link

@@ -101,6 +101,9 @@ export const AdminCardPatchSchema = z.object({
 export const AdminCardDeleteSchema = z.object({
   id: z.string().uuid(),
 });
+export const WitnessWatchSchema = z.object({
+  eventId: z.string().uuid(),
+});
 
 export const ForecastPredictSchema = z.object({
   questionId: z.string().uuid(),
@@ -110,4 +113,18 @@ export const ForecastPredictSchema = z.object({
 
 export const ProgressSchema = z.object({
   slug: z.string().min(1).max(200),
+});
+
+export const CirclePostSchema = z.object({
+  circleId: z.string().uuid(),
+  content: z.string().min(1).max(280),
+  parentId: z.string().uuid().optional(),
+});
+
+export const CircleLikeSchema = z.object({
+  postId: z.string().uuid(),
+});
+
+export const CircleJoinSchema = z.object({
+  circleId: z.string().uuid(),
 });

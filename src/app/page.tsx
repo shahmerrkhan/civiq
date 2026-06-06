@@ -56,6 +56,27 @@ const FEATURES = [
     border: "rgba(52,211,153,0.15)",
   },
   {
+    icon: "⏳",
+    title: "Witness",
+    desc: "Live countdowns on real Ontario political decisions — bills, rulings, elections. Know before it happens.",
+    color: "rgba(248,113,113,0.06)",
+    border: "rgba(248,113,113,0.15)",
+  },
+  {
+    icon: "🔮",
+    title: "Civic Forecast",
+    desc: "Predict what happens in Ontario politics. Set your confidence, earn points, climb the leaderboard.",
+    color: "rgba(167,139,250,0.06)",
+    border: "rgba(167,139,250,0.15)",
+  },
+  {
+    icon: "🔵",
+    title: "Civic Circles",
+    desc: "Join issue-based groups. Post your take, reply to others, and see how the left, centre and right split.",
+    color: "rgba(96,165,250,0.06)",
+    border: "rgba(96,165,250,0.15)",
+  },
+  {
     icon: "💬",
     title: "Structured debate",
     desc: "Get matched with someone who disagrees. Steelman their view first — then argue.",

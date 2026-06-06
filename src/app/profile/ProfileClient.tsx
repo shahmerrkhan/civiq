@@ -431,6 +431,55 @@ const stats = [
               ))}
             </div>
           )}
+          {/* My Ontario */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "24px 28px", marginTop: "20px" }}
+        >
+          <div style={{ fontSize: "11px", color: "#444", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "6px" }}>My Ontario</div>
+          <div style={{ fontSize: "13px", color: "#333", marginBottom: "20px" }}>Your political footprint since joining Civiq.</div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+
+            {/* Compass identity */}
+            <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "14px 16px", borderRadius: "12px", backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <div style={{ fontSize: "22px" }}>🧭</div>
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: "700", color: skipped ? "#555" : color }}>
+                  {skipped ? "No compass yet" : label}
+                </div>
+                <div style={{ fontSize: "12px", color: "#444" }}>Political identity based on your quiz</div>
+              </div>
+            </div>
+
+            {/* Engagement summary */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              {[
+                { icon: "📚", label: "Modules completed", value: modulesCompleted, color: "#4ade80" },
+                { icon: "🗳️", label: "Polls voted", value: pollsVoted, color: "#60a5fa" },
+                { icon: "💬", label: "Opinions logged", value: opinions.length, color: "#a78bfa" },
+                { icon: "🔥", label: "Day streak", value: streakCount, color: "#f5a623" },
+              ].map(item => (
+                <div key={item.label} style={{ padding: "12px 14px", borderRadius: "10px", backgroundColor: `${item.color}08`, border: `1px solid ${item.color}15` }}>
+                  <div style={{ fontSize: "18px", marginBottom: "4px" }}>{item.icon}</div>
+                  <div style={{ fontSize: "20px", fontWeight: "800", color: item.color, letterSpacing: "-0.5px" }}>{item.value}</div>
+                  <div style={{ fontSize: "11px", color: "#444", fontWeight: "600", marginTop: "2px" }}>{item.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Narrative line */}
+            <div style={{ padding: "14px 16px", borderRadius: "12px", backgroundColor: "rgba(245,166,35,0.04)", border: "1px solid rgba(245,166,35,0.1)", fontSize: "13px", color: "#888", lineHeight: "1.7" }}>
+              {modulesCompleted === 0 && pollsVoted === 0
+                ? "You're just getting started. Complete a module or vote on a poll to build your Ontario political story."
+                : `You've engaged with ${modulesCompleted + pollsVoted + opinions.length} pieces of Ontario civic content${streakCount > 1 ? ` and kept a ${streakCount}-day streak` : ""}. ${skipped ? "Take the quiz to complete your political profile." : `Your ${label} compass shapes how you see issues.`}`
+              }
+            </div>
+
+          </div>
+        </motion.div>
         </motion.div>
 
       </div>

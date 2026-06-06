@@ -295,3 +295,41 @@ export const civicChallengeStreaks = pgTable("civic_challenge_streaks", {
   lastCompletedWeek: text("last_completed_week"), // "2025-06-02"
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const circles = pgTable("circles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  emoji: text("emoji").notNull().default("🏛️"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const circleMembers = pgTable("circle_members", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  circleId: uuid("circle_id").references(() => circles.id),
+  userId: text("user_id").references(() => users.id),
+  leaning: text("leaning"), // "left" | "centre" | "right" — pulled from their compass
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+export const circlePosts = pgTable("circle_posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  circleId: uuid("circle_id").references(() => circles.id),
+  userId: text("user_id").references(() => users.id),
+  username: text("username"),
+  content: text("content").notNull(),
+  leaning: text("leaning"), // "left" | "centre" | "right"
+  parentId: uuid("parent_id"), // null = top-level post, set = reply
+  likeCount: integer("like_count").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const circlePostLikes = pgTable("circle_post_likes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  postId: uuid("post_id").references(() => circlePosts.id),
+  userId: text("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { forecastQuestions, forecastPredictions, forecastLeaderboard, users } from "@/db/schema";
+import { forecastQuestions, forecastPredictions, forecastLeaderboard, users, userActivity } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { generateWeeklyForecasts, closeExpiredVoting, resolveExpiredForecasts } from "@/lib/forecast";
@@ -154,6 +154,17 @@ export async function POST(req: NextRequest) {
       prediction,
       confidence,
     });
+    await db.insert(userActivity).values({ userId, action: "forecast_predict", meta: { questionId, xp: 25 } });
+
+    // Update streak
+    const today = new Date().toISOString().slice(0, 10);
+    const userRow = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (userRow[0]) {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      const last = userRow[0].lastStreakDate;
+      const newStreak = last === today ? userRow[0].streakCount ?? 1 : last === yesterday ? (userRow[0].streakCount ?? 0) + 1 : 1;
+      await db.update(users).set({ streakCount: newStreak, lastStreakDate: today }).where(eq(users.id, userId));
+    }
 
     return NextResponse.json({ success: true, updated: false });
   } catch (err) {

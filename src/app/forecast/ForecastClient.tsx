@@ -521,30 +521,107 @@ function QuestionCard({
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                     <span style={{ fontSize: "13px", color: "#555", fontWeight: "600" }}>
                       Confidence
                     </span>
-                    <span style={{
-                      fontSize: "14px",
-                      fontWeight: "800",
-                      color: pendingConfidence >= 80 ? "#f5a623" : "#888",
-                    }}>
+                    <motion.span
+                      key={pendingConfidence}
+                      initial={{ scale: 1.15, opacity: 0.6 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.15 }}
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: "800",
+                        color: pendingConfidence >= 85 ? "#f5a623" : pendingConfidence >= 70 ? "#a78bfa" : "#888",
+                        letterSpacing: "-0.3px",
+                      }}
+                    >
                       {pendingConfidence}%
-                    </span>
+                    </motion.span>
                   </div>
-                  <input
-                    type="range"
-                    min={50}
-                    max={100}
-                    value={pendingConfidence}
-                    onChange={e => setPendingConfidence(Number(e.target.value))}
-                    style={{ width: "100%", marginBottom: "16px", accentColor: "#f5a623" }}
-                  />
-                  <div style={{ fontSize: "12px", color: "#333", marginBottom: "16px" }}>
-                    {pendingConfidence >= 80
-                      ? `High confidence — you'll earn ${pendingConfidence} points if correct`
-                      : `${pendingConfidence} points if correct`}
+
+                  {/* Custom styled slider track */}
+                  <div style={{ position: "relative", marginBottom: "14px" }}>
+                    <style>{`
+                      .conf-slider {
+                        -webkit-appearance: none;
+                        appearance: none;
+                        width: 100%;
+                        height: 6px;
+                        border-radius: 100px;
+                        outline: none;
+                        cursor: pointer;
+                        background: linear-gradient(
+                          to right,
+                          ${pendingConfidence >= 85 ? "#f5a623" : pendingConfidence >= 70 ? "#a78bfa" : "#60a5fa"} 0%,
+                          ${pendingConfidence >= 85 ? "#f5a623" : pendingConfidence >= 70 ? "#a78bfa" : "#60a5fa"} ${((pendingConfidence - 50) / 50) * 100}%,
+                          rgba(255,255,255,0.07) ${((pendingConfidence - 50) / 50) * 100}%,
+                          rgba(255,255,255,0.07) 100%
+                        );
+                      }
+                      .conf-slider::-webkit-slider-thumb {
+                        -webkit-appearance: none;
+                        appearance: none;
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background: ${pendingConfidence >= 85 ? "#f5a623" : pendingConfidence >= 70 ? "#a78bfa" : "#60a5fa"};
+                        border: 2px solid rgba(0,0,0,0.4);
+                        box-shadow: 0 0 8px ${pendingConfidence >= 85 ? "rgba(245,166,35,0.5)" : pendingConfidence >= 70 ? "rgba(167,139,250,0.5)" : "rgba(96,165,250,0.5)"};
+                        cursor: pointer;
+                        transition: box-shadow 0.15s ease, background 0.15s ease;
+                      }
+                      .conf-slider::-moz-range-thumb {
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background: ${pendingConfidence >= 85 ? "#f5a623" : pendingConfidence >= 70 ? "#a78bfa" : "#60a5fa"};
+                        border: 2px solid rgba(0,0,0,0.4);
+                        box-shadow: 0 0 8px ${pendingConfidence >= 85 ? "rgba(245,166,35,0.5)" : pendingConfidence >= 70 ? "rgba(167,139,250,0.5)" : "rgba(96,165,250,0.5)"};
+                        cursor: pointer;
+                      }
+                      .conf-slider::-webkit-slider-thumb:hover {
+                        box-shadow: 0 0 14px ${pendingConfidence >= 85 ? "rgba(245,166,35,0.7)" : pendingConfidence >= 70 ? "rgba(167,139,250,0.7)" : "rgba(96,165,250,0.7)"};
+                      }
+                    `}</style>
+                    <input
+                      type="range"
+                      min={50}
+                      max={100}
+                      value={pendingConfidence}
+                      onChange={e => setPendingConfidence(Number(e.target.value))}
+                      className="conf-slider"
+                    />
+                    {/* tick labels */}
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px" }}>
+                      {[50, 60, 70, 80, 90, 100].map(v => (
+                        <span key={v} style={{
+                          fontSize: "10px",
+                          color: pendingConfidence >= v ? (v >= 85 ? "#f5a623" : v >= 70 ? "#a78bfa" : "#60a5fa") : "#2a2a2a",
+                          fontWeight: "700",
+                          transition: "color 0.15s ease",
+                        }}>{v}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{
+                    fontSize: "12px",
+                    marginBottom: "16px",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    backgroundColor: pendingConfidence >= 85 ? "rgba(245,166,35,0.06)" : pendingConfidence >= 70 ? "rgba(167,139,250,0.06)" : "rgba(96,165,250,0.06)",
+                    border: `1px solid ${pendingConfidence >= 85 ? "rgba(245,166,35,0.12)" : pendingConfidence >= 70 ? "rgba(167,139,250,0.12)" : "rgba(96,165,250,0.12)"}`,
+                    color: pendingConfidence >= 85 ? "#f5a623" : pendingConfidence >= 70 ? "#a78bfa" : "#60a5fa",
+                    fontWeight: "600",
+                    transition: "all 0.15s ease",
+                  }}>
+                    {pendingConfidence >= 85
+                      ? `🔥 High conviction — ${pendingConfidence} pts if you're right`
+                      : pendingConfidence >= 70
+                      ? `💡 Moderate confidence — ${pendingConfidence} pts if correct`
+                      : `🎲 Low confidence — ${pendingConfidence} pts if correct`}
                   </div>
 
                   <div style={{ display: "flex", gap: "10px" }}>
