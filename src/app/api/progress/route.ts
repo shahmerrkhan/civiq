@@ -3,8 +3,10 @@ import { db } from "@/db";
 import { userProgress, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { ProgressSchema } from "@/lib/schemas";const body = await req.json().catch(() => null);
-  const parsed = ProgressSchema.safeParse(body);
+import { ProgressSchema } from "@/lib/schemas";
+
+
+const parsed = ProgressSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Missing slug" }, { status: 400 });
   const { slug } = parsed.data;
 
@@ -34,7 +36,7 @@ export async function POST(req: Request) {
   );
   if (existing.length > 0) return NextResponse.json({ success: true, already: true });
 
-await db.insert(userProgress).values({
+  await db.insert(userProgress).values({
     userId,
     moduleSlug: slug,
     completed: true,
