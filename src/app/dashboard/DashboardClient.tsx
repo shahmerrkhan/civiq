@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
 import StreakBadge from "@/components/StreakBadge";
+import AppTour, { TourButton } from "@/components/AppTour";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Infrastructure: "#60a5fa",
@@ -55,12 +56,21 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
   const [showDeepDive, setShowDeepDive] = useState<number | null>(null);
   const [explainCard, setExplainCard] = useState<number | null>(null);
   const [explainText, setExplainText] = useState<Record<number, string>>({});
-const [explainLoading, setExplainLoading] = useState<number | null>(null);
+  const [explainLoading, setExplainLoading] = useState<number | null>(null);
   const [bookmarked, setBookmarked] = useState<Record<number, boolean>>({});
   const [bookmarkLoading, setBookmarkLoading] = useState<number | null>(null);
   const [til, setTil] = useState<string | null>(null);
   const [discussLoading, setDiscussLoading] = useState<number | null>(null);
   const [storylineCount, setStorylineCount] = useState(0);
+  const [tourActive, setTourActive] = useState(false);
+
+  useEffect(() => {
+    const done = localStorage.getItem("civiq_tour_done");
+    if (!done) {
+      const t = setTimeout(() => setTourActive(true), 1500);
+      return () => clearTimeout(t);
+    }
+  }, []);
   
   const handleDiscuss = async (card: Card) => {
     setDiscussLoading(card.id);
@@ -276,7 +286,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
         )}
 
         <AnimatePresence mode="wait">
-          <motion.div key={activeFilter}>
+          <motion.div key={activeFilter} data-tour="feed">
             {!loading && !error && filteredCards.map((card, i) => {
               const expanded = activeCard === card.id;
               const color = CATEGORY_COLORS[card.category] || CATEGORY_COLORS.default;
@@ -548,6 +558,8 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
           </motion.div>
         </AnimatePresence>
       </div>
+    {tourActive && <AppTour onDone={() => setTourActive(false)} />}
+      <TourButton onStart={() => setTourActive(true)} />
     </AppLayout>
   );
 }

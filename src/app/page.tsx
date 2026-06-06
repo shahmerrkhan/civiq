@@ -51,7 +51,35 @@ const FEATURES = [
   {
     icon: "📚",
     title: "Learn in 5 minutes",
-    desc: "60+ bite-sized modules on government, ideologies, and the figures who shaped history.",
+    desc: "200+ bite-sized modules on government, ideologies, and the figures who shaped history.",
+    color: "rgba(52,211,153,0.06)",
+    border: "rgba(52,211,153,0.15)",
+  },
+  {
+    icon: "💬",
+    title: "Structured debate",
+    desc: "Get matched with someone who disagrees. Steelman their view first — then argue.",
+    color: "rgba(251,146,60,0.06)",
+    border: "rgba(251,146,60,0.15)",
+  },
+  {
+    icon: "🎯",
+    title: "Weekly challenges",
+    desc: "3 missions every Monday designed to push you outside your political comfort zone.",
+    color: "rgba(245,166,35,0.06)",
+    border: "rgba(245,166,35,0.15)",
+  },
+  {
+    icon: "📖",
+    title: "Follow storylines",
+    desc: "Track ongoing Ontario political stories chapter by chapter as they develop.",
+    color: "rgba(167,139,250,0.06)",
+    border: "rgba(167,139,250,0.15)",
+  },
+  {
+    icon: "🗺️",
+    title: "Regional map",
+    desc: "See how different parts of Ontario vote on the issues that matter to you.",
     color: "rgba(52,211,153,0.06)",
     border: "rgba(52,211,153,0.15)",
   },
@@ -676,7 +704,7 @@ export default function Home() {
               </h2>
             </motion.div>
 
-            <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "14px" }}>
+              <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "14px" }}>
               {FEATURES.map((f, i) => (
                 <motion.div
                   key={f.title}
@@ -714,20 +742,56 @@ export default function Home() {
         </div>
 
         {/* CCF STRIP */}
-        <div id="about" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(6,6,12,0.95)", padding: "28px 20px", position: "relative", zIndex: 5 }}>
-          <div style={{ maxWidth: "1160px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "14px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-              <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.1em", color: "#666", textTransform: "uppercase" }}>In partnership with</div>
-              <a href="https://www.civicclarityfoundation.org" target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: "14px", fontWeight: "700", color: "#e8e6e0", borderLeft: "2px solid #f5a623", paddingLeft: "12px", textDecoration: "none" }}>
-                Civic Clarity Foundation ↗
-              </a>
-            </div>
-            <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7" }}>
-              A non-partisan, youth-focused think tank committed to governmental transparency, accountability, and meaningful youth inclusion in democracy.
-            </div>
-          </div>
+<div id="about" style={{ borderTop: "1px solid rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(6,6,12,0.95)", padding: "56px 48px", position: "relative", zIndex: 5 }}>
+  <div style={{ maxWidth: "1160px", margin: "0 auto" }}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      style={{ display: "flex", alignItems: "center", gap: "48px", flexWrap: "wrap" }}
+    >
+      {/* Logos */}
+      <div style={{ display: "flex", alignItems: "center", gap: "24px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{
+            width: "48px", height: "48px", borderRadius: "14px",
+            background: "linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.05))",
+            border: "1px solid rgba(245,166,35,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "26px", fontFamily: "'Playfair Display', serif", fontWeight: "900", color: "#f5a623",
+          }}>Q</div>
+          <div style={{ fontSize: "18px", fontWeight: "800", color: "#f0ede6", fontFamily: "'Playfair Display', serif", letterSpacing: "-0.5px" }}>Civiq</div>
         </div>
+
+        <div style={{ width: "1px", height: "40px", backgroundColor: "rgba(255,255,255,0.08)" }} />
+
+        <a href="https://www.civicclarityfoundation.org" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
+          <img
+            src="/ccf-logo.png"
+            alt="Civic Clarity Foundation"
+            style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", border: "1px solid rgba(255,255,255,0.08)" }}
+          />
+          <div>
+            <div style={{ fontSize: "14px", fontWeight: "700", color: "#e8e6e0" }}>Civic Clarity Foundation</div>
+            <div style={{ fontSize: "11px", color: "#555", marginTop: "1px" }}>civicclarityfoundation.org ↗</div>
+          </div>
+        </a>
+      </div>
+
+      {/* Divider */}
+      <div style={{ width: "1px", height: "60px", backgroundColor: "rgba(255,255,255,0.05)", flexShrink: 0 }} className="ccf-divider" />
+
+      {/* Text */}
+      <div style={{ flex: 1, minWidth: "260px" }}>
+        <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.1em", color: "#f5a623", textTransform: "uppercase", marginBottom: "10px" }}>In partnership with</div>
+        <div style={{ fontSize: "15px", color: "#666", lineHeight: "1.75", maxWidth: "480px" }}>
+          Civiq is built in partnership with the Civic Clarity Foundation — a non-partisan, youth-focused think tank committed to governmental transparency, accountability, and meaningful youth inclusion in democracy.
+        </div>
+      </div>
+    </motion.div>
+  </div>
+</div>
 
         {/* ISSUE OF THE WEEK */}
         <div style={{ position: "relative", zIndex: 5, borderTop: "1px solid rgba(255,255,255,0.04)" }}>

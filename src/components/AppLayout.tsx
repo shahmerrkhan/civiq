@@ -7,13 +7,13 @@ import Logo from "@/components/Logo";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/dashboard", icon: "🏠" },
-  { label: "Challenges", href: "/challenges", icon: "🎯" },
-  { label: "Learn", href: "/learn", icon: "📚" },
+  { label: "Challenges", href: "/challenges", icon: "🎯", tour: "challenges" },
+  { label: "Learn", href: "/learn", icon: "📚", tour: "learn" },
   { label: "Polls", href: "/polls", icon: "🗳️" },
   { label: "Swipe", href: "/daily", icon: "⚡" },
-  { label: "Debate", href: "/debate", icon: "💬" },
+  { label: "Debate", href: "/debate", icon: "💬", tour: "debate" },
   { label: "Map", href: "/map", icon: "🗺️" },
-  { href: "/storylines", icon: "📖", label: "Stories" },
+  { href: "/storylines", icon: "📖", label: "Stories", tour: "storylines" },
   { label: "Saved", href: "/bookmarks", icon: "🔖" },
   { label: "Opinions", href: "/opinions", icon: "🗒️" },
   { label: "Pulse", href: "/pulse", icon: "⚡" },
