@@ -291,9 +291,9 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                   </div>
                 </div>
               )}
-              <ClerkLoaded>
+              {mounted && <ClerkLoaded>
                 <UserButton appearance={{ variables: { colorBackground: "#1a1a24", colorText: "#e8e6e0", colorTextSecondary: "#999", colorInputBackground: "#242430", colorInputText: "#e8e6e0", colorNeutral: "#888" }, elements: { userButtonPopoverCard: { backgroundColor: "#1a1a24", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }, userButtonPopoverActionButton: { color: "#ccc" }, userButtonPopoverActionButtonText: { color: "#ccc" }, userButtonPopoverActionButtonIcon: { color: "#888" }, userButtonPopoverFooter: { display: "none" } } }} />
-              </ClerkLoaded>
+              </ClerkLoaded>}
             </div>
           </div>
         )}
@@ -340,9 +340,9 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                     <span style={{ fontSize: "13px", fontWeight: "800", color: "#f5a623" }}>{streak}</span>
                   </div>
                 )}
-                <ClerkLoaded>
+                {mounted && <ClerkLoaded>
                 <UserButton appearance={{ variables: { colorBackground: "#1a1a24", colorText: "#e8e6e0", colorTextSecondary: "#999", colorInputBackground: "#242430", colorInputText: "#e8e6e0", colorNeutral: "#888" }, elements: { userButtonPopoverCard: { backgroundColor: "#1a1a24", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }, userButtonPopoverActionButton: { color: "#ccc" }, userButtonPopoverActionButtonText: { color: "#ccc" }, userButtonPopoverActionButtonIcon: { color: "#888" }, userButtonPopoverFooter: { display: "none" } } }} />
-                </ClerkLoaded>
+                </ClerkLoaded>}
               </div>
             </div>
           )}

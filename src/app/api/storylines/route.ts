@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { storylines, storylineChapters, storylineFollows, storylineOpinions } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
@@ -32,20 +32,14 @@ export async function GET() {
         const follow = await db
           .select()
           .from(storylineFollows)
-          .where(
-            eq(storylineFollows.userId, userId) &&
-            eq(storylineFollows.storylineId, s.id) as any
-          )
+          .where(and(eq(storylineFollows.userId, userId), eq(storylineFollows.storylineId, s.id)))
           .limit(1);
         isFollowing = follow.length > 0;
 
         const op = await db
           .select()
           .from(storylineOpinions)
-          .where(
-            eq(storylineOpinions.userId, userId) &&
-            eq(storylineOpinions.storylineId, s.id) as any
-          )
+          .where(and(eq(storylineOpinions.userId, userId), eq(storylineOpinions.storylineId, s.id)))
           .orderBy(desc(storylineOpinions.createdAt))
           .limit(1);
         myOpinion = op[0]?.opinion ?? null;
