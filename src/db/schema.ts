@@ -70,7 +70,41 @@ export const pollVotes = pgTable("poll_votes", {
   userLeaning: text("user_leaning"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+export const storylines = pgTable("storylines", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  summary: text("summary").notNull(),
+  status: text("status").notNull().default("active"), // 'active' | 'stalled' | 'passed' | 'defeated'
+  category: text("category"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
+export const storylineChapters = pgTable("storyline_chapters", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  storylineId: uuid("storyline_id").references(() => storylines.id),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  publishedAt: timestamp("published_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const storylineFollows = pgTable("storyline_follows", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").references(() => users.id),
+  storylineId: uuid("storyline_id").references(() => storylines.id),
+  followedAt: timestamp("followed_at").defaultNow(),
+});
+
+export const storylineOpinions = pgTable("storyline_opinions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").references(() => users.id),
+  storylineId: uuid("storyline_id").references(() => storylines.id),
+  chapterId: uuid("chapter_id").references(() => storylineChapters.id),
+  opinion: text("opinion").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 export const userOpinions = pgTable("user_opinions", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id").references(() => users.id),

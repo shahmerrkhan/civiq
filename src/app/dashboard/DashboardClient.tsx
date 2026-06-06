@@ -60,6 +60,7 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
   const [bookmarkLoading, setBookmarkLoading] = useState<number | null>(null);
   const [til, setTil] = useState<string | null>(null);
   const [discussLoading, setDiscussLoading] = useState<number | null>(null);
+  const [storylineCount, setStorylineCount] = useState(0);
   
   const handleDiscuss = async (card: Card) => {
     setDiscussLoading(card.id);
@@ -84,6 +85,16 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
     } catch {}
     setDiscussLoading(null);
   };
+
+  useEffect(() => {
+    fetch("/api/storylines")
+      .then(r => r.json())
+      .then(d => {
+        const followed = (d.storylines ?? []).filter((s: any) => s.isFollowing).length;
+        setStorylineCount(followed);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch("/api/til")
@@ -169,6 +180,34 @@ const [explainLoading, setExplainLoading] = useState<number | null>(null);
           </div>
           <div style={{ fontSize: "14px", color: "#444" }}>What's happening in your province today</div>
         </motion.div>
+
+          {storylineCount > 0 && (
+          <Link href="/storylines" style={{ textDecoration: "none", display: "block", marginBottom: "12px" }}>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "10px 14px", borderRadius: "10px",
+                background: "rgba(245,166,35,0.05)",
+                border: "1px solid rgba(245,166,35,0.12)",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "14px" }}>📖</span>
+                <div style={{ fontSize: "12px", fontWeight: "700", color: "#f5a623" }}>
+                  {storylineCount} {storylineCount === 1 ? "story" : "stories"} you follow
+                </div>
+                <div style={{ fontSize: "12px", color: "#444" }}>— see what's developed</div>
+              </div>
+              <div style={{ fontSize: "13px", color: "#444" }}>→</div>
+            </motion.div>
+          </Link>
+        )}
 
         <Link href="/daily" style={{ textDecoration: "none", display: "block", marginBottom: "16px" }}>
           <motion.div
