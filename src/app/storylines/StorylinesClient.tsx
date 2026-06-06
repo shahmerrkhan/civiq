@@ -162,8 +162,8 @@ export default function StorylinesClient({ userId }: { userId: string | null }) 
   const displayed = filter === "following" ? storylines.filter(s => s.isFollowing) : storylines;
 
   return (
-    <AppLayout>
-      <div style={{ minHeight: "100vh", backgroundColor: "#06060c", padding: "0 0 80px 0" }}>
+    <AppLayout active="/storylines">
+    <div style={{ minHeight: "100vh", backgroundColor: "#06060c", padding: "0 0 80px 0" }}>
 
         {/* Header */}
         <div style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", padding: "32px 24px 24px" }}>
