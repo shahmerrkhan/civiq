@@ -109,6 +109,19 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#fb923c",
   },
   {
+    icon: "🔮",
+    label: "Forecast",
+    title: "Civic Forecast",
+    description: "Predict what happens in Ontario politics before it happens.",
+    bullets: [
+      "3 new predictions drop every Monday",
+      "Set your confidence — higher confidence = more points if correct",
+      "Leaderboard tracks the sharpest predictors",
+    ],
+    route: "/forecast",
+    accentColor: "#a78bfa",
+  },
+  {
     icon: "🔥",
     label: "Your Score",
     title: "Civic Score & Streak",

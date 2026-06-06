@@ -16,11 +16,12 @@ export async function generateWeeklyForecasts(weekStart: string) {
 
   if (existing.length >= 3) return existing;
 
-  const closesAt = new Date(weekStart);
-  closesAt.setDate(closesAt.getDate() + 5); // closes Saturday
+  const now = new Date();
+  const closesAt = new Date(now);
+  closesAt.setDate(closesAt.getDate() + 5);
 
-  const resolvesAt = new Date(weekStart);
-  resolvesAt.setDate(resolvesAt.getDate() + 14); // resolves 2 weeks later
+  const resolvesAt = new Date(now);
+  resolvesAt.setDate(resolvesAt.getDate() + 14);
 
   const completion = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",

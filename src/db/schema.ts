@@ -267,6 +267,27 @@ export const forecastLeaderboard = pgTable("forecast_leaderboard", {
   correctPredictions: integer("correct_predictions").notNull().default(0),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+export const witnessEvents = pgTable("witness_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  deadlineAt: timestamp("deadline_at").notNull(),
+  status: text("status").notNull().default("upcoming"), // 'upcoming' | 'resolved'
+  outcome: text("outcome"),
+  outcomeExplanation: text("outcome_explanation"),
+  sourceUrl: text("source_url"),
+  weekStart: text("week_start").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const witnessWatches = pgTable("witness_watches", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").references(() => users.id),
+  eventId: uuid("event_id").references(() => witnessEvents.id),
+  watchedAt: timestamp("watched_at").defaultNow(),
+});
 
 export const civicChallengeStreaks = pgTable("civic_challenge_streaks", {
   userId: text("user_id").primaryKey().references(() => users.id),
