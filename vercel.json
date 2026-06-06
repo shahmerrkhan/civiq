@@ -8,9 +8,13 @@
       "path": "/api/cron/evening",
       "schedule": "0 22 * * *"
     },
-    {
+{
       "path": "/api/cron/weekly-pulse",
       "schedule": "0 13 * * 1"
+    },
+    {
+      "path": "/api/cron/storylines",
+      "schedule": "0 9 * * 1"
     }
   ]
 }
