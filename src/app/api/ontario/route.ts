@@ -66,7 +66,7 @@ export async function GET() {
     if (cat) categoryCount[cat] = (categoryCount[cat] ?? 0) + 1;
   }
   const topCategory = Object.entries(categoryCount).sort((a, b) => b - a)?. ?? null;
-
+  
   return NextResponse.json({
     user: {
       username: user.username,
