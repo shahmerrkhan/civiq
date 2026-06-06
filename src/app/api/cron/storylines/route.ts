@@ -30,7 +30,7 @@ export async function GET(req: Request) {
 
       const latestChapter = existingChapters[0];
       const latestDate = latestChapter
-        ? new Date(latestChapter.publishedAt).toISOString().slice(0, 10)
+        ? new Date(latestChapter.publishedAt ?? Date.now()).toISOString().slice(0, 10)
         : "2024-01-01";
 
       const today = new Date().toISOString().slice(0, 10);
