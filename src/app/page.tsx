@@ -770,8 +770,9 @@ export default function Home() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      style={{ display: "flex", alignItems: "center", gap: "48px", flexWrap: "wrap" }}
-    >
+      style={{ display: "flex", alignItems: "center", gap: "48px", flexWrap: "wrap", justifyContent: "center" }}
+      
+      >
       {/* Logos */}
       <div style={{ display: "flex", alignItems: "center", gap: "24px", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
