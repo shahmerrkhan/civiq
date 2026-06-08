@@ -92,7 +92,7 @@ const recentCards = await sql`
     for (const user of users) {
       if (!user.email) continue;
       await resend.emails.send({
-        from: "Civiq <digest@civiq.ca>",
+        from: "Civiq <onboarding@resend.dev>",
         to: user.email,
         subject: `This week in Ontario politics 🏛️ · ${new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" })}`,
         html,
