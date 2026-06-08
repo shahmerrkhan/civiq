@@ -9,10 +9,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No webhook secret" }, { status: 500 });
   }
 
-  const headerPayload = headers();
-  const svix_id = headerPayload.get("svix-id");
-  const svix_timestamp = headerPayload.get("svix-timestamp");
-  const svix_signature = headerPayload.get("svix-signature");
+  const headerPayload = await headers();
+    const svix_id = headerPayload.get("svix-id");
+    const svix_timestamp = headerPayload.get("svix-timestamp");
+    const svix_signature = headerPayload.get("svix-signature");
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
     return NextResponse.json({ error: "Missing svix headers" }, { status: 400 });
