@@ -257,6 +257,29 @@ export default function AdminClient({
     setLoading(null);
   };
 
+  // ── Approve pending AI-generated content ──────────────────
+  const handleApproveWitness = async (id: string) => {
+    setLoading(id);
+    await fetch("/api/admin/witness", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, approvePending: true }),
+    });
+    setWitnessEvents(prev => prev.map(e => e.id === id ? { ...e, status: "upcoming" } : e));
+    setLoading(null);
+  };
+
+  const handleApproveForecast = async (id: string) => {
+    setLoading(id);
+    await fetch("/api/admin/forecast", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, approvePending: true }),
+    });
+    setForecastQuestions(prev => prev.map(q => q.id === id ? { ...q, status: "open" } : q));
+    setLoading(null);
+  };
+
   // ── Digest / Blast ─────────────────────────────────────────
   const handleSendDigest = async () => {
     setSendingDigest(true);
@@ -375,7 +398,7 @@ export default function AdminClient({
             <div>
               <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>Admin</div>
               <div style={{ fontSize: "14px", color: "#444" }}>
-                {pending.length} pending · {approved.length} live · {witnessEvents.length} witness · {forecastQuestions.length} forecast
+                {pending.length} pending cards · {approved.length} live · {witnessEvents.filter(e => e.status === "pending").length} witness pending · {forecastQuestions.filter(q => q.status === "pending").length} forecast pending
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
@@ -534,10 +557,43 @@ export default function AdminClient({
                 </div>
               </div>
 
-              {/* Witness list */}
-              {witnessEvents.length === 0 ? (
+              {/* Pending AI-generated witness events */}
+              {witnessEvents.filter(e => e.status === "pending").length > 0 && (
+                <div style={{ marginBottom: "28px" }}>
+                  <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623", marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    🤖 AI-generated — needs review ({witnessEvents.filter(e => e.status === "pending").length})
+                  </div>
+                  {witnessEvents.filter(e => e.status === "pending").map((event, i) => (
+                    <motion.div key={event.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
+                      style={{ backgroundColor: "rgba(245,166,35,0.04)", border: "1px solid rgba(245,166,35,0.2)", borderRadius: "16px", padding: "20px", marginBottom: "12px" }}
+                    >
+                      <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "11px", fontWeight: "700", color: categoryColor[event.category] || "#f87171", backgroundColor: `${categoryColor[event.category] || "#f87171"}15`, padding: "2px 8px", borderRadius: "100px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{event.category}</span>
+                        <span style={{ fontSize: "11px", fontWeight: "700", color: "#f5a623", backgroundColor: "rgba(245,166,35,0.1)", padding: "2px 8px", borderRadius: "100px", textTransform: "uppercase", letterSpacing: "0.05em" }}>pending review</span>
+                        {event.sourceUrl && <a href={event.sourceUrl} target="_blank" rel="noreferrer" style={{ fontSize: "11px", color: "#555", textDecoration: "none", padding: "2px 8px", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "100px" }}>source ↗</a>}
+                      </div>
+                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#f0ede6", lineHeight: "1.4", marginBottom: "6px" }}>{event.title}</div>
+                      <div style={{ fontSize: "13px", color: "#666", lineHeight: "1.6", marginBottom: "10px" }}>{event.description}</div>
+                      <div style={{ fontSize: "11px", color: "#444", marginBottom: "14px" }}>
+                        Deadline: {new Date(event.deadlineAt).toLocaleDateString("en-CA")} · Week: {event.weekStart}
+                      </div>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleApproveWitness(event.id)} disabled={loading === event.id}
+                          style={{ padding: "9px 20px", borderRadius: "10px", border: "none", backgroundColor: "#4ade80", color: "#000", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loading === event.id ? 0.5 : 1 }}
+                        >{loading === event.id ? "..." : "✓ Approve"}</motion.button>
+                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleDeleteWitness(event.id)} disabled={loading === event.id}
+                          style={{ padding: "9px 20px", borderRadius: "10px", border: "1px solid rgba(248,113,113,0.3)", backgroundColor: "rgba(248,113,113,0.08)", color: "#f87171", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loading === event.id ? 0.5 : 1 }}
+                        >{loading === event.id ? "..." : "✗ Delete"}</motion.button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+
+              {/* Live witness events */}
+              {witnessEvents.filter(e => e.status !== "pending").length === 0 && witnessEvents.filter(e => e.status === "pending").length === 0 ? (
                 <div style={{ textAlign: "center", padding: "40px 0", color: "#555", fontSize: "14px" }}>No witness events yet.</div>
-              ) : witnessEvents.map((event, i) => (
+              ) : witnessEvents.filter(e => e.status !== "pending").map((event, i) => (
                 <WitnessAdminCard
                   key={event.id}
                   event={event}
@@ -632,10 +688,42 @@ export default function AdminClient({
                 )}
               </AnimatePresence>
 
-              {/* Forecast list */}
-              {forecastQuestions.length === 0 ? (
+              {/* Pending AI-generated forecast questions */}
+              {forecastQuestions.filter(q => q.status === "pending").length > 0 && (
+                <div style={{ marginBottom: "28px" }}>
+                  <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623", marginBottom: "14px" }}>
+                    🤖 AI-generated — needs review ({forecastQuestions.filter(q => q.status === "pending").length})
+                  </div>
+                  {forecastQuestions.filter(q => q.status === "pending").map((q, i) => (
+                    <motion.div key={q.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
+                      style={{ backgroundColor: "rgba(245,166,35,0.04)", border: "1px solid rgba(245,166,35,0.2)", borderRadius: "16px", padding: "20px", marginBottom: "12px" }}
+                    >
+                      <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "11px", fontWeight: "700", color: categoryColor[q.category] || "#a78bfa", backgroundColor: `${categoryColor[q.category] || "#a78bfa"}15`, padding: "2px 8px", borderRadius: "100px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{q.category}</span>
+                        <span style={{ fontSize: "11px", fontWeight: "700", color: "#f5a623", backgroundColor: "rgba(245,166,35,0.1)", padding: "2px 8px", borderRadius: "100px", textTransform: "uppercase", letterSpacing: "0.05em" }}>pending review</span>
+                      </div>
+                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#f0ede6", lineHeight: "1.4", marginBottom: "6px" }}>{q.question}</div>
+                      <div style={{ fontSize: "13px", color: "#666", lineHeight: "1.6", marginBottom: "10px" }}>{q.context}</div>
+                      <div style={{ fontSize: "11px", color: "#444", marginBottom: "14px" }}>
+                        Closes: {new Date(q.closesAt).toLocaleDateString("en-CA")} · Resolves: {new Date(q.resolvesAt).toLocaleDateString("en-CA")} · Week: {q.weekStart}
+                      </div>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleApproveForecast(q.id)} disabled={loading === q.id}
+                          style={{ padding: "9px 20px", borderRadius: "10px", border: "none", backgroundColor: "#4ade80", color: "#000", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loading === q.id ? 0.5 : 1 }}
+                        >{loading === q.id ? "..." : "✓ Approve"}</motion.button>
+                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleDeleteForecast(q.id)} disabled={loading === q.id}
+                          style={{ padding: "9px 20px", borderRadius: "10px", border: "1px solid rgba(248,113,113,0.3)", backgroundColor: "rgba(248,113,113,0.08)", color: "#f87171", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loading === q.id ? 0.5 : 1 }}
+                        >{loading === q.id ? "..." : "✗ Delete"}</motion.button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+
+              {/* Live forecast questions */}
+              {forecastQuestions.filter(q => q.status !== "pending").length === 0 && forecastQuestions.filter(q => q.status === "pending").length === 0 ? (
                 <div style={{ textAlign: "center", padding: "40px 0", color: "#555", fontSize: "14px" }}>No forecast questions yet.</div>
-              ) : forecastQuestions.map((q, i) => (
+              ) : forecastQuestions.filter(q => q.status !== "pending").map((q, i) => (
                 <motion.div key={q.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
                   style={{ backgroundColor: "rgba(255,255,255,0.02)", border: `1px solid ${q.status === "resolved" ? "rgba(74,222,128,0.12)" : "rgba(255,255,255,0.06)"}`, borderRadius: "16px", padding: "20px", marginBottom: "12px" }}
                 >

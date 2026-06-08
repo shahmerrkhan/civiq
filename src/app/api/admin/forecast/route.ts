@@ -21,14 +21,22 @@ export async function POST(req: NextRequest) {
     closesAt: new Date(body.closesAt),
     resolvesAt: new Date(body.resolvesAt),
     weekStart: body.weekStart,
-    status: "open",
+    status: "pending",
   }).returning();
   return NextResponse.json({ question });
 }
 
 export async function PATCH(req: NextRequest) {
   if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { id, outcome, outcomeExplanation } = await req.json();
+  const { id, outcome, outcomeExplanation, approvePending } = await req.json();
+
+  if (approvePending) {
+    const [question] = await db.update(forecastQuestions)
+      .set({ status: "open" })
+      .where(eq(forecastQuestions.id, id))
+      .returning();
+    return NextResponse.json({ question });
+  }
 
   // Resolve the question
   const [question] = await db.update(forecastQuestions)

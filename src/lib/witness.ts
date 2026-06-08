@@ -30,28 +30,36 @@ export async function generateWeeklyWitnessEvents(weekStart: string) {
     max_tokens: 2500,
     messages: [{
       role: "user",
-      content: `You are generating "Witness Events" for Civiq, a civic education platform for Ontario youth. These are real upcoming Ontario political decisions, court dates, bill readings, elections, budget votes, or policy announcements that have a known or approximate deadline within the next 30 days.
+      content: `You are generating "Witness Events" for Civiq, a civic education platform for Ontario youth. These are real upcoming Ontario political decisions, court dates, bill readings, elections, budget votes, or policy announcements.
 
 Today is ${now.toISOString().split("T")[0]}. Generate exactly 5 events.
+
+CRITICAL ACCURACY RULES — a human editor will fact-check every event before it goes live:
+- JURISDICTION: Every event must be clearly Ontario provincial OR explicitly labeled federal/municipal. Do NOT mix them up. High-speed rail (e.g. Alto/VIA) is FEDERAL. Toronto municipal elections are MUNICIPAL. Ontario Legislature bills are PROVINCIAL.
+- LEGISLATURE SESSION: The Ontario Legislature typically sits October-December and February-June. If the house is not in session, do NOT generate bill reading or confidence motion events.
+- BILLS: Only reference bills by number if you are certain they exist and have not already received Royal Assent. If unsure, describe the policy area without a bill number.
+- COURT CASES: Only generate court events if a real case is ongoing. Do not invent court appeals or legal challenges.
+- BUDGET: Ontario's budget is typically tabled in late March or April. Do not generate budget events outside that window unless referencing a real supplementary estimate.
+- ELECTIONS: Toronto municipal elections are in October of election years. Do not invent election dates.
+- If you are uncertain about any fact, omit that event and replace it with one you are confident about.
+- sourceUrl must be a real, working URL from ola.org, ontario.ca, toronto.ca, canada.ca, or a major Canadian news outlet. Do not invent URLs.
 
 Return ONLY valid JSON, no markdown, no backticks:
 {
   "events": [
     {
-      "title": "Short punchy title, max 10 words. E.g. 'Bill 212 Third Reading Vote'",
-      "description": "2-3 sentences. What is this, why does it matter to young Ontarians, what happens if it passes or fails.",
-      "category": "Bills | Courts | Elections | Budget | Policy | Municipal",
+      "title": "Short punchy title, max 10 words.",
+      "description": "2-3 sentences. What is this, why does it matter to young Ontarians, what happens next.",
+      "category": "Bills | Courts | Elections | Budget | Policy | Municipal | Federal",
+      "jurisdiction": "provincial | federal | municipal",
       "deadlineDays": 7,
-      "sourceUrl": "https://www.ola.org or relevant real URL"
+      "sourceUrl": "https://real-url-here.ca"
     }
   ]
 }
 
-Rules:
 - deadlineDays must be between 1 and 30
-- Every event must be Ontario-specific
-- Must be a real type of political event (bill reading, court ruling, election, budget vote, policy deadline)
-- Vary the categories
+- Vary categories
 - Make them genuinely interesting to a 16-25 year old`,
     }],
   });

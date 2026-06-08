@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(req: Request) {
+export async function POST(req: Request) {
   try {
     webpush.setVapidDetails(
       process.env.VAPID_EMAIL!,

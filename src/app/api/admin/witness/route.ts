@@ -21,14 +21,23 @@ export async function POST(req: NextRequest) {
     deadlineAt: new Date(body.deadlineAt),
     sourceUrl: body.sourceUrl || null,
     weekStart: body.weekStart,
-    status: "upcoming",
+    status: "pending",
   }).returning();
   return NextResponse.json({ event });
 }
 
 export async function PATCH(req: NextRequest) {
   if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { id, outcome, outcomeExplanation } = await req.json();
+  const { id, outcome, outcomeExplanation, approvePending } = await req.json();
+
+  if (approvePending) {
+    const [event] = await db.update(witnessEvents)
+      .set({ status: "upcoming", updatedAt: new Date() })
+      .where(eq(witnessEvents.id, id))
+      .returning();
+    return NextResponse.json({ event });
+  }
+
   const [event] = await db.update(witnessEvents)
     .set({ status: "resolved", outcome, outcomeExplanation, updatedAt: new Date() })
     .where(eq(witnessEvents.id, id))

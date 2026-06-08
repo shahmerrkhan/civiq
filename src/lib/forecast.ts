@@ -30,7 +30,15 @@ export async function generateWeeklyForecasts(weekStart: string) {
       role: "user",
       content: `You are generating weekly political prediction questions for Civiq, a civic education platform for Ontario youth.
 
-Today is ${weekStart}. Generate exactly 3 Yes/No prediction questions about Ontario politics that will be answerable within 2 weeks. These should be about real, specific things that are currently happening or likely to happen — bills, elections, political moves, government decisions, court rulings, policy announcements.
+Today is ${weekStart}. Generate exactly 3 Yes/No prediction questions about Ontario politics that will be answerable within 2 weeks.
+
+CRITICAL ACCURACY RULES — a human editor will fact-check every question before it goes live:
+- JURISDICTION: Be precise. If a topic is federal (e.g. federal budget, federal rail, federal housing policy), label it clearly or skip it. Do not present federal events as Ontario provincial events.
+- LEGISLATURE SESSION: If the Ontario Legislature is not currently in session, do not generate questions about bill readings, motions of confidence, or tabling of legislation. The house typically rises in June and returns in October.
+- COURT CASES: Only reference real, known court cases. Do not invent OSAP appeals, union challenges, or legal disputes unless they are real and ongoing.
+- ELECTIONS: Only reference elections that are actually scheduled. Toronto municipal elections are in October of election years. Do not invent byelection dates.
+- BILLS: Only reference bills that exist and are currently active (not already passed or defeated).
+- If you are uncertain whether something is real, make the question more general (e.g. "Will the Ontario government announce new housing policy this week?" rather than citing a specific bill you're unsure about).
 
 Return ONLY valid JSON, no markdown, no backticks:
 {
@@ -38,16 +46,15 @@ Return ONLY valid JSON, no markdown, no backticks:
     {
       "question": "Will X happen by [specific date]? Max 20 words, clear Yes/No.",
       "context": "2-3 sentences of background. What is this about, why does it matter to young Ontarians.",
-      "category": "Housing | Healthcare | Education | Environment | Economy | Politics | Courts"
+      "category": "Housing | Healthcare | Education | Environment | Economy | Politics | Courts",
+      "jurisdiction": "provincial | federal | municipal"
     }
   ]
 }
 
-Rules:
-- Questions must be binary — clearly resolvable as Yes or No
-- Must be Ontario-specific or directly relevant to Ontario
+- Questions must be binary and clearly resolvable as Yes or No
+- Must be Ontario-relevant
 - Must be about something that can realistically resolve in 2 weeks
-- No vague questions like "Will Doug Ford remain popular?" — must be a specific event
 - Vary the categories`,
     }],
   });

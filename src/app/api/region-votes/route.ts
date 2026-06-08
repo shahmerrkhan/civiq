@@ -5,8 +5,8 @@ import { regionVotes } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { RegionVoteSchema } from "@/lib/schemas";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
+export async function POST(req: Request) {
+const { searchParams } = new URL(req.url);
   const issueId = searchParams.get("issueId");
   if (!issueId) return NextResponse.json({ error: "Missing issueId" }, { status: 400 });
 

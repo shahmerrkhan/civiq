@@ -81,8 +81,8 @@ Make each card genuinely interesting. Vary the categories. No duplicates.`,
   return inserted;
 }
 
-export async function GET(req: Request) {
-  try {
+export async function POST(req: Request) {
+try {
     await auth();
 
     const { searchParams } = new URL(req.url);

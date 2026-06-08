@@ -243,7 +243,7 @@ export const forecastQuestions = pgTable("forecast_questions", {
   category: text("category").notNull(),
   closesAt: timestamp("closes_at").notNull(),   // when voting locks
   resolvesAt: timestamp("resolves_at").notNull(), // when Groq checks outcome
-  status: text("status").notNull().default("open"), // 'open' | 'closed' | 'resolved'
+  status: text("status").notNull().default("pending"), // 'pending' | 'open' | 'closed' | 'resolved'
   outcome: boolean("outcome"),                  // true = Yes happened, false = No
   outcomeExplanation: text("outcome_explanation"),
   weekStart: text("week_start").notNull(),      // "2025-06-09"
@@ -273,7 +273,7 @@ export const witnessEvents = pgTable("witness_events", {
   description: text("description").notNull(),
   category: text("category").notNull(),
   deadlineAt: timestamp("deadline_at").notNull(),
-  status: text("status").notNull().default("upcoming"), // 'upcoming' | 'resolved'
+  status: text("status").notNull().default("pending"), // 'pending' | 'upcoming' | 'resolved'
   outcome: text("outcome"),
   outcomeExplanation: text("outcome_explanation"),
   sourceUrl: text("source_url"),

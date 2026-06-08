@@ -21,8 +21,8 @@ async function sendWithRetry(sub: typeof pushSubscriptions.$inferSelect, payload
   return "failed";
 }
 
-export async function GET(req: Request) {
-  try {
+export async function POST(req: Request) {
+try {
     webpush.setVapidDetails(
       process.env.VAPID_EMAIL!,
       process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,

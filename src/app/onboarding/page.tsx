@@ -222,14 +222,20 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
     };
     setResult(final);
 
-    await fetch("/api/onboarding", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        compassPosition: final,
-        topics: selectedTopics,
+    await Promise.all([
+      fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          compassPosition: final,
+          topics: selectedTopics,
+        }),
       }),
-    });
+      fetch("/api/digest/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }),
+    ]);
 
     setSaving(false);
     setStage("result");
