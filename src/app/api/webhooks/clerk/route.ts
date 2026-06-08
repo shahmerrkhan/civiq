@@ -36,7 +36,9 @@ export async function POST(req: Request) {
 
   if (evt.type === "user.created") {
     const { id, email_addresses, username } = evt.data;
-    const email = email_addresses?.[0]?.email_address ?? "";
+    const email = email_addresses?.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address 
+    ?? email_addresses?.[0]?.email_address 
+    ?? "";
 
     await sql`
       INSERT INTO users (id, email, username, onboarding_complete, streak_count, created_at)
