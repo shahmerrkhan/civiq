@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { forecastQuestions, forecastPredictions, forecastLeaderboard } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-const ADMIN_IDS = ["user_3Ebe9C8ppBPw7DLTYbMH52lz5vT"];
+const ADMIN_IDS = ["user_3Ebe9C8ppBPw7DLTYbMH52lz5vT", "user_3EhHcsl86ffTPyR3CpgqKS6Prnj"];
 
 async function checkAdmin() {
   const { userId } = await auth();

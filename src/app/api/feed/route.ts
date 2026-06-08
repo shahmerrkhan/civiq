@@ -11,7 +11,7 @@ export const revalidate = 0;
 
 const CARDS_PER_PAGE = 10;
 const MIN_POOL = 20;
-const MAX_POOL = 100; // never generate if we already have this many
+const MAX_POOL = 99999; // no hard cap, keep growing
 let isGenerating = false; // in-memory lock to prevent simultaneous generation
 
 async function generateAndSave(count: number) {

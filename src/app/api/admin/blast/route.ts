@@ -4,7 +4,7 @@ import webpush from "web-push";
 import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
 
-const ADMIN_IDS = ["user_3Ebe9C8ppBPw7DLTYbMH52lz5vT"];
+const ADMIN_IDS = ["user_3Ebe9C8ppBPw7DLTYbMH52lz5vT", "user_3EhHcsl86ffTPyR3CpgqKS6Prnj"];
 
 export async function POST(req: Request) {
   try {
