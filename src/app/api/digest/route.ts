@@ -11,8 +11,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const users = await sql`SELECT email FROM users WHERE email != '' AND onboarding_complete = true`;
-
+    const users = await sql`SELECT email FROM users WHERE email != ''`;
+    
 const recentCards = await sql`
       SELECT title, summary, category, perspectives
       FROM content_cards
