@@ -283,9 +283,13 @@ export default function AdminClient({
   // ── Digest / Blast ─────────────────────────────────────────
   const handleSendDigest = async () => {
     setSendingDigest(true);
-    const res = await fetch("/api/digest", { method: "POST", headers: { "Content-Type": "application/json", authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || ""}` } });
-    const data = await res.json();
-    setDigestMsg(data.sent ? `✓ Sent to ${data.sent} users` : "Failed — check console");
+    try {
+      const res = await fetch("/api/digest", { method: "GET" });
+      const data = await res.json();
+      setDigestMsg(data.sent ? `✓ Sent to ${data.sent} users` : `Failed: ${data.error || "check logs"}`);
+    } catch (err) {
+      setDigestMsg("Failed — check console");
+    }
     setSendingDigest(false);
     setTimeout(() => setDigestMsg(""), 4000);
   };

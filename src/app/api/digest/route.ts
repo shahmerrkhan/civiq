@@ -7,7 +7,9 @@ const resend = new Resend(process.env.RESEND_API_KEY!);
 export async function GET(req: Request) {
   try {
     const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const { userId } = await import("@clerk/nextjs/server").then(m => m.auth());
+    const isAdmin = process.env.ADMIN_USER_IDS?.split(",").includes(userId ?? "");
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && !isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
