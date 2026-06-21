@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { storylines, storylineChapters } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { groqWithTimeout } from "@/lib/groq";
+import { geminiGenerate } from "@/lib/gemini";
 
 export async function POST(req: Request) {
-const authHeader = req.headers.get("authorization");
+  const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -19,7 +19,6 @@ const authHeader = req.headers.get("authorization");
 
   for (const story of activeStorylines) {
     try {
-      // get latest chapter so we know what's already been covered
       const existingChapters = await db
         .select()
         .from(storylineChapters)
@@ -33,11 +32,8 @@ const authHeader = req.headers.get("authorization");
 
       const today = new Date().toISOString().slice(0, 10);
 
-        const res = await groqWithTimeout({
-         model: "llama-3.3-70b-versatile",
-        messages: [{
-          role: "user",
-          content: `You are a non-partisan Ontario political journalist writing for young Canadians aged 16-25.
+      const raw = await geminiGenerate({
+        prompt: `You are a non-partisan Ontario political journalist writing for young Canadians aged 16-25.
 
 The storyline is: "${story.title}"
 Summary: "${story.summary}"
@@ -64,14 +60,13 @@ If NO significant development has happened, return:
   "hasUpdate": false
 }
 
-Return ONLY valid JSON, no other text. Base your answer on realistic knowledge of Ontario politics.`
-        }],
+Return ONLY valid JSON, no other text. Base your answer on realistic knowledge of Ontario politics.`,
         temperature: 0.3,
-        max_tokens: 400,
+        maxTokens: 400,
+        grounding: true,
       });
 
-      const text = res.choices[0]?.message?.content ?? "";
-      const clean = text.replace(/```json|```/g, "").trim();
+      const clean = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(clean);
 
       if (parsed.hasUpdate && parsed.chapter) {
@@ -82,7 +77,6 @@ Return ONLY valid JSON, no other text. Base your answer on realistic knowledge o
           publishedAt: new Date(parsed.chapter.publishedAt),
         });
 
-        // update the storyline's updatedAt
         await db
           .update(storylines)
           .set({ updatedAt: new Date() })

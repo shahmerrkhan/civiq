@@ -11,7 +11,7 @@ const MESSAGES = [
   { title: "Daily quiz is live 🧠", body: "Test what you learned today. Takes 60 seconds.", url: "/learn" },
 ];
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   try {
     webpush.setVapidDetails(
       process.env.VAPID_EMAIL!,

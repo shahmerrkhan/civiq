@@ -1,8 +1,6 @@
-import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
 import { sql } from "@/db";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+import { geminiGenerate } from "@/lib/gemini";
 
 const MODULE_PROMPTS: Record<string, string> = {
   "how-ontarios-legislature-works": "Explain how Ontario's provincial legislature works to a 16-year-old Canadian student. Cover: what the Legislative Assembly is, how MPPs are elected, how laws get passed, and why it matters to everyday life. Be specific to Ontario. Use ## for section headers.",
@@ -261,13 +259,11 @@ Each card:
 
 Last card must be type "question" with front starting with "What do YOU think:" and a provocative Ontario-relevant question on the back.`;
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      max_tokens: 2000,
-      messages: [{ role: "user", content: cardPrompt }],
-    });
-
-    const raw = completion.choices[0]?.message?.content || "";
+    const raw = await geminiGenerate({
+  prompt: cardPrompt,
+  maxTokens: 2000,
+  grounding: false,
+});
     const match = raw.match(/\[[\s\S]*\]/);
     if (!match) throw new Error("No JSON found");
     const content = match[0];

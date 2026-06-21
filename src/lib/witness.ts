@@ -1,10 +1,8 @@
-import Groq from "groq-sdk";
 import { db } from "@/db";
 import { witnessEvents, witnessWatches, pushSubscriptions } from "@/db/schema";
 import { eq, and, lte } from "drizzle-orm";
 import webpush from "web-push";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+import { geminiGenerate } from "@/lib/gemini";
 
 function getWeekStart() {
   const now = new Date();
@@ -25,12 +23,8 @@ export async function generateWeeklyWitnessEvents(weekStart: string) {
 
   const now = new Date();
 
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    max_tokens: 2500,
-    messages: [{
-      role: "user",
-      content: `You are generating "Witness Events" for Civiq, a civic education platform for Ontario youth. These are real upcoming Ontario political decisions, court dates, bill readings, elections, budget votes, or policy announcements.
+  const raw = await geminiGenerate({
+    prompt: `You are generating "Witness Events" for Civiq, a civic education platform for Ontario youth. These are real upcoming Ontario political decisions, court dates, bill readings, elections, budget votes, or policy announcements.
 
 Today is ${now.toISOString().split("T")[0]}. Generate exactly 5 events.
 
@@ -61,10 +55,10 @@ Return ONLY valid JSON, no markdown, no backticks:
 - deadlineDays must be between 1 and 30
 - Vary categories
 - Make them genuinely interesting to a 16-25 year old`,
-    }],
+    maxTokens: 2500,
+    grounding: true,
   });
 
-  const raw = completion.choices[0]?.message?.content ?? "";
   const match = raw.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("No JSON in witness generation");
 
@@ -111,12 +105,8 @@ export async function resolveExpiredWitnessEvents() {
 
   for (const event of expired) {
     try {
-      const completion = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 400,
-        messages: [{
-          role: "user",
-          content: `You are resolving a political event for Civiq.
+      const raw = await geminiGenerate({
+        prompt: `You are resolving a political event for Civiq.
 
 Event: "${event.title}"
 Description: "${event.description}"
@@ -129,10 +119,10 @@ Return ONLY valid JSON, no markdown:
   "outcome": "passed" | "failed" | "delayed" | "cancelled" | "occurred" | "unknown",
   "explanation": "1-2 sentences on what actually happened."
 }`,
-        }],
+        maxTokens: 400,
+        grounding: true,
       });
 
-      const raw = completion.choices[0]?.message?.content ?? "";
       const match = raw.match(/\{[\s\S]*\}/);
       if (!match) continue;
 

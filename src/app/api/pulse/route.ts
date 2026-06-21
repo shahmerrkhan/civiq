@@ -1,8 +1,6 @@
-import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
 import { sql } from "@/db";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+import { geminiGenerate } from "@/lib/gemini";
 
 export async function GET() {
   try {
@@ -17,12 +15,8 @@ export async function GET() {
       return NextResponse.json({ pulse: cached[0].content, generatedAt: cached[0].created_at, cached: true });
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      max_tokens: 2000,
-      messages: [{
-        role: "user",
-        content: `You are Civiq, a non-partisan civic platform for Ontario Gen Z. Generate this week's Ontario Political Pulse.
+    const raw = await geminiGenerate({
+      prompt: `You are Civiq, a non-partisan civic platform for Ontario Gen Z. Generate this week's Ontario Political Pulse.
 
 Return ONLY a valid JSON object, no markdown, no backticks.
 
@@ -41,11 +35,11 @@ Return ONLY a valid JSON object, no markdown, no backticks.
   "didYouKnow": "one interesting Ontario political fact most people don't know"
 }
 
-Generate exactly 4 items. Be specific, current, and relevant to Gen Z in Ontario.`
-      }],
+Generate exactly 4 items. Be specific, current, and relevant to Gen Z in Ontario.`,
+      maxTokens: 2000,
+      grounding: true,
     });
 
-    const raw = completion.choices[0]?.message?.content || "";
     const clean = raw.replace(/```json|```/g, "").trim();
     const pulse = JSON.parse(clean);
 

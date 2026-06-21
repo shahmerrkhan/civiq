@@ -1,14 +1,11 @@
-import Groq from "groq-sdk";
 import { db } from "@/db";
 import { forecastQuestions, forecastPredictions, forecastLeaderboard, pushSubscriptions } from "@/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import webpush from "web-push";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+import { geminiGenerate } from "@/lib/gemini";
 
 // ─── Generate 3 new predictions for the week ─────────────────────────────────
 export async function generateWeeklyForecasts(weekStart: string) {
-  // Don't double-generate if we already have this week's forecasts
   const existing = await db
     .select()
     .from(forecastQuestions)
@@ -23,12 +20,8 @@ export async function generateWeeklyForecasts(weekStart: string) {
   const resolvesAt = new Date(now);
   resolvesAt.setDate(resolvesAt.getDate() + 14);
 
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    max_tokens: 2000,
-    messages: [{
-      role: "user",
-      content: `You are generating weekly political prediction questions for Civiq, a civic education platform for Ontario youth.
+  const raw = await geminiGenerate({
+    prompt: `You are generating weekly political prediction questions for Civiq, a civic education platform for Ontario youth.
 
 Today is ${weekStart}. Generate exactly 3 Yes/No prediction questions about Ontario politics that will be answerable within 2 weeks.
 
@@ -56,10 +49,10 @@ Return ONLY valid JSON, no markdown, no backticks:
 - Must be Ontario-relevant
 - Must be about something that can realistically resolve in 2 weeks
 - Vary the categories`,
-    }],
+    maxTokens: 2000,
+    grounding: true,
   });
 
-  const raw = completion.choices[0]?.message?.content ?? "";
   const match = raw.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("No JSON in forecast generation response");
 
@@ -81,29 +74,21 @@ Return ONLY valid JSON, no markdown, no backticks:
   return inserted;
 }
 
-// ─── Resolve expired questions via Groq ──────────────────────────────────────
+// ─── Resolve expired questions via Gemini ────────────────────────────────────
 export async function resolveExpiredForecasts() {
   const now = new Date();
 
   const expired = await db
     .select()
     .from(forecastQuestions)
-    .where(
-      and(
-        eq(forecastQuestions.status, "closed"),
-      )
-    );
+    .where(eq(forecastQuestions.status, "closed"));
 
   const pastDeadline = expired.filter(q => new Date(q.resolvesAt) <= now);
 
   for (const question of pastDeadline) {
     try {
-      const completion = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 500,
-        messages: [{
-          role: "user",
-          content: `You are resolving a political prediction question for Civiq.
+      const raw = await geminiGenerate({
+        prompt: `You are resolving a political prediction question for Civiq.
 
 Question: "${question.question}"
 Context: "${question.context}"
@@ -118,17 +103,16 @@ Return ONLY valid JSON, no markdown:
 }
 
 If you genuinely cannot determine the outcome, return {"outcome": null, "explanation": "Unable to verify outcome from available information."}`,
-        }],
+        maxTokens: 500,
+        grounding: true,
       });
 
-      const raw = completion.choices[0]?.message?.content ?? "";
       const match = raw.match(/\{[\s\S]*\}/);
       if (!match) continue;
 
       const result = JSON.parse(match[0]);
-      if (result.outcome === null) continue; // skip unresolvable
+      if (result.outcome === null) continue;
 
-      // Update question
       await db.update(forecastQuestions)
         .set({
           status: "resolved",
@@ -137,7 +121,6 @@ If you genuinely cannot determine the outcome, return {"outcome": null, "explana
         })
         .where(eq(forecastQuestions.id, question.id));
 
-      // Score all predictions for this question
       await scorePredictions(question.id, result.outcome);
 
     } catch (err) {
@@ -178,15 +161,12 @@ async function scorePredictions(questionId: string, outcome: boolean) {
 
   for (const pred of predictions) {
     const correct = pred.prediction === outcome;
-    // Points formula: correct = confidence value as points (50-100), wrong = 0
     const points = correct ? pred.confidence : 0;
 
-    // Update prediction
     await db.update(forecastPredictions)
       .set({ pointsEarned: points })
       .where(eq(forecastPredictions.id, pred.id));
 
-    // Upsert leaderboard
     const existing = await db
       .select()
       .from(forecastLeaderboard)
@@ -212,7 +192,6 @@ async function scorePredictions(questionId: string, outcome: boolean) {
     }
   }
 
-  // Push notify all users who predicted on this question
   await notifyResolution(questionId);
 }
 

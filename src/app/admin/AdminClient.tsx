@@ -659,7 +659,7 @@ export default function AdminClient({
                       style={{ backgroundColor: "#0f0f18", border: "1px solid rgba(167,139,250,0.2)", borderRadius: "20px", padding: "28px", width: "100%", maxWidth: "480px", fontFamily: "'DM Sans', sans-serif" }}
                     >
                       <div style={{ fontSize: "16px", fontWeight: "800", color: "#f0ede6", marginBottom: "6px" }}>Manual resolve</div>
-                      <div style={{ fontSize: "13px", color: "#555", marginBottom: "20px" }}>Override Groq's resolution. This scores all existing predictions immediately.</div>
+                      <div style={{ fontSize: "13px", color: "#555", marginBottom: "20px" }}>Override Gemini's resolution. This scores all existing predictions immediately.</div>
                       <div style={{ marginBottom: "14px" }}>
                         <label style={labelStyle}>Outcome</label>
                         <div style={{ display: "flex", gap: "10px" }}>

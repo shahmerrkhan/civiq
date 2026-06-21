@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   try {
     const authHeader = req.headers.get("authorization");
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -77,8 +77,8 @@ const recentCards = await sql`
             `;
           }).join("")}
 
-          <a href="https://civiq-sooty.vercel.app" class="cta">Read the full feed →</a>
-
+          <a href="https://getciviq.org" class="cta">Read the full feed →</a>
+          
           <div class="footer">
             You're getting this because you signed up for Civiq.<br>
             Built by Shahmeer · Powered by Civic Clarity Foundation · Ontario, Canada

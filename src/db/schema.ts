@@ -242,7 +242,7 @@ export const forecastQuestions = pgTable("forecast_questions", {
   context: text("context").notNull(),           // 2-3 sentence background
   category: text("category").notNull(),
   closesAt: timestamp("closes_at").notNull(),   // when voting locks
-  resolvesAt: timestamp("resolves_at").notNull(), // when Groq checks outcome
+  resolvesAt: timestamp("resolves_at").notNull(), // when Gemini checks outcome
   status: text("status").notNull().default("pending"), // 'pending' | 'open' | 'closed' | 'resolved'
   outcome: boolean("outcome"),                  // true = Yes happened, false = No
   outcomeExplanation: text("outcome_explanation"),

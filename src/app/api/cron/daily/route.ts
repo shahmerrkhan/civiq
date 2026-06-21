@@ -1,12 +1,10 @@
-import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { dailyQuestions, dailyAnswers, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { DailyAnswerSchema } from "@/lib/schemas";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+import { geminiGenerate } from "@/lib/gemini";
 
 function getTodayDate() {
   return new Date().toISOString().split("T")[0];
@@ -26,14 +24,10 @@ export async function GET() {
   let question = existing[0];
 
   if (!question) {
-    // Generate new question with Groq
+    // Generate new question with Gemini
     try {
-      const completion = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 500,
-        messages: [{
-          role: "user",
-          content: `Generate one Ontario politics trivia question for young Canadians (16-25). It must be about a real fact, law, policy, or political figure relevant to Ontario or Canada.
+      const raw = await geminiGenerate({
+  prompt: `Generate one Ontario politics trivia question for young Canadians (16-25). It must be about a real fact, law, policy, or political figure relevant to Ontario or Canada.
 
 Return ONLY valid JSON, no markdown, no backticks:
 {
@@ -43,15 +37,15 @@ Return ONLY valid JSON, no markdown, no backticks:
   "explanation": "2-3 sentences explaining the correct answer and why it matters to young Ontarians"
 }
 
-Topics: Ontario legislature, provincial policies, Canadian political history, Doug Ford, healthcare, housing, education, minimum wage, Indigenous rights, environment. Make it genuinely interesting and educational, not trivial.`
-        }],
-      });
+Topics: Ontario legislature, provincial policies, Canadian political history, Doug Ford, healthcare, housing, education, minimum wage, Indigenous rights, environment. Make it genuinely interesting and educational, not trivial.`,
+  maxTokens: 500,
+  grounding: true,
+});
 
-      const raw = completion.choices[0]?.message?.content || "";
-      const match = raw.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error("No JSON");
+const match = raw.match(/\{[\s\S]*\}/);
+if (!match) throw new Error("No JSON");
 
-      const parsed = JSON.parse(match[0]);
+const parsed = JSON.parse(match[0]);
 
       const inserted = await db.insert(dailyQuestions).values({
         question: parsed.question,

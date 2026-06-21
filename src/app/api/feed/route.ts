@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import Groq from "groq-sdk";
 import { db } from "@/db";
 import { contentCards } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+import { geminiGenerate } from "@/lib/gemini";
 
 export const revalidate = 0;
 
@@ -15,12 +13,8 @@ const MAX_POOL = 99999; // no hard cap, keep growing
 let isGenerating = false; // in-memory lock to prevent simultaneous generation
 
 async function generateAndSave(count: number) {
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    max_tokens: 6000,
-    messages: [{
-      role: "user",
-      content: `Generate ${count} current Ontario political news cards for young Canadians (16-25). Cover a variety of these categories: Housing, Healthcare, Education, Environment, Economy, Infrastructure. Each must feel like a real, specific issue — not generic.
+  const raw = await geminiGenerate({
+    prompt: `Generate ${count} current Ontario political news cards for young Canadians (16-25). Cover a variety of these categories: Housing, Healthcare, Education, Environment, Economy, Infrastructure. Each must feel like a real, specific issue — not generic.
 
 Return ONLY valid JSON, no markdown, no backticks:
 {
@@ -42,10 +36,10 @@ Return ONLY valid JSON, no markdown, no backticks:
 }
 
 Make each card genuinely interesting. Vary the categories. No duplicates.`,
-    }],
+    maxTokens: 6000,
+    grounding: true,
   });
 
-  const raw = completion.choices[0]?.message?.content ?? "";
   const match = raw.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("No JSON in response");
 

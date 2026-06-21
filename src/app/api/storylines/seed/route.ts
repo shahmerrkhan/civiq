@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { storylines, storylineChapters } from "@/db/schema";
-import { groqWithTimeout } from "@/lib/groq";
+import { geminiGenerate } from "@/lib/gemini";
 
 const STORYLINE_TOPICS = [
   { title: "Ontario's Municipal Zoning Overhaul", slug: "municipal-zoning-bill-185", status: "active", category: "Housing" },
@@ -12,11 +12,8 @@ const STORYLINE_TOPICS = [
 ];
 
 async function generateStoryline(topic: typeof STORYLINE_TOPICS[0]) {
-    const res = await groqWithTimeout({
-    model: "llama-3.3-70b-versatile",
-    messages: [{
-      role: "user",
-      content: `You are a non-partisan Ontario political journalist writing for young Canadians aged 16-25.
+  const raw = await geminiGenerate({
+    prompt: `You are a non-partisan Ontario political journalist writing for young Canadians aged 16-25.
 
 Generate a storyline for: "${topic.title}"
 
@@ -37,14 +34,13 @@ Requirements:
 - Each chapter covers a real development in this Ontario political story
 - Dates must be realistic and chronological
 - Completely non-partisan, just facts
-- Written for a 16-year-old audience`
-    }],
+- Written for a 16-year-old audience`,
     temperature: 0.4,
-    max_tokens: 1000,
+    maxTokens: 1000,
+    grounding: true,
   });
 
-  const text = res.choices[0]?.message?.content ?? "";
-  const clean = text.replace(/```json|```/g, "").trim();
+  const clean = raw.replace(/```json|```/g, "").trim();
   return JSON.parse(clean);
 }
 
@@ -58,7 +54,6 @@ export async function POST(req: Request) {
 
   for (const topic of STORYLINE_TOPICS) {
     try {
-      // skip if already exists
       const existing = await db.select().from(storylines).where(
         (await import("drizzle-orm")).eq(storylines.slug, topic.slug)
       ).limit(1);

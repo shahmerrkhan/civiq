@@ -1,8 +1,6 @@
-import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
 import { ExplainSchema } from "@/lib/schemas";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+import { geminiGenerate } from "@/lib/gemini";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
@@ -11,22 +9,18 @@ export async function POST(req: Request) {
   const { title, summary } = parsed.data;
 
   try {
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      max_tokens: 200,
-      messages: [{
-        role: "user",
-        content: `Explain this political news to a 16-year-old who knows nothing about politics. Plain casual language, no jargon, max 4 sentences. Be direct about why it matters to a young person in Ontario.
+    const explanation = await geminiGenerate({
+      prompt: `Explain this political news to a 16-year-old who knows nothing about politics. Plain casual language, no jargon, max 4 sentences. Be direct about why it matters to a young person in Ontario.
 
 Story: "${title}"
 Context: "${summary}"
 
-Plain English explanation:`
-      }],
+Plain English explanation:`,
+      maxTokens: 200,
+      grounding: false,
     });
 
-    const explanation = completion.choices[0]?.message?.content?.trim() || "";
-    return NextResponse.json({ explanation });
+    return NextResponse.json({ explanation: explanation.trim() });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
