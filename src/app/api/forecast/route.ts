@@ -41,11 +41,12 @@ export async function GET(req: NextRequest) {
 
     const predMap: Record<string, typeof allPredictions> = {};
     for (const p of allPredictions) {
+      if (!p.questionId) continue;
       if (!predMap[p.questionId]) predMap[p.questionId] = [];
       predMap[p.questionId].push(p);
     }
     const myPredMap: Record<string, typeof myPredictions[0]> = {};
-    for (const p of myPredictions) myPredMap[p.questionId] = p;
+    for (const p of myPredictions) if (p.questionId) myPredMap[p.questionId] = p;
 
     const enriched = questions.map((q) => {
       const preds = predMap[q.id] ?? [];
