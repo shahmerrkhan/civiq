@@ -88,8 +88,11 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { challengeId } = await req.json();
-  if (!challengeId) return NextResponse.json({ error: "Missing challengeId" }, { status: 400 });
+  const body = await req.json().catch(() => null);
+  const challengeId = body?.challengeId;
+  if (!challengeId || typeof challengeId !== "string") {
+    return NextResponse.json({ error: "Missing challengeId" }, { status: 400 });
+  }
 
   // Check already completed
   const existing = await db

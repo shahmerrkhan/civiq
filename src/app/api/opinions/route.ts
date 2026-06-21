@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { userOpinions, users } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { userOpinions, userActivity } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { OpinionSchema } from "@/lib/schemas";
 
@@ -35,9 +35,11 @@ await db.insert(userOpinions).values({
     opinion: opinion.trim(),
   }).onConflictDoNothing();
 
-  await db.update(users)
-    .set({ streakCount: sql`COALESCE(streak_count, 0) + 0` })
-    .where(eq(users.id, userId));
+  await db.insert(userActivity).values({
+    userId,
+    action: "opinion",
+    meta: { xp: 15, cardId },
+  });
 
   return NextResponse.json({ success: true, pointsAwarded: 15 });
 }

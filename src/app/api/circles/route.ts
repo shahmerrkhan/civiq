@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { circles, circleMembers, circlePosts, users } from "@/db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { circles, circleMembers, users } from "@/db/schema";
+import { eq, sql, and, inArray } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { CircleJoinSchema } from "@/lib/schemas";
 
@@ -64,27 +64,29 @@ export async function GET(req: NextRequest) {
     // All circles list with member counts
     const allCircles = await db.select().from(circles).where(eq(circles.isActive, true));
 
-    const withCounts = await Promise.all(
-      allCircles.map(async (c) => {
-        const members = await db
-          .select({ count: sql<number>`cast(count(*) as int)` })
-          .from(circleMembers)
-          .where(eq(circleMembers.circleId, c.id));
-        const memberCount = members[0]?.count ?? 0;
+    
+    const circleIds = allCircles.map(c => c.id);
 
-        let isMember = false;
-        if (userId) {
-          const mine = await db
-            .select()
-            .from(circleMembers)
-            .where(and(eq(circleMembers.circleId, c.id), eq(circleMembers.userId, userId)))
-            .limit(1);
-          isMember = mine.length > 0;
-        }
+    const [memberCounts, userMemberships] = await Promise.all([
+      db.select({
+        circleId: circleMembers.circleId,
+        count: sql<number>`cast(count(*) as int)`,
+      }).from(circleMembers).where(inArray(circleMembers.circleId, circleIds)).groupBy(circleMembers.circleId),
+      userId
+        ? db.select({ circleId: circleMembers.circleId }).from(circleMembers)
+            .where(and(inArray(circleMembers.circleId, circleIds), eq(circleMembers.userId, userId)))
+        : Promise.resolve([]),
+    ]);
 
-        return { ...c, memberCount, isMember };
-      })
-    );
+    const countMap: Record<string, number> = {};
+    for (const r of memberCounts) countMap[r.circleId] = r.count;
+    const memberSet = new Set((userMemberships as { circleId: string }[]).map(m => m.circleId));
+
+    const withCounts = allCircles.map(c => ({
+      ...c,
+      memberCount: countMap[c.id] ?? 0,
+      isMember: memberSet.has(c.id),
+    }));
 
     const sorted = withCounts.sort((a, b) => b.memberCount - a.memberCount);
     return NextResponse.json({ circles: sorted });

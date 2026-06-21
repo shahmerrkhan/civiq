@@ -14,6 +14,12 @@ try {
     const roomId = searchParams.get("roomId");
     if (!roomId) return NextResponse.json({ error: "roomId required" }, { status: 400 });
 
+    const room = await sql`SELECT * FROM debate_rooms WHERE id = ${roomId}`;
+    if (!room[0]) return NextResponse.json({ error: "Room not found" }, { status: 404 });
+    if (room[0].user_a_id !== userId && room[0].user_b_id !== userId) {
+      return NextResponse.json({ error: "Not a participant" }, { status: 403 });
+    }
+
     const messages = await sql`
       SELECT * FROM debate_messages WHERE room_id = ${roomId} ORDER BY created_at ASC
     `;

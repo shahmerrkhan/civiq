@@ -47,5 +47,15 @@ export async function POST(req: Request) {
     `;
   }
 
+  if (evt.type === "user.updated") {
+    const { id, email_addresses } = evt.data;
+    const email = email_addresses?.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address
+      ?? email_addresses?.[0]?.email_address
+      ?? "";
+    if (email) {
+      await sql`UPDATE users SET email = ${email} WHERE id = ${id}`;
+    }
+  }
+
   return NextResponse.json({ received: true });
 }

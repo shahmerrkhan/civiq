@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { forecastQuestions, forecastPredictions, forecastLeaderboard, users, userActivity } from "@/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, inArray } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
-import { generateWeeklyForecasts, closeExpiredVoting, resolveExpiredForecasts } from "@/lib/forecast";
+import { generateWeeklyForecasts } from "@/lib/forecast";
 import { ForecastPredictSchema } from "@/lib/schemas";
 
 function getWeekStart() {
@@ -18,13 +18,7 @@ export async function GET(req: NextRequest) {
   try {
     const { userId } = await auth();
 
-    // Run maintenance inline — close expired voting, resolve expired questions
-    await closeExpiredVoting();
-    await resolveExpiredForecasts();
-
     const weekStart = getWeekStart();
-
-    // Auto-generate this week's forecasts if missing
     await generateWeeklyForecasts(weekStart);
 
     const questions = await db
@@ -33,46 +27,42 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(forecastQuestions.createdAt));
 
     // Enrich with vote counts + user's prediction if logged in
-    const enriched = await Promise.all(
-      questions.map(async (q) => {
-        const allPredictions = await db
-          .select()
-          .from(forecastPredictions)
-          .where(eq(forecastPredictions.questionId, q.id));
+    
+    const questionIds = questions.map(q => q.id);
 
-        const yesCount = allPredictions.filter(p => p.prediction === true).length;
-        const noCount = allPredictions.filter(p => p.prediction === false).length;
-        const total = allPredictions.length;
+    const [allPredictions, myPredictions] = await Promise.all([
+      questionIds.length > 0
+        ? db.select().from(forecastPredictions).where(inArray(forecastPredictions.questionId, questionIds))
+        : Promise.resolve([]),
+      userId && questionIds.length > 0
+        ? db.select().from(forecastPredictions).where(and(eq(forecastPredictions.userId, userId), inArray(forecastPredictions.questionId, questionIds)))
+        : Promise.resolve([]),
+    ]);
 
-        const yesPct = total > 0 ? Math.round((yesCount / total) * 100) : 50;
-        const noPct = 100 - yesPct;
+    const predMap: Record<string, typeof allPredictions> = {};
+    for (const p of allPredictions) {
+      if (!predMap[p.questionId]) predMap[p.questionId] = [];
+      predMap[p.questionId].push(p);
+    }
+    const myPredMap: Record<string, typeof myPredictions[0]> = {};
+    for (const p of myPredictions) myPredMap[p.questionId] = p;
 
-        let myPrediction = null;
-        if (userId) {
-          const mine = await db
-            .select()
-            .from(forecastPredictions)
-            .where(
-              and(
-                eq(forecastPredictions.userId, userId),
-                eq(forecastPredictions.questionId, q.id)
-              )
-            )
-            .limit(1);
-          myPrediction = mine[0] ?? null;
-        }
-
-        return {
-          ...q,
-          yesCount,
-          noCount,
-          total,
-          yesPct,
-          noPct,
-          myPrediction,
-        };
-      })
-    );
+    const enriched = questions.map((q) => {
+      const preds = predMap[q.id] ?? [];
+      const yesCount = preds.filter(p => p.prediction === true).length;
+      const noCount = preds.filter(p => p.prediction === false).length;
+      const total = preds.length;
+      const yesPct = total > 0 ? Math.round((yesCount / total) * 100) : 50;
+      return {
+        ...q,
+        yesCount,
+        noCount,
+        total,
+        yesPct,
+        noPct: 100 - yesPct,
+        myPrediction: myPredMap[q.id] ?? null,
+      };
+    });
 
     // Leaderboard — top 10
     const leaderboard = await db

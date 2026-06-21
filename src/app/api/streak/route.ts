@@ -47,6 +47,7 @@ export async function POST() {
   }
 }
 
+
 export async function GET() {
   try {
     const { userId } = await auth();
@@ -59,13 +60,6 @@ export async function GET() {
     const yesterday = getYesterdayStr();
     const last = rows[0].last_streak_date;
     const isActive = last === today || last === yesterday;
-
-    // Auto-increment streak on GET if not yet counted today
-    if (last !== today) {
-      const newStreak = last === yesterday ? (rows[0].streak_count || 0) + 1 : 1;
-      await sql`UPDATE users SET streak_count = ${newStreak}, last_streak_date = ${today} WHERE id = ${userId}`.catch(() => {});
-      return NextResponse.json({ streak: newStreak, lastDate: today });
-    }
 
     return NextResponse.json({
       streak: isActive ? (rows[0].streak_count || 0) : 0,

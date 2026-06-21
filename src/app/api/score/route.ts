@@ -16,7 +16,3 @@ export async function GET() {
   const xp = rows.reduce((sum, r) => sum + ((r.meta as any)?.xp ?? 0), 0);
   return NextResponse.json({ xp });
 }
-
-export async function POST() {
-  return NextResponse.json({ success: true });
-}

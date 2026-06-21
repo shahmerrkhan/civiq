@@ -19,8 +19,6 @@ export async function GET() {
   try {
     const { userId } = await auth();
 
-    await resolveExpiredWitnessEvents();
-
     const weekStart = getWeekStart();
     await generateWeeklyWitnessEvents(weekStart);
 

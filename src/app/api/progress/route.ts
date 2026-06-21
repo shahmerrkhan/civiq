@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { userProgress, users } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { userProgress, userActivity } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { ProgressSchema } from "@/lib/schemas";
 
@@ -38,9 +38,11 @@ export async function POST(req: Request) {
     completedAt: new Date(),
   });
 
-  await db.update(users)
-  .set({ streakCount: sql`COALESCE(streak_count, 0) + 0` })
-  .where(eq(users.id, userId));
+  await db.insert(userActivity).values({
+  userId,
+  action: "module_complete",
+  meta: { xp: 20, slug },
+});
 
-  return NextResponse.json({ success: true, pointsAwarded: 20 });
+return NextResponse.json({ success: true, pointsAwarded: 20 });
 }

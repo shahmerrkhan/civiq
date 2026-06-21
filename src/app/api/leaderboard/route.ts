@@ -1,44 +1,49 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { users, pollVotes, userProgress, userOpinions, dailyAnswers } from "@/db/schema";
-import { eq, count, desc } from "drizzle-orm";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const allUsers = await db.select().from(users).where(eq(users.onboardingComplete, true));
+    const { sql: rawSql } = await import("@/db");
 
-    const scores = await Promise.all(
-      allUsers.map(async (u) => {
-        const [votes, progress, opinions, correct] = await Promise.all([
-          db.select({ count: count() }).from(pollVotes).where(eq(pollVotes.userId, u.id)),
-          db.select({ count: count() }).from(userProgress).where(eq(userProgress.userId, u.id)),
-          db.select({ count: count() }).from(userOpinions).where(eq(userOpinions.userId, u.id)),
-          db.select({ count: count() }).from(dailyAnswers).where(eq(dailyAnswers.userId, u.id)),
-        ]);
-        const civicScore =
-          (progress[0]?.count ?? 0) * 10 +
-          (votes[0]?.count ?? 0) * 5 +
-          (correct[0]?.count ?? 0) * 15 +
-          (opinions[0]?.count ?? 0) * 3;
+    const rows = await rawSql`
+      SELECT
+        u.id,
+        u.username,
+        u.streak_count,
+        COALESCE(p.cnt, 0) * 10 +
+        COALESCE(v.cnt, 0) * 5 +
+        COALESCE(d.cnt, 0) * 15 +
+        COALESCE(o.cnt, 0) * 3 AS civic_score
+      FROM users u
+      LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM user_progress GROUP BY user_id) p ON p.user_id = u.id
+      LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM poll_votes GROUP BY user_id) v ON v.user_id = u.id
+      LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM daily_answers GROUP BY user_id) d ON d.user_id = u.id
+      LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM user_opinions GROUP BY user_id) o ON o.user_id = u.id
+      WHERE u.onboarding_complete = true
+      ORDER BY civic_score DESC
+    `;
 
-        return {
-          userId: u.id,
-          username: u.username || "Anonymous",
-          streakCount: u.streakCount ?? 0,
-          civicScore,
-          isCurrentUser: u.id === userId,
-        };
-      })
-    );
+    const allScores = rows.map((r: any) => ({
+      userId: r.id,
+      username: r.username || "Anonymous",
+      streakCount: r.streak_count ?? 0,
+      civicScore: Number(r.civic_score),
+      isCurrentUser: r.id === userId,
+    }));
 
-    const sorted = scores.sort((a, b) => b.civicScore - a.civicScore).slice(0, 20);
-    const currentUserRank = scores.findIndex(s => s.isCurrentUser) + 1;
+    const currentUserRank = allScores.findIndex((s: any) => s.isCurrentUser) + 1;
 
-    return NextResponse.json({ leaderboard: sorted, currentUserRank, total: scores.length });
+    return NextResponse.json({
+      leaderboard: allScores.slice(0, 20),
+      currentUserRank,
+      total: allScores.length,
+    });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
