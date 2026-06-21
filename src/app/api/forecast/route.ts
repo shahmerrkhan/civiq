@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
         : Promise.resolve([]),
     ]);
 
-    const predMap: Record<string, typeof allPredictions> = {};
+    const predMap: Record<string, (typeof allPredictions)[0][]> = {};
     for (const p of allPredictions) {
       if (!p.questionId) continue;
       if (!predMap[p.questionId]) predMap[p.questionId] = [];
