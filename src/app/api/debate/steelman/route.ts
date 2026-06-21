@@ -2,18 +2,21 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { SteelmanSchema } from "@/lib/schemas";
 import { geminiGenerate } from "@/lib/gemini";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const allowed = await checkRateLimit(userId, "steelman", 10);
+    if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
     const body = await req.json().catch(() => null);
     const parsed = SteelmanSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     const { content, cardTitle, opposingLeaning } = parsed.data;
-    
-    
+
     const raw = await geminiGenerate({
       prompt: `You are evaluating whether someone genuinely tried to understand the opposing political view before debating.
 

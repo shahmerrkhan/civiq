@@ -4,6 +4,7 @@ import { circlePosts, circlePostLikes, circleMembers, users } from "@/db/schema"
 import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { CirclePostSchema, CircleLikeSchema } from "@/lib/schemas";
+import sanitizeHtml from "sanitize-html";
 
 export async function GET(req: NextRequest) {
   try {
@@ -77,7 +78,8 @@ export async function POST(req: NextRequest) {
     const { circleId, content, parentId } = parsed.data;
 
     // Content sanity check
-    const trimmed = content.trim();
+
+    const trimmed = sanitizeHtml(content.trim(), { allowedTags: [], allowedAttributes: {} });
     if (trimmed.length < 1 || trimmed.length > 280) {
       return NextResponse.json({ error: "Content must be 1–280 characters" }, { status: 400 });
     }

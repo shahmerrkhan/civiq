@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, uuid, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, uuid, jsonb, index } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -36,7 +36,7 @@ export const userProgress = pgTable("user_progress", {
   moduleSlug: text("module_slug"),
   completed: boolean("completed").default(false),
   completedAt: timestamp("completed_at"),
-});
+}, (t) => [index("user_progress_user_id_idx").on(t.userId)]);
 
 export const contentCards = pgTable("content_cards", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -69,7 +69,8 @@ export const pollVotes = pgTable("poll_votes", {
   optionIndex: integer("option_index").notNull(),
   userLeaning: text("user_leaning"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [index("poll_votes_user_id_idx").on(t.userId)]);
+
 export const storylines = pgTable("storylines", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
@@ -111,7 +112,7 @@ export const userOpinions = pgTable("user_opinions", {
   cardId: uuid("card_id").references(() => contentCards.id),
   opinion: text("opinion").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [index("user_opinions_user_id_idx").on(t.userId)]);
 
 export const learnCache = pgTable("learn_cache", {
   slug: text("slug").primaryKey(),
@@ -148,7 +149,7 @@ export const dailyAnswers = pgTable("daily_answers", {
   answerIndex: integer("answer_index").notNull(),
   correct: boolean("correct").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [index("daily_answers_user_id_idx").on(t.userId)]);
 
 export const bookmarks = pgTable("bookmarks", {
   id: uuid("id").primaryKey().defaultRandom(),

@@ -1,9 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { userOpinions, userActivity } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { OpinionSchema } from "@/lib/schemas";
+import sanitizeHtml from "sanitize-html";
 
 export async function GET() {
   const { userId } = await auth();
@@ -29,10 +30,10 @@ export async function POST(req: Request) {
 
   if (!cardId || !opinion?.trim()) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-await db.insert(userOpinions).values({
+  await db.insert(userOpinions).values({
     userId,
     cardId,
-    opinion: opinion.trim(),
+    opinion: sanitizeHtml(opinion.trim(), { allowedTags: [], allowedAttributes: {} }),
   }).onConflictDoNothing();
 
   await db.insert(userActivity).values({
@@ -42,4 +43,26 @@ await db.insert(userOpinions).values({
   });
 
   return NextResponse.json({ success: true, pointsAwarded: 15 });
+}
+
+export async function DELETE(req: Request) {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await req.json().catch(() => null);
+  const opinionId = body?.id;
+  if (!opinionId || typeof opinionId !== "string") {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
+
+  const existing = await db
+    .select()
+    .from(userOpinions)
+    .where(and(eq(userOpinions.id, opinionId), eq(userOpinions.userId, userId)))
+    .limit(1);
+
+  if (!existing[0]) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  await db.delete(userOpinions).where(eq(userOpinions.id, opinionId));
+  return NextResponse.json({ deleted: true });
 }

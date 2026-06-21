@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { ExplainSchema } from "@/lib/schemas";
 import { geminiGenerate } from "@/lib/gemini";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(req: Request) {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const allowed = await checkRateLimit(userId, "explain", 20);
+  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
   const body = await req.json().catch(() => null);
   const parsed = ExplainSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Missing fields" }, { status: 400 });

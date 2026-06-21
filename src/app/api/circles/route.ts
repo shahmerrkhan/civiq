@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     const countMap: Record<string, number> = {};
-    for (const r of memberCounts) countMap[r.circleId] = r.count;
+    for (const r of memberCounts) if (r.circleId) countMap[r.circleId] = r.count;
     const memberSet = new Set((userMemberships as { circleId: string }[]).map(m => m.circleId));
 
     const withCounts = allCircles.map(c => ({
