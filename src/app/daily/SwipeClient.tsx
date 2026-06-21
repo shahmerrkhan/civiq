@@ -59,12 +59,19 @@ export default function SwipeClient() {
   const touchStartX = useRef<number>(0);
   const isDragging = useRef(false);
 
+  const hasMore = useRef(true);
+
   const fetchCards = useCallback(async (pageNum: number, append = false) => {
+    if (append && !hasMore.current) {
+      setLoadingMore(false);
+      return;
+    }
     try {
       const res = await fetch(`/api/feed?page=${pageNum}&limit=10`);
       const data = await res.json();
       if (data.cards) {
         setCards(prev => append ? [...prev, ...data.cards] : data.cards);
+        hasMore.current = data.hasMore;
       }
     } catch {}
     setLoading(false);
@@ -490,7 +497,7 @@ export default function SwipeClient() {
 
             {/* Source + deep dive */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-              <span style={{ fontSize: "11px", color: "#666" }}>via {card.source} · <span style={{ color: "#777" }}>{Math.floor(Math.random() * 180) + 40} reading now</span></span>
+              <span style={{ fontSize: "11px", color: "#666" }}>via {card.source}</span>
               <button
                 onClick={() => setShowDeepDive(d => !d)}
                 style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "#f5a623", fontWeight: "700", fontFamily: "'DM Sans', sans-serif" }}
