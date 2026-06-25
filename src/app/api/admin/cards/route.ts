@@ -7,8 +7,6 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 
 const ADMIN_EMAILS = ["m.shahmeer.khan8@gmail.com", "rehan.mazid@gmail.com"];
 
-import { Redis } from "@upstash/redis";
-
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
