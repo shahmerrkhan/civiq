@@ -16,15 +16,26 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
+const limiters = {
+  circles:  { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s"), prefix: "civiq:rl:circles" }),  limit: 20 },
+  forecast: { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60 s"), prefix: "civiq:rl:forecast" }), limit: 30 },
+  witness:  { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60 s"), prefix: "civiq:rl:witness" }),  limit: 30 },
+  opinions: { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60 s"), prefix: "civiq:rl:opinions" }), limit: 15 },
+  polls:    { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s"), prefix: "civiq:rl:polls" }),    limit: 20 },
+  admin:    { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s"), prefix: "civiq:rl:admin" }),    limit: 60 },
+  cron:     { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, "60 s"), prefix: "civiq:rl:cron" }),     limit: 10 },
+  default:  { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s"), prefix: "civiq:rl:default" }), limit: 60 },
+};
+
 function getLimiter(pathname: string) {
-  if (pathname.startsWith("/api/circles/posts")) return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s") }), limit: 20 };
-  if (pathname.startsWith("/api/forecast"))      return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60 s") }), limit: 30 };
-  if (pathname.startsWith("/api/witness"))       return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60 s") }), limit: 30 };
-  if (pathname.startsWith("/api/opinions"))      return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60 s") }), limit: 15 };
-  if (pathname.startsWith("/api/polls"))         return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s") }), limit: 20 };
-  if (pathname.startsWith("/api/admin"))         return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s") }), limit: 60 };
-  if (pathname.startsWith("/api/cron"))          return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, "60 s") }), limit: 10 };
-  return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s") }), limit: 60 };
+  if (pathname.startsWith("/api/circles/posts")) return limiters.circles;
+  if (pathname.startsWith("/api/forecast"))      return limiters.forecast;
+  if (pathname.startsWith("/api/witness"))       return limiters.witness;
+  if (pathname.startsWith("/api/opinions"))      return limiters.opinions;
+  if (pathname.startsWith("/api/polls"))         return limiters.polls;
+  if (pathname.startsWith("/api/admin"))         return limiters.admin;
+  if (pathname.startsWith("/api/cron"))          return limiters.cron;
+  return limiters.default;
 }
 
 function getIp(req: NextRequest): string {
@@ -35,11 +46,19 @@ function getIp(req: NextRequest): string {
   );
 }
 
+const BLOCKED_IPS = new Set<string>([
+  // Add bad actor IPs here as needed, e.g. "123.456.789.0"
+]);
+
 export default clerkMiddleware(async (auth, request) => {
   const pathname = request.nextUrl.pathname;
 
   if (pathname.startsWith("/api")) {
     const ip = getIp(request);
+
+    if (BLOCKED_IPS.has(ip)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     const routeKey = pathname.split("/").slice(0, 4).join("/");
     const { limiter, limit } = getLimiter(pathname);
     const { success, remaining } = await limiter.limit(`${ip}:${routeKey}`);

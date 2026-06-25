@@ -299,7 +299,11 @@ export const witnessWatches = pgTable("witness_watches", {
   userId: text("user_id").references(() => users.id),
   eventId: uuid("event_id").references(() => witnessEvents.id),
   watchedAt: timestamp("watched_at").defaultNow(),
-});
+}, (t) => [
+  uniqueIndex("witness_watches_unique").on(t.userId, t.eventId),
+  index("witness_watches_user_id_idx").on(t.userId),
+  index("witness_watches_event_id_idx").on(t.eventId),
+]);
 
 export const civicChallengeStreaks = pgTable("civic_challenge_streaks", {
   userId: text("user_id").primaryKey().references(() => users.id),
@@ -341,11 +345,18 @@ export const circlePosts = pgTable("circle_posts", {
   parentId: uuid("parent_id"), // null = top-level post, set = reply
   likeCount: integer("like_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [
+  index("circle_posts_circle_id_idx").on(t.circleId),
+  index("circle_posts_user_id_idx").on(t.userId),
+  index("circle_posts_parent_id_idx").on(t.parentId),
+]);
 
 export const circlePostLikes = pgTable("circle_post_likes", {
   id: uuid("id").primaryKey().defaultRandom(),
   postId: uuid("post_id").references(() => circlePosts.id),
   userId: text("user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [
+  uniqueIndex("circle_post_likes_unique").on(t.postId, t.userId),
+  index("circle_post_likes_post_id_idx").on(t.postId),
+]);
