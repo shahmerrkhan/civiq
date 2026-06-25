@@ -1,6 +1,8 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)", "/learn(.*)", "/polls(.*)", "/profile(.*)",
@@ -9,68 +11,46 @@ const isProtectedRoute = createRouteMatcher([
   "/ontario(.*)", "/debate(.*)", "/map(.*)", "/storylines(.*)",
 ]);
 
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
-// Different limits per route sensitivity
-function getLimit(pathname: string): { limit: number; window: number } {
-  if (pathname.startsWith("/api/circles/posts")) return { limit: 20, window: 60_000 };  // post spam
-  if (pathname.startsWith("/api/forecast"))      return { limit: 30, window: 60_000 };  // prediction spam
-  if (pathname.startsWith("/api/witness"))       return { limit: 30, window: 60_000 };
-  if (pathname.startsWith("/api/opinions"))      return { limit: 15, window: 60_000 };  // opinion spam
-  if (pathname.startsWith("/api/polls"))         return { limit: 20, window: 60_000 };
-  if (pathname.startsWith("/api/admin"))         return { limit: 60, window: 60_000 };
-  if (pathname.startsWith("/api/cron"))          return { limit: 10, window: 60_000 };
-  return { limit: 60, window: 60_000 }; // default
+function getLimiter(pathname: string) {
+  if (pathname.startsWith("/api/circles/posts")) return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s") }), limit: 20 };
+  if (pathname.startsWith("/api/forecast"))      return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60 s") }), limit: 30 };
+  if (pathname.startsWith("/api/witness"))       return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60 s") }), limit: 30 };
+  if (pathname.startsWith("/api/opinions"))      return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60 s") }), limit: 15 };
+  if (pathname.startsWith("/api/polls"))         return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s") }), limit: 20 };
+  if (pathname.startsWith("/api/admin"))         return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s") }), limit: 60 };
+  if (pathname.startsWith("/api/cron"))          return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, "60 s") }), limit: 10 };
+  return { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s") }), limit: 60 };
 }
 
-function getRateLimitKey(req: NextRequest, pathname: string): string {
-  const ip =
+function getIp(req: NextRequest): string {
+  return (
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     req.headers.get("x-real-ip") ??
-    "unknown";
-  return `${ip}:${pathname.split("/").slice(0, 4).join("/")}`;
-}
-
-function checkRateLimit(key: string, limit: number, window: number): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const entry = rateLimitMap.get(key);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(key, { count: 1, resetAt: now + window });
-    return { allowed: true, remaining: limit - 1 };
-  }
-  if (entry.count >= limit) return { allowed: false, remaining: 0 };
-  entry.count += 1;
-  return { allowed: true, remaining: limit - entry.count };
-}
-
-// Clean up old entries every 500 requests to prevent memory leak
-let cleanupCounter = 0;
-function maybeCleanup() {
-  cleanupCounter++;
-  if (cleanupCounter % 500 !== 0) return;
-  const now = Date.now();
-  for (const [key, val] of rateLimitMap.entries()) {
-    if (now > val.resetAt) rateLimitMap.delete(key);
-  }
+    "unknown"
+  );
 }
 
 export default clerkMiddleware(async (auth, request) => {
   const pathname = request.nextUrl.pathname;
 
   if (pathname.startsWith("/api")) {
-    maybeCleanup();
-    const { limit, window } = getLimit(pathname);
-    const key = getRateLimitKey(request, pathname);
-    const { allowed, remaining } = checkRateLimit(key, limit, window);
+    const ip = getIp(request);
+    const routeKey = pathname.split("/").slice(0, 4).join("/");
+    const { limiter, limit } = getLimiter(pathname);
+    const { success, remaining } = await limiter.limit(`${ip}:${routeKey}`);
 
-    if (!allowed) {
+    if (!success) {
       return NextResponse.json(
         { error: "Too many requests. Slow down." },
         { status: 429, headers: { "X-RateLimit-Limit": String(limit), "X-RateLimit-Remaining": "0", "Retry-After": "60" } }
       );
     }
 
-    // Block unauthenticated writes on sensitive routes
     const writeMethods = ["POST", "PATCH", "DELETE", "PUT"];
     const sensitiveRoutes = ["/api/circles", "/api/forecast", "/api/witness", "/api/opinions", "/api/polls", "/api/bookmarks", "/api/debate"];
     const isSensitiveWrite = writeMethods.includes(request.method) && sensitiveRoutes.some(r => pathname.startsWith(r));

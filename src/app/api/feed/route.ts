@@ -1,20 +1,28 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { contentCards } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { geminiGenerate } from "@/lib/gemini";
+import { Redis } from "@upstash/redis";
 
 export const revalidate = 0;
 
 const CARDS_PER_PAGE = 10;
 const MIN_POOL = 20;
-const MAX_POOL = 99999; // no hard cap, keep growing
-let isGenerating = false; // in-memory lock to prevent simultaneous generation
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
 async function generateAndSave(count: number) {
-  const raw = await geminiGenerate({
-    prompt: `Generate ${count} current Ontario political news cards for young Canadians (16-25). Cover a variety of these categories: Housing, Healthcare, Education, Environment, Economy, Infrastructure. Each must feel like a real, specific issue — not generic.
+  const locked = await redis.set("civiq:feed:generating", "1", { nx: true, ex: 60 });
+  if (!locked) return;
+
+  try {
+    const raw = await geminiGenerate({
+      prompt: `Generate ${count} current Ontario political news cards for young Canadians (16-25). Cover a variety of these categories: Housing, Healthcare, Education, Environment, Economy, Infrastructure. Each must feel like a real, specific issue — not generic.
 
 Return ONLY valid JSON, no markdown, no backticks:
 {
@@ -36,47 +44,48 @@ Return ONLY valid JSON, no markdown, no backticks:
 }
 
 Make each card genuinely interesting. Vary the categories. No duplicates.`,
-    maxTokens: 6000,
-    grounding: true,
-  });
+      maxTokens: 6000,
+      grounding: true,
+    });
 
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("No JSON in response");
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("No JSON in response");
 
-  let jsonStr = match[0];
-  try {
-    JSON.parse(jsonStr);
-  } catch {
-    const lastGood = jsonStr.lastIndexOf('"},');
-    if (lastGood > 0) jsonStr = jsonStr.substring(0, lastGood + 2) + "]}";
-    else throw new Error("JSON too malformed");
+    let jsonStr = match[0];
+    try {
+      JSON.parse(jsonStr);
+    } catch {
+      const lastGood = jsonStr.lastIndexOf('"},');
+      if (lastGood > 0) jsonStr = jsonStr.substring(0, lastGood + 2) + "]}";
+      else throw new Error("JSON too malformed");
+    }
+
+    const parsed = JSON.parse(jsonStr);
+    const generated = parsed.cards as {
+      title: string; summary: string; source: string; category: string;
+      stat: string; perspectives: { left: string; centre: string; right: string }; deepdive: string;
+    }[];
+
+    await db.insert(contentCards).values(
+      generated.map(c => ({
+        title: c.title,
+        summary: c.summary,
+        sourceName: c.source,
+        category: c.category,
+        stat: c.stat,
+        perspectives: c.perspectives,
+        deepDive: c.deepdive,
+        approved: true,
+        publishedAt: new Date(),
+      }))
+    );
+  } finally {
+    await redis.del("civiq:feed:generating");
   }
-
-  const parsed = JSON.parse(jsonStr);
-  const generated = parsed.cards as {
-    title: string; summary: string; source: string; category: string;
-    stat: string; perspectives: { left: string; centre: string; right: string }; deepdive: string;
-  }[];
-
-  const inserted = await db.insert(contentCards).values(
-    generated.map(c => ({
-      title: c.title,
-      summary: c.summary,
-      sourceName: c.source,
-      category: c.category,
-      stat: c.stat,
-      perspectives: c.perspectives,
-      deepDive: c.deepdive,
-      approved: true,
-      publishedAt: new Date(),
-    }))
-  ).returning();
-
-  return inserted;
 }
 
 export async function GET(req: Request) {
-try {
+  try {
     await auth();
 
     const { searchParams } = new URL(req.url);
@@ -84,45 +93,32 @@ try {
     const limit = Math.min(20, parseInt(searchParams.get("limit") ?? String(CARDS_PER_PAGE)));
     const offset = (page - 1) * limit;
 
-    // Count total approved cards
-    const allCards = await db
+    const [{ total }] = await db
+      .select({ total: sql<number>`cast(count(*) as int)` })
+      .from(contentCards)
+      .where(eq(contentCards.approved, true));
+
+    if (total < MIN_POOL) {
+      await generateAndSave(MIN_POOL - total);
+    } else if (total < MIN_POOL + 10) {
+      generateAndSave(10).catch(console.error);
+    }
+
+    const slice = await db
       .select()
       .from(contentCards)
       .where(eq(contentCards.approved, true))
-      .orderBy(desc(contentCards.publishedAt));
+      .orderBy(desc(contentCards.publishedAt))
+      .limit(limit)
+      .offset(offset);
 
-    // Only generate if pool is low, we're not already generating, and we haven't hit the max
-    if (allCards.length < MIN_POOL && !isGenerating && allCards.length < MAX_POOL) {
-      isGenerating = true;
-      try {
-        await generateAndSave(MIN_POOL - allCards.length);
-        const refreshed = await db
-          .select()
-          .from(contentCards)
-          .where(eq(contentCards.approved, true))
-          .orderBy(desc(contentCards.publishedAt));
-        const slice = refreshed.slice(offset, offset + limit);
-        isGenerating = false;
-        return NextResponse.json({ cards: formatCards(slice), total: refreshed.length, page, hasMore: offset + limit < refreshed.length });
-      } catch (genErr) {
-        console.error("Generation failed:", genErr);
-        isGenerating = false;
-      }
-    }
-
-    const slice = allCards.slice(offset, offset + limit);
-
-    // Only top up in background if genuinely low and not already generating
-    if (allCards.length < MIN_POOL + 10 && !isGenerating && allCards.length < MAX_POOL) {
-      isGenerating = true;
-      generateAndSave(10).catch((e) => { console.error(e); isGenerating = false; }).then(() => { isGenerating = false; });
-    }
+    const finalTotal = total < MIN_POOL ? MIN_POOL : total;
 
     return NextResponse.json({
       cards: formatCards(slice),
-      total: allCards.length,
+      total: finalTotal,
       page,
-      hasMore: offset + limit < allCards.length,
+      hasMore: offset + limit < finalTotal,
     });
 
   } catch (err) {
@@ -132,9 +128,10 @@ try {
         .select()
         .from(contentCards)
         .where(eq(contentCards.approved, true))
-        .orderBy(desc(contentCards.publishedAt));
+        .orderBy(desc(contentCards.publishedAt))
+        .limit(10);
       if (fallback.length > 0) {
-        return NextResponse.json({ cards: formatCards(fallback.slice(0, 10)), total: fallback.length, page: 1, hasMore: false });
+        return NextResponse.json({ cards: formatCards(fallback), total: fallback.length, page: 1, hasMore: false });
       }
     } catch {}
     return NextResponse.json({ error: "Could not load feed" }, { status: 500 });

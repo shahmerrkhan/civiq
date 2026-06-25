@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ posts: enriched });
   } catch (err) {
     console.error("Circles posts GET error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to load posts" }, { status: 500 });
   }
 }
 
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ post: { ...post, liked: false, replyCount: 0 } });
   } catch (err) {
     console.error("Circles posts POST error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create post" }, { status: 500 });
   }
 }
 
@@ -149,6 +149,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ liked: true });
   } catch (err) {
     console.error("Circles posts PATCH error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update post" }, { status: 500 });
   }
 }

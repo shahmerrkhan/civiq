@@ -46,10 +46,10 @@ export async function GET() {
     return NextResponse.json({ cards: result });
   } catch (err) {
     console.error("feed error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Admin cards GET error:", err);
+    return NextResponse.json({ error: "Failed to load cards" }, { status: 500 });
   }
-
-  }
+}
 
 export async function PATCH(req: Request) {
   if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -58,7 +58,8 @@ export async function PATCH(req: Request) {
     await db.update(contentCards).set({ approved }).where(eq(contentCards.id, id));
     return NextResponse.json({ ok: true });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Admin cards PATCH error:", err);
+    return NextResponse.json({ error: "Failed to update card" }, { status: 500 });
   }
 }
 
@@ -70,6 +71,8 @@ export async function DELETE(req: Request) {
     await db.delete(contentCards).where(eq(contentCards.id, id));
     return NextResponse.json({ ok: true });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Admin cards DELETE error:", err);
+    return NextResponse.json({ error: "Failed to delete card" }, { status: 500 });
   }
-}   
+}
+

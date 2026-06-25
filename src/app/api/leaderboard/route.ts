@@ -45,6 +45,7 @@ export async function GET() {
       total: allScores.length,
     });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Leaderboard error:", err);
+    return NextResponse.json({ error: "Failed to load leaderboard" }, { status: 500 });
   }
 }

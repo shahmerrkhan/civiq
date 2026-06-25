@@ -22,6 +22,13 @@
       "when": 1782019272930,
       "tag": "0002_worthless_hardball",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782349517746,
+      "tag": "0003_silly_skin",
+      "breakpoints": true
     }
   ]
 }

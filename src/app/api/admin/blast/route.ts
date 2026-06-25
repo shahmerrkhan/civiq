@@ -47,6 +47,7 @@ export async function POST(req: Request) {
     const failed = results.filter((r) => r.status === "rejected").length;
     return NextResponse.json({ sent, failed });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Blast error:", err);
+    return NextResponse.json({ error: "Failed to send notifications" }, { status: 500 });
   }
 }

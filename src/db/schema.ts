@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, uuid, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, uuid, jsonb, index, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -64,12 +64,15 @@ export const polls = pgTable("polls", {
 
 export const pollVotes = pgTable("poll_votes", {
   id: uuid("id").primaryKey().defaultRandom(),
-  pollId: text("poll_id"),
-  userId: text("user_id").references(() => users.id),
+  pollId: text("poll_id").notNull(),
+  userId: text("user_id").references(() => users.id).notNull(),
   optionIndex: integer("option_index").notNull(),
   userLeaning: text("user_leaning"),
   createdAt: timestamp("created_at").defaultNow(),
-}, (t) => [index("poll_votes_user_id_idx").on(t.userId)]);
+}, (t) => [
+  index("poll_votes_user_id_idx").on(t.userId),
+  uniqueIndex("poll_votes_poll_user_unique").on(t.pollId, t.userId),
+]);
 
 export const storylines = pgTable("storylines", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -96,7 +99,10 @@ export const storylineFollows = pgTable("storyline_follows", {
   userId: text("user_id").references(() => users.id),
   storylineId: uuid("storyline_id").references(() => storylines.id),
   followedAt: timestamp("followed_at").defaultNow(),
-});
+}, (t) => [
+  index("storyline_follows_user_id_idx").on(t.userId),
+  index("storyline_follows_storyline_id_idx").on(t.storylineId),
+]);
 
 export const storylineOpinions = pgTable("storyline_opinions", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -160,7 +166,7 @@ export const bookmarks = pgTable("bookmarks", {
   cardCategory: text("card_category"),
   cardSource: text("card_source"),
   savedAt: timestamp("saved_at").defaultNow(),
-});
+}, (t) => [index("bookmarks_user_id_idx").on(t.userId)]);
 
 export const swipeReactions = pgTable("swipe_reactions", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -168,7 +174,10 @@ export const swipeReactions = pgTable("swipe_reactions", {
   cardDbId: text("card_db_id").notNull(),
   reaction: text("reaction").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [
+  index("swipe_reactions_user_id_idx").on(t.userId),
+  index("swipe_reactions_card_id_idx").on(t.cardDbId),
+]);
 
 export const userActivity = pgTable("user_activity", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -176,7 +185,9 @@ export const userActivity = pgTable("user_activity", {
   action: text("action").notNull(),
   meta: jsonb("meta"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [
+  index("user_activity_user_action_created_idx").on(t.userId, t.action, t.createdAt),
+]);
 
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -312,9 +323,13 @@ export const circleMembers = pgTable("circle_members", {
   id: uuid("id").primaryKey().defaultRandom(),
   circleId: uuid("circle_id").references(() => circles.id),
   userId: text("user_id").references(() => users.id),
-  leaning: text("leaning"), // "left" | "centre" | "right" — pulled from their compass
+  leaning: text("leaning"),
   joinedAt: timestamp("joined_at").defaultNow(),
-});
+}, (t) => [
+  index("circle_members_circle_id_idx").on(t.circleId),
+  index("circle_members_user_id_idx").on(t.userId),
+  uniqueIndex("circle_members_unique").on(t.circleId, t.userId),
+]);
 
 export const circlePosts = pgTable("circle_posts", {
   id: uuid("id").primaryKey().defaultRandom(),

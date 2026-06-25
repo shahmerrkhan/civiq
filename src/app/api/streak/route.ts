@@ -21,18 +21,26 @@ export async function POST() {
     const today = getTodayStr();
     const yesterday = getYesterdayStr();
 
-    const rows = await sql`SELECT streak_count, last_streak_date FROM users WHERE id = ${userId}`;
-    if (!rows[0]) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const updated = await sql`
+      UPDATE users
+      SET
+        streak_count = CASE
+          WHEN last_streak_date = ${yesterday} THEN COALESCE(streak_count, 0) + 1
+          ELSE 1
+        END,
+        last_streak_date = ${today}
+      WHERE id = ${userId}
+        AND (last_streak_date IS DISTINCT FROM ${today})
+      RETURNING streak_count, last_streak_date
+    `;
 
-    const { streak_count, last_streak_date } = rows[0];
-
-    if (last_streak_date === today) {
-      return NextResponse.json({ streak: streak_count, alreadyCounted: true });
+    if (!updated[0]) {
+      const rows = await sql`SELECT streak_count, last_streak_date FROM users WHERE id = ${userId}`;
+      if (!rows[0]) return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ streak: rows[0].streak_count, alreadyCounted: true });
     }
 
-    const newStreak = last_streak_date === yesterday ? (streak_count || 0) + 1 : 1;
-
-    await sql`UPDATE users SET streak_count = ${newStreak}, last_streak_date = ${today} WHERE id = ${userId}`;
+    const newStreak = updated[0].streak_count;
 
     // Log activity
     await db.insert(userActivity).values({
