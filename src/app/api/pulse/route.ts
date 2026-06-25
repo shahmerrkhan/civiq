@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { sql } from "@/db";
 import { geminiGenerate } from "@/lib/gemini";
 
 export async function GET() {
   try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const cached = await sql`
       SELECT content, created_at FROM pulse_cache
       WHERE created_at > NOW() - INTERVAL '7 days'
@@ -40,16 +44,24 @@ Generate exactly 4 items. Be specific, current, and relevant to Gen Z in Ontario
       grounding: true,
     });
 
-    const clean = raw.replace(/```json|```/g, "").trim();
-    const pulse = JSON.parse(clean);
+    let pulse: unknown;
+    try {
+      const clean = raw.replace(/```json|```/g, "").trim();
+      const match = clean.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error("No JSON found in response");
+      pulse = JSON.parse(match[0]);
+    } catch (parseErr) {
+      console.error("Pulse JSON parse error:", parseErr);
+      return NextResponse.json({ error: "Failed to generate pulse" }, { status: 500 });
+    }
 
     await sql`
       INSERT INTO pulse_cache (content) VALUES (${JSON.stringify(pulse)})
-    `;
+    `.catch(err => console.error("Pulse cache insert error:", err));
 
     return NextResponse.json({ pulse, generatedAt: new Date().toISOString(), cached: false });
   } catch (err) {
-    console.error("pulse error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Pulse GET error:", err);
+    return NextResponse.json({ error: "Failed to load pulse" }, { status: 500 });
   }
-}
+} 
