@@ -15,6 +15,14 @@ export async function POST(req: Request) {
     if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     const { cardDbId, cardTitle, cardSummary, userLeaning } = parsed.data;
     
+    // Clean up expired waiting rooms for this user
+    await sql`
+      UPDATE debate_rooms SET status = 'closed'
+      WHERE user_a_id = ${userId}
+        AND status = 'waiting'
+        AND created_at < NOW() - INTERVAL '24 hours'
+    `;
+
     // Check if user already has an active room for this card
     const existing = await db.select().from(debateRooms).where(
       and(
@@ -24,6 +32,15 @@ export async function POST(req: Request) {
     );
     if (existing.length > 0) {
       return NextResponse.json({ room: existing[0] });
+    }
+
+    // Limit: max 5 open waiting rooms per user at a time
+    const openWaiting = await sql`
+      SELECT COUNT(*) as cnt FROM debate_rooms
+      WHERE user_a_id = ${userId} AND status = 'waiting'
+    `;
+    if (Number(openWaiting[0]?.cnt ?? 0) >= 5) {
+      return NextResponse.json({ error: "Too many open debate requests. Wait for someone to join one first." }, { status: 429 });
     }
 
     // Try to find a waiting room from someone with a different leaning
@@ -68,7 +85,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-try {
+  try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

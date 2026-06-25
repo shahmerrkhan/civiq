@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { DebateMessageSchema } from "@/lib/schemas";
 
 export async function GET(req: Request) {
-try {
+  try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -61,11 +61,16 @@ export async function POST(req: Request) {
       }
     }
 
+    const trimmed = content.trim();
+    if (trimmed.length < 1 || trimmed.length > 2000) {
+      return NextResponse.json({ error: "Message must be 1–2000 characters" }, { status: 400 });
+    }
+
     const inserted = await db.insert(debateMessages).values({
       roomId,
       userId,
       type,
-      content: content.trim(),
+      content: trimmed,
       steelmanApproved: steelmanApproved ?? null,
     }).returning();
 

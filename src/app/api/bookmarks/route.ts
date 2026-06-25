@@ -6,19 +6,25 @@ import { NextResponse } from "next/server";
 import { BookmarkSchema } from "@/lib/schemas";
 
 export async function GET() {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const saved = await db
-    .select()
-    .from(bookmarks)
-    .where(eq(bookmarks.userId, userId))
-    .orderBy(bookmarks.savedAt);
+    const saved = await db
+      .select()
+      .from(bookmarks)
+      .where(eq(bookmarks.userId, userId))
+      .orderBy(bookmarks.savedAt);
 
-  return NextResponse.json({ bookmarks: saved });
+    return NextResponse.json({ bookmarks: saved });
+  } catch (err) {
+    console.error("Bookmarks GET error:", err);
+    return NextResponse.json({ error: "Failed to load bookmarks" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
+  try {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -58,4 +64,8 @@ export async function POST(req: Request) {
   }).catch(() => {});
 
   return NextResponse.json({ bookmarked: true });
+  } catch (err) {
+    console.error("Bookmarks POST error:", err);
+    return NextResponse.json({ error: "Failed to save bookmark" }, { status: 500 });
+  }
 }
