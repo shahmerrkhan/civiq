@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { ReactionSchema } from "@/lib/schemas";
 
 export async function POST(req: Request) {
+  try {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -40,4 +41,8 @@ export async function POST(req: Request) {
   }).catch(() => {});
 
   return NextResponse.json({ reacted: true, reaction });
+  } catch (err) {
+    console.error("Reactions POST error:", err);
+    return NextResponse.json({ error: "Failed to save reaction" }, { status: 500 });
+  }
 }
