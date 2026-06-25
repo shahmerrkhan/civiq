@@ -34,27 +34,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  if (evt.type === "user.created") {
-    const { id, email_addresses, username } = evt.data;
-    const email = email_addresses?.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address 
-    ?? email_addresses?.[0]?.email_address 
-    ?? "";
+  try {
+    if (evt.type === "user.created") {
+      const { id, email_addresses, username } = evt.data;
+      const email = email_addresses?.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address
+        ?? email_addresses?.[0]?.email_address
+        ?? "";
 
-    await sql`
-      INSERT INTO users (id, email, username, onboarding_complete, streak_count, created_at)
-      VALUES (${id}, ${email}, ${username ?? null}, false, 0, NOW())
-      ON CONFLICT (id) DO NOTHING
-    `;
-  }
-
-  if (evt.type === "user.updated") {
-    const { id, email_addresses } = evt.data;
-    const email = email_addresses?.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address
-      ?? email_addresses?.[0]?.email_address
-      ?? "";
-    if (email) {
-      await sql`UPDATE users SET email = ${email} WHERE id = ${id}`;
+      await sql`
+        INSERT INTO users (id, email, username, onboarding_complete, streak_count, created_at)
+        VALUES (${id}, ${email}, ${username ?? null}, false, 0, NOW())
+        ON CONFLICT (id) DO NOTHING
+      `;
     }
+
+    if (evt.type === "user.updated") {
+      const { id, email_addresses } = evt.data;
+      const email = email_addresses?.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address
+        ?? email_addresses?.[0]?.email_address
+        ?? "";
+      if (email) {
+        await sql`UPDATE users SET email = ${email} WHERE id = ${id}`;
+      }
+    }
+  } catch (err) {
+    console.error("Webhook DB error:", err);
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

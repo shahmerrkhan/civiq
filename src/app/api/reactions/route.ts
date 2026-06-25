@@ -14,7 +14,6 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   const { cardDbId, reaction } = parsed.data;
 
-  // Upsert — replace previous reaction on same card
   const existing = await db
     .select()
     .from(swipeReactions)
@@ -26,7 +25,10 @@ export async function POST(req: Request) {
       await db.delete(swipeReactions).where(eq(swipeReactions.id, existing[0].id));
       return NextResponse.json({ reacted: false });
     }
-    await db.delete(swipeReactions).where(eq(swipeReactions.id, existing[0].id));
+    await db.update(swipeReactions)
+      .set({ reaction })
+      .where(eq(swipeReactions.id, existing[0].id));
+    return NextResponse.json({ reacted: true, reaction });
   }
 
   await db.insert(swipeReactions).values({ userId, cardDbId, reaction });

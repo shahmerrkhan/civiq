@@ -14,21 +14,23 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   const { pollId, optionIndex } = parsed.data;
 
-  const existing = await db.select().from(pollVotes).where(
-    and(eq(pollVotes.pollId, pollId), eq(pollVotes.userId, userId))
-  );
-  if (existing.length > 0) return NextResponse.json({ error: "Already voted" }, { status: 409 });
-
   const user = await db.select({ compassPosition: users.compassPosition }).from(users).where(eq(users.id, userId));
   const pos = (user[0]?.compassPosition as { x: number; y: number }) ?? { x: 0, y: 0 };
   const leaning = pos.x < -0.1 ? "Left" : pos.x > 0.1 ? "Right" : "Centre";
 
-  await db.insert(pollVotes).values({ pollId, userId, optionIndex, userLeaning: leaning });
+  try {
+    await db.insert(pollVotes).values({ pollId, userId, optionIndex, userLeaning: leaning });
+  } catch (err: any) {
+    if (err?.code === "23505") return NextResponse.json({ error: "Already voted" }, { status: 409 });
+    console.error("Poll vote error:", err);
+    return NextResponse.json({ error: "Failed to record vote" }, { status: 500 });
+  }
+
   await db.insert(userActivity).values({
     userId,
     action: "poll_vote",
     meta: { xp: 10, pollId },
-  });
+  }).catch(() => {});
 
   return NextResponse.json({ success: true, pointsAwarded: 10 });
 }

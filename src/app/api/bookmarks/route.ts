@@ -30,7 +30,10 @@ export async function POST(req: Request) {
   const existing = await db
     .select()
     .from(bookmarks)
-    .where(and(eq(bookmarks.userId, userId), eq(bookmarks.cardTitle, cardTitle)))
+    .where(and(
+      eq(bookmarks.userId, userId),
+      cardDbId ? eq(bookmarks.cardDbId, cardDbId) : eq(bookmarks.cardTitle, cardTitle)
+    ))
     .limit(1);
 
   if (existing[0]) {
