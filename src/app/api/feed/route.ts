@@ -86,8 +86,8 @@ Make each card genuinely interesting. Vary the categories. No duplicates.`,
 
 export async function GET(req: Request) {
   try {
-    await auth();
-
+    // Feed is public — no auth required
+    
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
     const limit = Math.min(20, parseInt(searchParams.get("limit") ?? String(CARDS_PER_PAGE)));
@@ -139,8 +139,8 @@ export async function GET(req: Request) {
 }
 
 function formatCards(cards: typeof contentCards.$inferSelect[]) {
-  return cards.map((c, i) => ({
-    id: i + 1,
+  return cards.map((c) => ({
+    id: c.id,
     dbId: c.id,
     title: c.title,
     summary: c.summary,

@@ -31,20 +31,28 @@ export async function POST(req: Request) {
       title: title.trim(),
       body: body.trim(),
       url: url?.trim() || "/dashboard",
-        tag: `admin-blast-${Date.now()}`,
+      tag: `admin-blast-${Date.now()}`,
     });
 
-    const results = await Promise.allSettled(
-      subs.map((sub) =>
-        webpush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          payload
-        )
-      )
-    );
+    // Send in batches of 100 to avoid OOMing the serverless function
+    const BATCH_SIZE = 100;
+    let sent = 0;
+    let failed = 0;
 
-    const sent = results.filter((r) => r.status === "fulfilled").length;
-    const failed = results.filter((r) => r.status === "rejected").length;
+    for (let i = 0; i < subs.length; i += BATCH_SIZE) {
+      const batch = subs.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(
+        batch.map((sub) =>
+          webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            payload
+          )
+        )
+      );
+      sent += results.filter((r) => r.status === "fulfilled").length;
+      failed += results.filter((r) => r.status === "rejected").length;
+    }
+
     return NextResponse.json({ sent, failed });
   } catch (err) {
     console.error("Blast error:", err);

@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import { Redis } from "@upstash/redis";
 import { contentCards, polls } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -6,18 +7,34 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 
 const ADMIN_EMAILS = ["m.shahmeer.khan8@gmail.com", "rehan.mazid@gmail.com"];
 
+import { Redis } from "@upstash/redis";
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
 async function checkAdmin(): Promise<boolean> {
   const { userId } = await auth();
   if (!userId) return false;
+
+  const cacheKey = `civiq:admin:${userId}`;
+  const cached = await redis.get<boolean>(cacheKey).catch(() => null);
+  if (cached !== null) return cached;
+
   const client = await clerkClient();
   const user = await client.users.getUser(userId);
   const email = user.emailAddresses?.[0]?.emailAddress ?? "";
-  return ADMIN_EMAILS.includes(email);
+  const isAdmin = ADMIN_EMAILS.includes(email);
+
+  await redis.set(cacheKey, isAdmin, { ex: 300 }).catch(() => {});
+  return isAdmin;
 }
 
 export const revalidate = 0;
 
 export async function GET() {
+  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const cards = await db
       .select()
@@ -45,7 +62,6 @@ export async function GET() {
     }));
     return NextResponse.json({ cards: result });
   } catch (err) {
-    console.error("feed error:", err);
     console.error("Admin cards GET error:", err);
     return NextResponse.json({ error: "Failed to load cards" }, { status: 500 });
   }
