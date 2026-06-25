@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { dailyQuestions, dailyAnswers, users } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { dailyQuestions, dailyAnswers, userActivity } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { DailyAnswerSchema } from "@/lib/schemas";
 import { geminiGenerate } from "@/lib/gemini";
@@ -11,6 +11,7 @@ function getTodayDate() {
 }
 
 export async function GET() {
+  try {
   const { userId } = await auth();
   const today = getTodayDate();
 
@@ -90,7 +91,7 @@ const parsed = JSON.parse(match[0]);
       id: question.id,
       question: question.question,
       options: question.options,
-      correctIndex: userAnswer ? question.correctIndex : null, // only reveal if answered
+      correctIndex: userAnswer ? question.correctIndex : null,
       explanation: userAnswer ? question.explanation : null,
     },
     userAnswer: userAnswer ? { answerIndex: userAnswer.answerIndex, correct: userAnswer.correct } : null,
@@ -98,9 +99,14 @@ const parsed = JSON.parse(match[0]);
     totalAnswers: allAnswers.length,
     date: today,
   });
+  } catch (err) {
+    console.error("Daily GET error:", err);
+    return NextResponse.json({ error: "Failed to load question" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
+  try {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -135,11 +141,12 @@ await db.insert(dailyAnswers).values({
     correct,
   });
 
-  // Award points
   const points = correct ? 25 : 10;
-  await db.update(users)
-    .set({ streakCount: sql`COALESCE(streak_count, 0) + 0` })
-    .where(eq(users.id, userId));
+  await db.insert(userActivity).values({
+    userId,
+    action: "daily_answer",
+    meta: { xp: points, questionId, correct },
+  }).catch(() => {});
 
   return NextResponse.json({
     correct,
@@ -147,4 +154,8 @@ await db.insert(dailyAnswers).values({
     explanation: question[0].explanation,
     pointsAwarded: points,
   });
+  } catch (err) {
+    console.error("Daily POST error:", err);
+    return NextResponse.json({ error: "Failed to submit answer" }, { status: 500 });
+  }
 }

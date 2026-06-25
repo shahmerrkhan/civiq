@@ -13,15 +13,16 @@ const MESSAGES = [
 
 export async function GET(req: Request) {
   try {
+    const authHeader = req.headers.get("authorization");
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     webpush.setVapidDetails(
       process.env.VAPID_EMAIL!,
       process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
       process.env.VAPID_PRIVATE_KEY!
     );
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const subs = await db.select().from(pushSubscriptions);
     if (!subs.length) return NextResponse.json({ sent: 0 });
@@ -42,6 +43,7 @@ export async function GET(req: Request) {
     const failed = results.filter((r) => r.status === "rejected").length;
     return NextResponse.json({ sent, failed });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Evening cron error:", err);
+    return NextResponse.json({ error: "Failed to send notifications" }, { status: 500 });
   }
 }

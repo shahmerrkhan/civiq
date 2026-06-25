@@ -44,6 +44,7 @@ or
     const result = JSON.parse(match[0]);
     return NextResponse.json(result);
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Steelman error:", err);
+    return NextResponse.json({ error: "Failed to evaluate steelman" }, { status: 500 });
   }
 }

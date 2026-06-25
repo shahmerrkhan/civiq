@@ -25,7 +25,8 @@ try {
     `;
     return NextResponse.json({ messages });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Debate messages GET error:", err);
+    return NextResponse.json({ error: "Failed to load messages" }, { status: 500 });
   }
 }
 
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: inserted[0] });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Debate messages POST error:", err);
+    return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
   }
 }

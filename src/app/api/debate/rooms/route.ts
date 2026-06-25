@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ room: newRoom[0] });
   } catch (err) {
     console.error("debate/rooms error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create or join room" }, { status: 500 });
   }
 }
 
@@ -87,6 +87,7 @@ try {
 
     return NextResponse.json({ room: room[0] });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Debate rooms GET error:", err);
+    return NextResponse.json({ error: "Failed to load room" }, { status: 500 });
   }
 }
