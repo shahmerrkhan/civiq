@@ -51,7 +51,8 @@ export async function POST() {
 
     return NextResponse.json({ streak: newStreak, alreadyCounted: false });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Streak POST error:", err);
+    return NextResponse.json({ error: "Failed to update streak" }, { status: 500 });
   }
 }
 

@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { storylines, storylineChapters, storylineFollows, storylineOpinions } from "@/db/schema";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, inArray } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
+import { Redis } from "@upstash/redis";
 
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
-let cachedStorylines: { data: unknown; cachedAt: number } | null = null;
+const CACHE_KEY = "civiq:storylines:base";
+const CACHE_TTL = 300; // 5 minutes in seconds
 
 async function fetchAllStorylines() {
   const allStorylines = await db
@@ -14,71 +19,100 @@ async function fetchAllStorylines() {
     .from(storylines)
     .orderBy(desc(storylines.updatedAt));
 
-  const enriched = await Promise.all(
-    allStorylines.map(async (s) => {
-      const chapters = await db
-        .select()
-        .from(storylineChapters)
-        .where(eq(storylineChapters.storylineId, s.id))
-        .orderBy(desc(storylineChapters.publishedAt));
+  if (allStorylines.length === 0) return [];
 
-      const followCount = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(storylineFollows)
-        .where(eq(storylineFollows.storylineId, s.id));
+  const storylineIds = allStorylines.map(s => s.id);
 
-      return {
-        ...s,
-        chapters,
-        chapterCount: chapters.length,
-        latestChapter: chapters[0] ?? null,
-        followers: Number(followCount[0]?.count ?? 0),
-      };
-    })
-  );
+  // Fetch all chapters and follow counts in 2 queries instead of 2N
+  const [allChapters, allFollowCounts] = await Promise.all([
+    db.select()
+      .from(storylineChapters)
+      .where(inArray(storylineChapters.storylineId, storylineIds))
+      .orderBy(desc(storylineChapters.publishedAt)),
+    db.select({
+        storylineId: storylineFollows.storylineId,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(storylineFollows)
+      .where(inArray(storylineFollows.storylineId, storylineIds))
+      .groupBy(storylineFollows.storylineId),
+  ]);
 
-  return enriched;
+  const chaptersByStoryline: Record<string, typeof allChapters> = {};
+  for (const c of allChapters) {
+    if (!c.storylineId) continue;
+    if (!chaptersByStoryline[c.storylineId]) chaptersByStoryline[c.storylineId] = [];
+    chaptersByStoryline[c.storylineId].push(c);
+  }
+  const followCountMap: Record<string, number> = {};
+  for (const f of allFollowCounts) {
+    if (f.storylineId) followCountMap[f.storylineId] = f.count;
+  }
+
+  return allStorylines.map(s => {
+    const chapters = chaptersByStoryline[s.id] ?? [];
+    return {
+      ...s,
+      chapters,
+      chapterCount: chapters.length,
+      latestChapter: chapters[0] ?? null,
+      followers: followCountMap[s.id] ?? 0,
+    };
+  });
 }
 
 export async function GET() {
-  const { userId } = await auth();
+  try {
+    const { userId } = await auth();
 
-  const now = Date.now();
+    // Try Redis cache first
+    let baseStorylines: Awaited<ReturnType<typeof fetchAllStorylines>>;
+    const cached = await redis.get<string>(CACHE_KEY).catch(() => null);
 
-  // Refresh cache if stale or empty
-  if (!cachedStorylines || now - cachedStorylines.cachedAt > CACHE_TTL_MS) {
-    const fresh = await fetchAllStorylines();
-    cachedStorylines = { data: fresh, cachedAt: now };
+    if (cached) {
+      baseStorylines = JSON.parse(cached as string);
+    } else {
+      baseStorylines = await fetchAllStorylines();
+      await redis.set(CACHE_KEY, JSON.stringify(baseStorylines), { ex: CACHE_TTL }).catch(() => {});
+    }
+
+    if (!userId) {
+      return NextResponse.json({
+        storylines: baseStorylines.map(s => ({ ...s, isFollowing: false, myOpinion: null })),
+      });
+    }
+
+    // Fetch all user-specific data in 2 queries instead of 2N
+    const storylineIds = baseStorylines.map(s => s.id);
+    const [myFollows, myOpinions] = await Promise.all([
+      storylineIds.length > 0
+        ? db.select({ storylineId: storylineFollows.storylineId })
+            .from(storylineFollows)
+            .where(and(eq(storylineFollows.userId, userId), inArray(storylineFollows.storylineId, storylineIds)))
+        : Promise.resolve([]),
+      storylineIds.length > 0
+        ? db.select({ storylineId: storylineOpinions.storylineId, opinion: storylineOpinions.opinion })
+            .from(storylineOpinions)
+            .where(and(eq(storylineOpinions.userId, userId), inArray(storylineOpinions.storylineId, storylineIds)))
+            .orderBy(desc(storylineOpinions.createdAt))
+        : Promise.resolve([]),
+    ]);
+
+    const followSet = new Set(myFollows.map(f => f.storylineId));
+    const opinionMap: Record<string, string> = {};
+    for (const o of myOpinions) {
+      if (o.storylineId && !opinionMap[o.storylineId]) opinionMap[o.storylineId] = o.opinion;
+    }
+
+    return NextResponse.json({
+      storylines: baseStorylines.map(s => ({
+        ...s,
+        isFollowing: followSet.has(s.id),
+        myOpinion: opinionMap[s.id] ?? null,
+      })),
+    });
+  } catch (err) {
+    console.error("Storylines GET error:", err);
+    return NextResponse.json({ error: "Failed to load storylines" }, { status: 500 });
   }
-
-  const baseStorylines = cachedStorylines.data as Awaited<ReturnType<typeof fetchAllStorylines>>;
-
-  // Per-user data (following/opinions) still fetched fresh — can't cache these
-  const enriched = await Promise.all(
-    baseStorylines.map(async (s) => {
-      let isFollowing = false;
-      let myOpinion = null;
-
-      if (userId) {
-        const follow = await db
-          .select()
-          .from(storylineFollows)
-          .where(and(eq(storylineFollows.userId, userId), eq(storylineFollows.storylineId, s.id)))
-          .limit(1);
-        isFollowing = follow.length > 0;
-
-        const op = await db
-          .select()
-          .from(storylineOpinions)
-          .where(and(eq(storylineOpinions.userId, userId), eq(storylineOpinions.storylineId, s.id)))
-          .orderBy(desc(storylineOpinions.createdAt))
-          .limit(1);
-        myOpinion = op[0]?.opinion ?? null;
-      }
-
-      return { ...s, isFollowing, myOpinion };
-    })
-  );
-
-  return NextResponse.json({ storylines: enriched });
 }
