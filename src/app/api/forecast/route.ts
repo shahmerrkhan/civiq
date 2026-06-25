@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { forecastQuestions, forecastPredictions, forecastLeaderboard, users, userActivity } from "@/db/schema";
-import { eq, desc, and, inArray } from "drizzle-orm";
+import { eq, desc, and, inArray, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { generateWeeklyForecasts } from "@/lib/forecast";
 import { ForecastPredictSchema } from "@/lib/schemas";
@@ -71,19 +71,19 @@ export async function GET(req: NextRequest) {
       .from(forecastLeaderboard)
       .orderBy(desc(forecastLeaderboard.totalPoints));
 
-    const leaderboardWithNames = await Promise.all(
-      leaderboard.slice(0, 10).map(async (entry) => {
-        const user = await db
-          .select()
-          .from(users)
-          .where(eq(users.id, entry.userId))
-          .limit(1);
-        return {
-          ...entry,
-          username: user[0]?.username ?? user[0]?.email?.split("@")[0] ?? "Anonymous",
-        };
-      })
-    );
+    const topEntries = leaderboard.slice(0, 10);
+    const leaderboardUserIds = topEntries.map(e => e.userId).filter(Boolean);
+    const leaderboardUsers = leaderboardUserIds.length > 0
+      ? await db.select().from(users).where(inArray(users.id, leaderboardUserIds))
+      : [];
+    const userMap = Object.fromEntries(leaderboardUsers.map(u => [u.id, u]));
+
+    const leaderboardWithNames = topEntries.map(entry => ({
+      ...entry,
+      username: userMap[entry.userId]?.username
+        ?? userMap[entry.userId]?.email?.split("@")[0]
+        ?? "Anonymous",
+    }));
 
     return NextResponse.json({
       questions: enriched,
@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err) {
     console.error("Forecast GET error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to load forecasts" }, { status: 500 });
   }
 }
 
@@ -147,19 +147,23 @@ export async function POST(req: NextRequest) {
     });
     await db.insert(userActivity).values({ userId, action: "forecast_predict", meta: { questionId, xp: 25 } });
 
-    // Update streak
+    // Update streak atomically
     const today = new Date().toISOString().slice(0, 10);
-    const userRow = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (userRow[0]) {
-      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-      const last = userRow[0].lastStreakDate;
-      const newStreak = last === today ? userRow[0].streakCount ?? 1 : last === yesterday ? (userRow[0].streakCount ?? 0) + 1 : 1;
-      await db.update(users).set({ streakCount: newStreak, lastStreakDate: today }).where(eq(users.id, userId));
-    }
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    await db.execute(sql`
+      UPDATE users SET
+        streak_count = CASE
+          WHEN last_streak_date = ${today} THEN COALESCE(streak_count, 1)
+          WHEN last_streak_date = ${yesterday} THEN COALESCE(streak_count, 0) + 1
+          ELSE 1
+        END,
+        last_streak_date = ${today}
+      WHERE id = ${userId}
+    `);
 
     return NextResponse.json({ success: true, updated: false });
   } catch (err) {
     console.error("Forecast POST error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to submit prediction" }, { status: 500 });
   }
 }

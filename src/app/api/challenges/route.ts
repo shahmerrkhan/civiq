@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { civicChallenges, civicChallengeCompletions, civicChallengeStreaks } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 
 function getThisMonday(): string {
   const now = new Date();
@@ -35,6 +35,7 @@ const WEEKLY_CHALLENGES = [
 ];
 
 export async function GET() {
+  try {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -58,7 +59,15 @@ export async function GET() {
   const completions = await db
     .select()
     .from(civicChallengeCompletions)
-    .where(eq(civicChallengeCompletions.userId, userId));
+    .where(
+      and(
+        eq(civicChallengeCompletions.userId, userId),
+        inArray(
+          civicChallengeCompletions.challengeId,
+          challenges.map(c => c.id)
+        )
+      )
+    );
 
   const completedIds = new Set(completions.map(c => c.challengeId));
 
@@ -82,9 +91,14 @@ export async function GET() {
     streak,
     completedCount: challenges.filter(c => completedIds.has(c.id)).length,
   });
+  } catch (err) {
+    console.error("Challenges GET error:", err);
+    return NextResponse.json({ error: "Failed to load challenges" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
+  try {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -120,7 +134,15 @@ export async function POST(req: Request) {
   const allCompletions = await db
     .select()
     .from(civicChallengeCompletions)
-    .where(eq(civicChallengeCompletions.userId, userId));
+    .where(
+      and(
+        eq(civicChallengeCompletions.userId, userId),
+        inArray(
+          civicChallengeCompletions.challengeId,
+          allChallenges.map(c => c.id)
+        )
+      )
+    );
 
   const completedIds = new Set(allCompletions.map(c => c.challengeId));
   const allDone = allChallenges.every(c => completedIds.has(c.id));
@@ -152,4 +174,8 @@ export async function POST(req: Request) {
 
   const challenge = allChallenges.find(c => c.id === challengeId);
   return NextResponse.json({ success: true, xpAwarded: challenge?.xpReward ?? 50, allDone });
+  } catch (err) {
+    console.error("Challenges POST error:", err);
+    return NextResponse.json({ error: "Failed to complete challenge" }, { status: 500 });
+  }
 }
