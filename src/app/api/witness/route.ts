@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { witnessEvents, witnessWatches, userActivity, users } from "@/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { witnessEvents, witnessWatches, userActivity } from "@/db/schema";
+import { eq, desc, and, inArray, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { generateWeeklyWitnessEvents, resolveExpiredWitnessEvents } from "@/lib/witness";
 import { WitnessWatchSchema } from "@/lib/schemas";
@@ -27,37 +27,39 @@ export async function GET() {
       .from(witnessEvents)
       .orderBy(desc(witnessEvents.deadlineAt));
 
-    const enriched = await Promise.all(
-      events.map(async (e) => {
-        const watchCount = await db
-          .select()
-          .from(witnessWatches)
-          .where(eq(witnessWatches.eventId, e.id));
+    const eventIds = events.map(e => e.id);
 
-        let isWatching = false;
-        if (userId) {
-          const mine = await db
-            .select()
-            .from(witnessWatches)
-            .where(and(eq(witnessWatches.userId, userId), eq(witnessWatches.eventId, e.id)))
-            .limit(1);
-          isWatching = mine.length > 0;
-        }
+    const [allWatches, myWatches] = await Promise.all([
+      eventIds.length > 0
+        ? db.select().from(witnessWatches).where(inArray(witnessWatches.eventId, eventIds))
+        : Promise.resolve([]),
+      userId && eventIds.length > 0
+        ? db.select().from(witnessWatches).where(
+            and(eq(witnessWatches.userId, userId), inArray(witnessWatches.eventId, eventIds))
+          )
+        : Promise.resolve([]),
+    ]);
 
-        const msLeft = new Date(e.deadlineAt).getTime() - Date.now();
-        const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
-        const hoursLeft = Math.max(0, Math.ceil(msLeft / 3600000));
+    const watchCountMap: Record<string, number> = {};
+    for (const w of allWatches) {
+      if (!w.eventId) continue;
+      watchCountMap[w.eventId] = (watchCountMap[w.eventId] ?? 0) + 1;
+    }
+    const myWatchSet = new Set(myWatches.map(w => w.eventId));
 
-        return {
-          ...e,
-          watchCount: watchCount.length,
-          isWatching,
-          daysLeft,
-          hoursLeft,
-          isUrgent: daysLeft <= 2 && e.status === "upcoming",
-        };
-      })
-    );
+    const enriched = events.map((e) => {
+      const msLeft = new Date(e.deadlineAt).getTime() - Date.now();
+      const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
+      const hoursLeft = Math.max(0, Math.ceil(msLeft / 3600000));
+      return {
+        ...e,
+        watchCount: watchCountMap[e.id] ?? 0,
+        isWatching: myWatchSet.has(e.id),
+        daysLeft,
+        hoursLeft,
+        isUrgent: daysLeft <= 2 && e.status === "upcoming",
+      };
+    });
 
     const upcoming = enriched.filter(e => e.status === "upcoming").sort((a, b) => a.daysLeft - b.daysLeft);
     const resolved = enriched.filter(e => e.status === "resolved");
@@ -65,7 +67,7 @@ export async function GET() {
     return NextResponse.json({ upcoming, resolved });
   } catch (err) {
     console.error("Witness GET error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to load events" }, { status: 500 });
   }
 }
 
@@ -97,19 +99,23 @@ export async function POST(req: NextRequest) {
     await db.insert(witnessWatches).values({ userId, eventId });
     await db.insert(userActivity).values({ userId, action: "witness_watch", meta: { eventId, xp: 10 } });
 
-    // Update streak
+    // Update streak atomically
     const today = new Date().toISOString().slice(0, 10);
-    const userRow = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (userRow[0]) {
-      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-      const last = userRow[0].lastStreakDate;
-      const newStreak = last === today ? userRow[0].streakCount ?? 1 : last === yesterday ? (userRow[0].streakCount ?? 0) + 1 : 1;
-      await db.update(users).set({ streakCount: newStreak, lastStreakDate: today }).where(eq(users.id, userId));
-    }
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    await db.execute(sql`
+      UPDATE users SET
+        streak_count = CASE
+          WHEN last_streak_date = ${today} THEN COALESCE(streak_count, 1)
+          WHEN last_streak_date = ${yesterday} THEN COALESCE(streak_count, 0) + 1
+          ELSE 1
+        END,
+        last_streak_date = ${today}
+      WHERE id = ${userId}
+    `);
 
     return NextResponse.json({ watching: true });
   } catch (err) {
     console.error("Witness POST error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update watch" }, { status: 500 });
   }
 }
