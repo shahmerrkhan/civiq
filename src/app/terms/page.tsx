@@ -49,7 +49,7 @@ const sections = [
 
 export default function Terms() {
   return (
-    <AppLayout>
+<AppLayout active="">
       <div style={{ maxWidth: "680px", margin: "0 auto", padding: "40px 20px 80px" }}>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <Link href="/dashboard" style={{ fontSize: "12px", color: "#444", textDecoration: "none", display: "inline-block", marginBottom: "32px" }}>← Back</Link>
