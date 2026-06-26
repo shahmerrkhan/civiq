@@ -90,6 +90,12 @@ export default function SignInPage() {
               dividerText: { color: "#444" },
               identityPreviewText: { color: "#e8e6e0" },
               identityPreviewEditButton: { color: "#f5a623" },
+              footerPages: { color: "#aaa" },
+              footerPagesLink: { color: "#888" },
+              footerAction: { color: "#888" },
+              badge: { color: "#aaa", backgroundColor: "#242424" },
+              tagInputItem: { color: "#f0ede6" },
+              formFieldInputShowPasswordButton: { color: "#888" },
             },
           }}
         />
