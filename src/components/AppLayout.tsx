@@ -481,6 +481,10 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                       );
                     })}
                   </div>
+                  <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", gap: "16px", paddingLeft: "4px" }}>
+                    <a href="/privacy" style={{ fontSize: "11px", color: "#444", textDecoration: "none" }}>Privacy Policy</a>
+                    <a href="/terms" style={{ fontSize: "11px", color: "#444", textDecoration: "none" }}>Terms of Service</a>
+                  </div>
                 </motion.div>
               </>
             )}

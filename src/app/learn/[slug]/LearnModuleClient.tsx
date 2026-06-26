@@ -51,7 +51,7 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
       .then(data => {
         try {
           const parsed = typeof data.content === "string" ? JSON.parse(data.content) : data.content;
-          setCards(parsed);
+          setCards(Array.isArray(parsed) ? parsed : []);
         } catch {
           setCards([]);
         }
@@ -61,11 +61,12 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
   }, [slug]);
 
   const color = categoryColors[module.category] || "#f5a623";
-  const progress = cards.length > 0 ? (current / cards.length) * 100 : 0;
-  const card = cards[current];
+  const safeCards = cards ?? [];
+  const progress = safeCards.length > 0 ? (current / safeCards.length) * 100 : 0;
+  const card = safeCards[current];
 
   const handleNext = () => {
-    const isLast = current === cards.length - 1;
+    const isLast = current === safeCards.length - 1;
     if (flipped) {
       setFlipped(false);
       setTimeout(() => {
@@ -174,7 +175,7 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
             Module complete
           </div>
           <div style={{ fontSize: "14px", color: "#555", marginBottom: "40px", lineHeight: "1.7" }}>
-            You went through all {cards.length} cards on {module.title}.
+            You went through all {safeCards.length} cards on {module.title}.
           </div>
         </motion.div>
         <motion.div
@@ -252,7 +253,7 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
             transition={{ duration: 0.2 }}
             style={{ fontSize: "13px", color: "#444", flexShrink: 0 }}
           >
-            {current + 1} / {cards.length}
+            {current + 1} / {safeCards.length}
           </motion.span>
         </motion.div>
 
@@ -397,7 +398,7 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
               transition: "filter 0.2s ease",
             }}
           >
-            {current === cards.length - 1 ? "Finish" : "Next →"}
+            {current === safeCards.length - 1 ? "Finish" : "Next →"}
           </motion.button>
         </motion.div>
       </div>

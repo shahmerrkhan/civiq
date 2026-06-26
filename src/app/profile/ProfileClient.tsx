@@ -482,6 +482,41 @@ const stats = [
         </motion.div>
         </motion.div>
 
+      {/* Delete Account */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,0,0,0.08)", borderRadius: "16px", padding: "24px 28px", marginTop: "20px" }}
+        >
+          <div style={{ fontSize: "11px", color: "#444", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "6px" }}>Danger Zone</div>
+          <div style={{ fontSize: "13px", color: "#333", marginBottom: "16px" }}>Permanently delete your account and all associated data. This cannot be undone.</div>
+          <button
+            onClick={async () => {
+              if (!confirm("Are you sure? This will permanently delete your account and all your data. This cannot be undone.")) return;
+              const res = await fetch("/api/user/delete", { method: "DELETE" });
+              if (res.ok) {
+                window.location.href = "/";
+              } else {
+                alert("Something went wrong. Email rehan.mazid@gmail.com to request deletion.");
+              }
+            }}
+            style={{
+              backgroundColor: "transparent",
+              border: "1px solid rgba(248,113,113,0.3)",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              fontSize: "13px",
+              fontWeight: "600",
+              color: "#f87171",
+              cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            Delete my account
+          </button>
+        </motion.div>
+
       </div>
     </AppLayout>
   );
