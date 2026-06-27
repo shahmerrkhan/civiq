@@ -81,10 +81,11 @@ function LeaningBar({ breakdown, total }: { breakdown: { left: number; centre: n
   );
 }
 
-function PostCard({ post, onLike, onReply, depth = 0 }: {
+function PostCard({ post, onLike, onReply, onReport, depth = 0 }: {
   post: Post;
   onLike: (postId: string) => void;
   onReply: (post: Post) => void;
+  onReport: (postId: string) => void;
   depth?: number;
 }) {
   const cfg = LEANING_CONFIG[post.leaning as keyof typeof LEANING_CONFIG] ?? LEANING_CONFIG.centre;
@@ -175,6 +176,22 @@ function PostCard({ post, onLike, onReply, depth = 0 }: {
               {post.replyCount > 0 ? `${post.replyCount} ${post.replyCount === 1 ? "reply" : "replies"}` : "Reply"}
             </button>
           )}
+          <button
+            onClick={() => onReport(post.id)}
+            style={{
+              marginLeft: "auto",
+              display: "flex", alignItems: "center", gap: "4px",
+              background: "none", border: "none", cursor: "pointer",
+              fontSize: "11px", fontWeight: "600", color: "#2a2a2a",
+              fontFamily: "'DM Sans', sans-serif",
+              padding: 0,
+              transition: "color 0.15s ease",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#f87171")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#2a2a2a")}
+          >
+            ⚑ Report
+          </button>
         </div>
       </div>
     </motion.div>
@@ -326,6 +343,21 @@ export default function CirclesClient({ userId }: { userId: string }) {
   const handleReply = (post: Post) => {
     setReplyingTo(post);
     setTimeout(() => composeRef.current?.focus(), 100);
+  };
+
+  const handleReport = async (postId: string) => {
+    const reason = prompt("Why are you reporting this post?\n\n• Hate speech\n• Misinformation\n• Spam\n• Harassment\n• Other");
+    if (!reason?.trim()) return;
+    try {
+      await fetch("/api/circles/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId, reason: reason.trim() }),
+      });
+      alert("Report submitted. We'll review it shortly.");
+    } catch {
+      alert("Failed to submit report. Please try again.");
+    }
   };
 
   const loadReplies = async (postId: string, circleId: string) => {
@@ -676,6 +708,7 @@ export default function CirclesClient({ userId }: { userId: string }) {
                       post={post}
                       onLike={handleLike}
                       onReply={handleReply}
+                      onReport={handleReport}
                     />
                     {/* Reply toggle */}
                     {post.replyCount > 0 && (
@@ -699,6 +732,7 @@ export default function CirclesClient({ userId }: { userId: string }) {
                           post={reply}
                           onLike={handleLike}
                           onReply={handleReply}
+                          onReport={handleReport}
                           depth={1}
                         />
                       ))}

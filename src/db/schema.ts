@@ -360,3 +360,15 @@ export const circlePostLikes = pgTable("circle_post_likes", {
   uniqueIndex("circle_post_likes_unique").on(t.postId, t.userId),
   index("circle_post_likes_post_id_idx").on(t.postId),
 ]);
+
+export const circlePostReports = pgTable("circle_post_reports", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  postId: uuid("post_id").references(() => circlePosts.id),
+  reportedBy: text("reported_by").references(() => users.id),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (t) => [
+  index("circle_post_reports_post_id_idx").on(t.postId),
+  index("circle_post_reports_user_id_idx").on(t.reportedBy),
+  uniqueIndex("circle_post_reports_unique").on(t.postId, t.reportedBy),
+]);
