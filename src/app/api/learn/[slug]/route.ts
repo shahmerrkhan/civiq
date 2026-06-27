@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { sql } from "@/db";
 import { geminiGenerate } from "@/lib/gemini";
 
@@ -228,12 +229,15 @@ const MODULE_PROMPTS: Record<string, string> = {
 };
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const prompt = MODULE_PROMPTS[slug];
-  if (!prompt) return NextResponse.json({ error: "Module not found" }, { status: 404 });
-
   try {
-    // check cache first
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { slug } = await params;
+    const prompt = MODULE_PROMPTS[slug];
+    if (!prompt) return NextResponse.json({ error: "Module not found" }, { status: 404 });
+
+    // Check cache first
     const cached = await sql`
       SELECT content, created_at FROM learn_cache
       WHERE slug = ${slug}
@@ -247,9 +251,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
 
     const cardPrompt = `${prompt}
 
-Return ONLY a valid JSON array of 8 flashcards. No markdown, no backticks, just raw JSON.
+Return ONLY a valid JSON array of 8 flashcards. No markdown, no backticks, no extra text — just the raw JSON array starting with [ and ending with ].
 
-Each card:
+Each card must match exactly:
 {
   "type": "fact" | "quote" | "question" | "stat" | "myth",
   "front": "one punchy sentence or question — max 15 words",
@@ -260,13 +264,36 @@ Each card:
 Last card must be type "question" with front starting with "What do YOU think:" and a provocative Ontario-relevant question on the back.`;
 
     const raw = await geminiGenerate({
-  prompt: cardPrompt,
-  maxTokens: 2000,
-  grounding: false,
-});
-    const match = raw.match(/\[[\s\S]*\]/);
-    if (!match) throw new Error("No JSON found");
-    const content = match[0];
+      prompt: cardPrompt,
+      maxTokens: 2000,
+      grounding: false,
+    });
+
+    // Try array match first, then object with cards key
+    let content: string;
+    const arrayMatch = raw.match(/\[[\s\S]*\]/);
+    if (arrayMatch) {
+      // Validate it actually parses
+      try {
+        const parsed = JSON.parse(arrayMatch[0]);
+        if (!Array.isArray(parsed) || parsed.length === 0) throw new Error("Empty array");
+        content = arrayMatch[0];
+      } catch {
+        return NextResponse.json({ error: "Failed to generate flashcards" }, { status: 500 });
+      }
+    } else {
+      // Try object wrapper fallback
+      const objMatch = raw.match(/\{[\s\S]*\}/);
+      if (!objMatch) return NextResponse.json({ error: "Failed to generate flashcards" }, { status: 500 });
+      try {
+        const parsed = JSON.parse(objMatch[0]);
+        const cards = parsed.cards ?? parsed.flashcards ?? parsed.data;
+        if (!Array.isArray(cards) || cards.length === 0) throw new Error("No cards found");
+        content = JSON.stringify(cards);
+      } catch {
+        return NextResponse.json({ error: "Failed to generate flashcards" }, { status: 500 });
+      }
+    }
 
     await sql`
       INSERT INTO learn_cache (slug, content)
@@ -276,7 +303,7 @@ Last card must be type "question" with front starting with "What do YOU think:" 
 
     return NextResponse.json({ content });
   } catch (err) {
-    console.error("learn error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Learn slug GET error:", err);
+    return NextResponse.json({ error: "Failed to load module" }, { status: 500 });
   }
 }

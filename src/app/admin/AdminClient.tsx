@@ -49,21 +49,34 @@ type ForecastQuestion = {
   weekStart: string;
 };
 
+type Report = {
+  id: string;
+  postId: string | null;
+  reportedBy: string | null;
+  reason: string;
+  createdAt: Date;
+  postContent: string | null;
+  postUsername: string | null;
+};
+
 export default function AdminClient({
   cards: initial,
   polls,
   witnessEvents: initialWitness,
   forecastQuestions: initialForecast,
+  reports: initialReports,
 }: {
   cards: Card[];
   polls: Poll[];
   witnessEvents: WitnessEvent[];
   forecastQuestions: ForecastQuestion[];
+  reports: Report[];
 }) {
   const [cards, setCards] = useState(initial);
   const [witnessEvents, setWitnessEvents] = useState(initialWitness);
   const [forecastQuestions, setForecastQuestions] = useState(initialForecast);
-  const [tab, setTab] = useState<"pending" | "approved" | "create" | "witness" | "forecast">("pending");
+  const [reports, setReports] = useState(initialReports);
+  const [tab, setTab] = useState<"pending" | "approved" | "create" | "witness" | "forecast" | "reports">("pending");
   const [loading, setLoading] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -124,6 +137,25 @@ export default function AdminClient({
 
   const pending = cards.filter(c => !c.approved);
   const approved = cards.filter(c => c.approved);
+
+  const handleDismissReport = async (id: string) => {
+    await fetch("/api/circles/reports", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setReports(prev => prev.filter(r => r.id !== id));
+  };
+
+  const handleDeleteReportedPost = async (postId: string, reportId: string) => {
+    if (!confirm("Delete this post and all its reports?")) return;
+    await fetch("/api/circles/posts", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: postId }),
+    });
+    setReports(prev => prev.filter(r => r.postId !== postId));
+  };
 
   // ── Card handlers ──────────────────────────────────────────
   const handleApprove = async (id: string) => {
@@ -434,17 +466,22 @@ export default function AdminClient({
 
         {/* Tabs */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} style={{ display: "flex", gap: "8px", marginBottom: "32px", flexWrap: "wrap" }}>
-          {(["pending", "approved", "create", "witness", "forecast"] as const).map(t => (
+          {(["pending", "approved", "create", "witness", "forecast", "reports"] as const).map(t => (
             <motion.button key={t} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => setTab(t)}
               style={{
                 padding: "7px 18px", borderRadius: "100px", fontSize: "13px", fontWeight: "600",
-                border: tab === t ? "1px solid #f5a623" : "1px solid rgba(255,255,255,0.08)",
-                backgroundColor: tab === t ? "rgba(245,166,35,0.1)" : "transparent",
-                color: tab === t ? "#f5a623" : "#555",
+                border: tab === t ? (t === "reports" ? "1px solid #f87171" : "1px solid #f5a623") : "1px solid rgba(255,255,255,0.08)",
+                backgroundColor: tab === t ? (t === "reports" ? "rgba(248,113,113,0.1)" : "rgba(245,166,35,0.1)") : "transparent",
+                color: tab === t ? (t === "reports" ? "#f87171" : "#f5a623") : "#555",
                 cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s ease", textTransform: "capitalize",
               }}
             >
-              {t === "pending" ? `Pending (${pending.length})` : t === "approved" ? `Live (${approved.length})` : t === "witness" ? `Witness (${witnessEvents.length})` : t === "forecast" ? `Forecast (${forecastQuestions.length})` : "Create"}
+              {t === "pending" ? `Pending (${pending.length})`
+                : t === "approved" ? `Live (${approved.length})`
+                : t === "witness" ? `Witness (${witnessEvents.length})`
+                : t === "forecast" ? `Forecast (${forecastQuestions.length})`
+                : t === "reports" ? <>Reports {reports.length > 0 && <span style={{ marginLeft: "4px", backgroundColor: "#f87171", color: "#000", borderRadius: "100px", padding: "1px 6px", fontSize: "10px", fontWeight: "800" }}>{reports.length}</span>}</>
+                : "Create"}
             </motion.button>
           ))}
         </motion.div>
@@ -763,6 +800,46 @@ export default function AdminClient({
                   </div>
                 </motion.div>
               ))}
+            </motion.div>
+          )}
+
+        {tab === "reports" && (
+            <motion.div key="reports" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+              <div style={{ fontSize: "11px", color: "#444", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "16px" }}>
+                {reports.length} report{reports.length !== 1 ? "s" : ""}
+              </div>
+              {reports.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "48px 0", color: "#2a2a2a", fontSize: "14px" }}>No reports. All clear.</div>
+              ) : (
+                reports.map((r, i) => (
+                  <motion.div key={r.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+                    style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(248,113,113,0.1)", borderRadius: "16px", padding: "18px 20px", marginBottom: "12px" }}
+                  >
+                    <div style={{ fontSize: "11px", color: "#f87171", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>
+                      Reported by {r.reportedBy ?? "unknown"} · {r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-CA") : ""}
+                    </div>
+                    {r.postContent && (
+                      <div style={{ fontSize: "14px", color: "#888", lineHeight: "1.65", backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "12px 14px", marginBottom: "10px" }}>
+                        <span style={{ fontSize: "11px", color: "#333", display: "block", marginBottom: "4px" }}>@{r.postUsername}</span>
+                        {r.postContent}
+                      </div>
+                    )}
+                    <div style={{ fontSize: "13px", color: "#f5a623", marginBottom: "14px" }}>
+                      Reason: <span style={{ color: "#888" }}>{r.reason}</span>
+                    </div>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                        onClick={() => r.postId && handleDeleteReportedPost(r.postId, r.id)}
+                        style={{ padding: "8px 16px", borderRadius: "10px", border: "1px solid rgba(248,113,113,0.3)", backgroundColor: "rgba(248,113,113,0.08)", color: "#f87171", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                      >Delete post</motion.button>
+                      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                        onClick={() => handleDismissReport(r.id)}
+                        style={{ padding: "8px 16px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "#555", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                      >Dismiss</motion.button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </motion.div>
           )}
 

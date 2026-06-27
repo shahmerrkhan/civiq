@@ -1,7 +1,7 @@
 import { db } from "@/db";
 export const dynamic = "force-dynamic";
-import { contentCards, polls, witnessEvents, forecastQuestions } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { contentCards, polls, witnessEvents, forecastQuestions, circlePostReports, circlePosts } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 import AdminClient from "./AdminClient";
 
 export default async function AdminPage() {
@@ -24,12 +24,27 @@ export default async function AdminPage() {
     .from(forecastQuestions)
     .orderBy(desc(forecastQuestions.createdAt));
 
+  const allReports = await db
+    .select({
+      id: circlePostReports.id,
+      postId: circlePostReports.postId,
+      reportedBy: circlePostReports.reportedBy,
+      reason: circlePostReports.reason,
+      createdAt: circlePostReports.createdAt,
+      postContent: circlePosts.content,
+      postUsername: circlePosts.username,
+    })
+    .from(circlePostReports)
+    .leftJoin(circlePosts, eq(circlePostReports.postId, circlePosts.id))
+    .orderBy(desc(circlePostReports.createdAt));
+
   return (
     <AdminClient
       cards={cards as any}
       polls={allPolls as any}
       witnessEvents={allWitnessEvents as any}
       forecastQuestions={allForecastQuestions as any}
+      reports={allReports as any}
     />
   );
 }

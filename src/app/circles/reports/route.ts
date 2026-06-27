@@ -49,3 +49,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to submit report" }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const ADMIN_IDS = ["user_3Ebe9C8ppBPw7DLTYbMH52lz5vT", "user_3EhHcsl86ffTPyR3CpgqKS6Prnj"];
+    if (!ADMIN_IDS.includes(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const body = await req.json().catch(() => null);
+    const { id } = body ?? {};
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+    await db.delete(circlePostReports).where(eq(circlePostReports.id, id));
+    return NextResponse.json({ dismissed: true });
+  } catch (err) {
+    console.error("Report DELETE error:", err);
+    return NextResponse.json({ error: "Failed to dismiss report" }, { status: 500 });
+  }
+}
