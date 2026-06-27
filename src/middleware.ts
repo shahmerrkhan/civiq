@@ -17,6 +17,7 @@ const redis = new Redis({
 });
 
 const limiters = {
+  learn:    { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60 s"), prefix: "civiq:rl:learn" }),     limit: 5 },
   circles:  { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s"), prefix: "civiq:rl:circles" }),  limit: 20 },
   forecast: { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60 s"), prefix: "civiq:rl:forecast" }), limit: 30 },
   witness:  { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60 s"), prefix: "civiq:rl:witness" }),  limit: 30 },
@@ -28,6 +29,7 @@ const limiters = {
 };
 
 function getLimiter(pathname: string) {
+  if (pathname.startsWith("/api/learn"))        return limiters.learn;
   if (pathname.startsWith("/api/circles/posts")) return limiters.circles;
   if (pathname.startsWith("/api/forecast"))      return limiters.forecast;
   if (pathname.startsWith("/api/witness"))       return limiters.witness;
