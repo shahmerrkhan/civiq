@@ -14,7 +14,7 @@ interface GeminiParams {
 
 export async function geminiGenerate({
   prompt,
-  model = "gemini-2.0-flash",
+  model = "gemini-1.5-flash",
   maxTokens = 1000,
   temperature = 0.7,
   grounding = false,
