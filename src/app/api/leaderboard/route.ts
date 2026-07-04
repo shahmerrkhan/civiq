@@ -49,7 +49,14 @@ export async function GET() {
       WHERE id = ${userId}
     `;
 
-    const leaderboard = topRows.map((r: { id: string; username: string | null; streak_count: number | null; civic_score: number | string }) => ({
+    interface LeaderboardRow {
+  id: string;
+  username: string | null;
+  streak_count: number | null;
+  civic_score: number | string;
+}
+
+const leaderboard = (topRows as LeaderboardRow[]).map((r) => ({
       userId: r.id,
       username: r.username || "Anonymous",
       streakCount: r.streak_count ?? 0,
