@@ -57,7 +57,7 @@ export default function IssueClient({ card, polls, userVotes, userOpinion, userI
   const [savingOpinion, setSavingOpinion] = useState(false);
   const [activePerspective, setActivePerspective] = useState("left");
 
-  const catColor = CATEGORY_COLORS[card.category?.toLowerCase()] || CATEGORY_COLORS.default;
+  const catColor = CATEGORY_COLORS[card.category?.toLowerCase() ?? "default"] || CATEGORY_COLORS.default;
   const perspectives = card.perspectives as Record<string, string> | null;
 
   const handleVote = async (pollId: string, optionIndex: number) => {
