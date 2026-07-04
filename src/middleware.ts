@@ -73,7 +73,7 @@ export default clerkMiddleware(async (auth, request) => {
     }
 
     const writeMethods = ["POST", "PATCH", "DELETE", "PUT"];
-    const sensitiveRoutes = ["/api/circles", "/api/forecast", "/api/witness", "/api/opinions", "/api/polls", "/api/bookmarks", "/api/debate"];
+    const sensitiveRoutes = ["/api/circles", "/api/forecast", "/api/witness", "/api/opinions", "/api/polls", "/api/bookmarks", "/api/debate", "/api/admin"];
     const isSensitiveWrite = writeMethods.includes(request.method) && sensitiveRoutes.some(r => pathname.startsWith(r));
 
     if (isSensitiveWrite) {
