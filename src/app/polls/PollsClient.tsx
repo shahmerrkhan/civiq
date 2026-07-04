@@ -109,7 +109,7 @@ export default function PollsClient({
               const options = getOptionsWithCounts(poll.id, poll.options as string[]);
               const totalVotes = getTotalVotes(poll.id);
               const hasVoted = voted[poll.id] !== undefined;
-              const catColor = CATEGORY_COLORS[poll.cardCategory?.toLowerCase()] || CATEGORY_COLORS.default;
+              const catColor = CATEGORY_COLORS[poll.cardCategory?.toLowerCase() ?? "default"] || CATEGORY_COLORS.default;
               const isExpired = poll.expiresAt && new Date(poll.expiresAt) < new Date();
 
               return (
