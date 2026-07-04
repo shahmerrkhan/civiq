@@ -231,7 +231,11 @@ export default function Home() {
     const android = /android/.test(navigator.userAgent.toLowerCase());
     if (ios) { setIsIOS(true); setShowInstall(true); }
     if (android) {
-      const handler = (e: Event) => { e.preventDefault(); setInstallPrompt(e); setShowInstall(true); };
+      const handler = (e: Event) => {
+        e.preventDefault();
+        setInstallPrompt(e as unknown as { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> });
+        setShowInstall(true);
+      };
       window.addEventListener("beforeinstallprompt", handler as EventListener);
       return () => window.removeEventListener("beforeinstallprompt", handler as EventListener);
     }
