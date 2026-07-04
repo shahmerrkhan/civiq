@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db, sql } from "@/db";
 import { debateMessages } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { DebateMessageSchema } from "@/lib/schemas";
+import sanitizeHtml from "sanitize-html";
 
 export async function GET(req: Request) {
   try {
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const trimmed = content.trim();
+    const trimmed = sanitizeHtml(content.trim(), { allowedTags: [], allowedAttributes: {} });
     if (trimmed.length < 1 || trimmed.length > 2000) {
       return NextResponse.json({ error: "Message must be 1–2000 characters" }, { status: 400 });
     }

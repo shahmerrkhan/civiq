@@ -379,8 +379,8 @@ const saveEdit = async (id: string) => {
       const res = await fetch("/api/digest", { method: "GET" });
       const data = await res.json();
       setDigestMsg(data.sent ? `✓ Sent to ${data.sent} users` : `Failed: ${data.error || "check logs"}`);
-    } catch (err) {
-      setDigestMsg("Failed — check console");
+    } catch {
+      setDigestMsg("Failed - check console");
     }
     setSendingDigest(false);
     setTimeout(() => setDigestMsg(""), 4000);
