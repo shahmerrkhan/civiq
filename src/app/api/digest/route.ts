@@ -25,7 +25,8 @@ const recentCards = await sql`
 
     if (!recentCards.length) return NextResponse.json({ error: "No feed content" }, { status: 404 });
 
-    const top3 = recentCards;
+    type DigestCard = { title: string; summary: string; category: string; perspectives?: { centre?: string } };
+    const top3 = recentCards as unknown as DigestCard[];
 
     const html = `
       <!DOCTYPE html>
@@ -59,8 +60,8 @@ const recentCards = await sql`
 
           <div class="week-label">This week in Ontario</div>
 
-          ${top3.map((card: any) => {
-            const categoryColors: Record<string, string> = {
+          ${top3.map((card) => {
+              const categoryColors: Record<string, string> = {
               Infrastructure: "#60a5fa",
               Economy: "#4ade80",
               Education: "#f59e0b",
