@@ -9,6 +9,8 @@ export default function StreakBadge() {
   useEffect(() => {
     const previous = getStreakData().streak;
     const current = recordActivity();
+    // Syncs streak display on mount, intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStreak(current);
     if (current > previous && current > 1) {
       setPopped(true);
@@ -42,3 +44,4 @@ export default function StreakBadge() {
     </div>
   );
 }
+

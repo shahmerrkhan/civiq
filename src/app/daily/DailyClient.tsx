@@ -83,7 +83,7 @@ const [error, setError] = useState(false);
             Daily Question
           </div>
           <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", marginBottom: "4px" }}>
-            Today's Ontario Question
+            Today&apos;s Ontario Question
           </div>
           <div style={{ fontSize: "13px", color: "#666" }}>
             {new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
@@ -105,7 +105,7 @@ const [error, setError] = useState(false);
         {!loading && error && (
           <div style={{ textAlign: "center", padding: "48px 0" }}>
             <div style={{ fontSize: "32px", marginBottom: "16px" }}>⚠️</div>
-            <div style={{ fontSize: "15px", color: "#555" }}>Could not load today's question. Try again in a moment.</div>
+            <div style={{ fontSize: "15px", color: "#555" }}>Could not load today&apos;s question. Try again in a moment.</div>
           </div>
         )}
         
@@ -275,3 +275,5 @@ const [error, setError] = useState(false);
     </AppLayout>
   );
 }
+
+

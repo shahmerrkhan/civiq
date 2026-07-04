@@ -336,7 +336,7 @@ export default function OntarioClient() {
                           <motion.div key={op.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                             style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: "rgba(167,139,250,0.04)", border: "1px solid rgba(167,139,250,0.1)" }}
                           >
-                            <div style={{ fontSize: "13px", color: "#aaa", lineHeight: "1.6", marginBottom: "6px" }}>"{op.opinion}"</div>
+                            <div style={{ fontSize: "13px", color: "#aaa", lineHeight: "1.6", marginBottom: "6px" }}>&quot;{op.opinion}&quot;</div>
                             <div style={{ fontSize: "11px", color: "#333" }}>{timeAgo(op.createdAt)}</div>
                           </motion.div>
                         ))}
@@ -440,7 +440,7 @@ export default function OntarioClient() {
 
                   {/* Activity breakdown */}
                   <div style={{ marginBottom: "16px" }}>
-                    <div style={{ fontSize: "11px", color: "#444", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>What You've Done</div>
+                    <div style={{ fontSize: "11px", color: "#444", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>What You&apos;ve Done</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                       {Object.entries(ACTION_LABELS).map(([action, cfg]) => {
                         const count = action === "poll_vote" ? data.pollsVoted
@@ -496,3 +496,4 @@ export default function OntarioClient() {
     </AppLayout>
   );
 }
+

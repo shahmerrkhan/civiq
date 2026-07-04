@@ -13,17 +13,33 @@ const CATEGORY_COLORS: Record<string, string> = {
   default: "#f5a623",
 };
 
-function getLeaningLabel(x: number, y: number) {
+function getLeaningLabel(x: number) {
   if (x < -0.1) return "Left";
   if (x > 0.1) return "Right";
   return "Centre";
 }
 
+export type Poll = {
+  id: string;
+  question: string;
+  options: unknown;
+  expiresAt: string | Date | null;
+  cardTitle: string | null;
+  cardCategory: string | null;
+};
+
+export type VoteCount = {
+  pollId: string;
+  optionIndex: number;
+  count: number;
+  leaning: string | null;
+};
+
 export default function PollsClient({
   polls, voteCounts, userVotes, userId, compassPosition,
 }: {
-  polls: any[];
-  voteCounts: any[];
+  polls: Poll[];
+  voteCounts: VoteCount[];
   userVotes: { pollId: string; optionIndex: number }[];
   userId: string | null;
   compassPosition: { x: number; y: number };
@@ -31,16 +47,16 @@ export default function PollsClient({
   const [voted, setVoted] = useState<Record<string, number>>(
     Object.fromEntries(userVotes.map((v) => [v.pollId, v.optionIndex]))
   );
-  const [optimisticCounts, setOptimisticCounts] = useState<any[]>(voteCounts);
+  const [optimisticCounts, setOptimisticCounts] = useState<VoteCount[]>(voteCounts);
   const [loading, setLoading] = useState<string | null>(null);
   const [justVoted, setJustVoted] = useState<string | null>(null);
   
   const getOptionsWithCounts = (pollId: string, options: string[]) => {
     return options.map((opt: string, idx: number) => {
       const relevant = optimisticCounts.filter((c) => c.pollId === pollId && c.optionIndex === idx);
-      const total = relevant.reduce((sum: number, c: any) => sum + Number(c.count), 0);
+      const total = relevant.reduce((sum: number, c: VoteCount) => sum + Number(c.count), 0);
       const byLeaning = { Left: 0, Centre: 0, Right: 0 } as Record<string, number>;
-      relevant.forEach((c: any) => {
+      relevant.forEach((c: VoteCount) => {
         const l = c.leaning || "Centre";
         byLeaning[l] = (byLeaning[l] || 0) + Number(c.count);
       });
@@ -54,7 +70,7 @@ export default function PollsClient({
   const handleVote = async (pollId: string, optionIndex: number) => {
     if (!userId || voted[pollId] !== undefined || loading) return;
     setLoading(pollId);
-    const leaning = getLeaningLabel(compassPosition.x, compassPosition.y);
+    const leaning = getLeaningLabel(compassPosition.x);
     setVoted((prev) => ({ ...prev, [pollId]: optionIndex }));
     setOptimisticCounts((prev) => [
       ...prev,
@@ -293,3 +309,10 @@ export default function PollsClient({
     </AppLayout>
   );
 }
+
+
+
+
+
+
+

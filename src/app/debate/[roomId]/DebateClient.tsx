@@ -67,18 +67,10 @@ export default function DebateClient({ roomId, userId }: { roomId: string; userI
   };
 
   useEffect(() => {
-    loadRoom();
-    loadMessages();
-    pollRef.current = setInterval(() => {
-      loadRoom();
-      loadMessages();
-    }, 8000);
-    return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [roomId]);
-
-  useEffect(() => {
     if (!room?.expires_at) return;
     const t = setInterval(() => setTimeRemaining(timeLeft(room.expires_at)), 30000);
+    // Syncs countdown display with room data, intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTimeRemaining(timeLeft(room.expires_at));
     return () => clearInterval(t);
   }, [room?.expires_at]);
@@ -87,6 +79,8 @@ export default function DebateClient({ roomId, userId }: { roomId: string; userI
     // Determine phase based on my messages
     const myMessages = messages.filter(m => m.user_id === userId);
     const hasApprovedSteelman = myMessages.some(m => m.type === "steelman" && m.steelman_approved === true);
+    // Derives debate phase from message history, intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (hasApprovedSteelman) setPhase("argument");
     else setPhase("steelman");
   }, [messages, userId]);
@@ -107,6 +101,18 @@ export default function DebateClient({ roomId, userId }: { roomId: string; userI
     const data = await res.json();
     if (data.messages) setMessages(data.messages);
   }
+
+  useEffect(() => {
+    // Initial + polling data load, intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadRoom();
+    loadMessages();
+    pollRef.current = setInterval(() => {
+      loadRoom();
+      loadMessages();
+    }, 8000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [roomId]);
 
   async function handleSubmit() {
     if (!input.trim() || submitting) return;
@@ -238,7 +244,7 @@ export default function DebateClient({ roomId, userId }: { roomId: string; userI
             <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 2, repeat: Infinity }} style={{ fontSize: "28px", marginBottom: "12px" }}>⏳</motion.div>
             <div style={{ fontSize: "15px", fontWeight: "700", color: "#f0ede6", marginBottom: "6px" }}>Looking for your match</div>
             <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7" }}>
-              When someone with a different political leaning joins this issue, you'll both be matched and the 72-hour debate window opens.
+              When someone with a different political leaning joins this issue, you&apos;ll both be matched and the 72-hour debate window opens.
             </div>
           </motion.div>
         )}
@@ -250,14 +256,14 @@ export default function DebateClient({ roomId, userId }: { roomId: string; userI
               <>
                 <div style={{ fontSize: "11px", fontWeight: "800", letterSpacing: "0.1em", textTransform: "uppercase", color: "#a78bfa", marginBottom: "6px" }}>Step 1 — Steelman</div>
                 <div style={{ fontSize: "13px", color: "#666", lineHeight: "1.7" }}>
-                  Before sharing your view, write the <strong style={{ color: "#ccc" }}>strongest possible version</strong> of the {leaningLabel(theirLeaning)} argument on this issue. Not what you think is wrong with it — what's actually right about it. The AI checks if it's genuine.
+                  Before sharing your view, write the <strong style={{ color: "#ccc" }}>strongest possible version</strong> of the {leaningLabel(theirLeaning)} argument on this issue. Not what you think is wrong with it — what&apos;s actually right about it. The AI checks if it&apos;s genuine.
                 </div>
               </>
             ) : (
               <>
                 <div style={{ fontSize: "11px", fontWeight: "800", letterSpacing: "0.1em", textTransform: "uppercase", color: "#f5a623", marginBottom: "6px" }}>Step 2 — Your Argument</div>
                 <div style={{ fontSize: "13px", color: "#666", lineHeight: "1.7" }}>
-                  Steelman accepted. Now make your actual case. Keep it grounded — you've already shown you understand the other side.
+                  Steelman accepted. Now make your actual case. Keep it grounded — you&apos;ve already shown you understand the other side.
                 </div>
               </>
             )}
@@ -354,3 +360,11 @@ export default function DebateClient({ roomId, userId }: { roomId: string; userI
     </AppLayout>
   );
 }
+
+
+
+
+
+
+
+

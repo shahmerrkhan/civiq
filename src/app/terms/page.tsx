@@ -9,7 +9,7 @@ const sections = [
   },
   {
     title: "Eligibility",
-    content: "You must be at least 13 years old to use Civiq. Civiq is intended for users aged 16–25 in Ontario, Canada.",
+    content: "You must be at least 14 years old to use Civiq. Civiq is intended for users aged 16–25 in Ontario, Canada.",
   },
   {
     title: "Your content",

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { db } from "@/db";
 import { pushSubscriptions, users } from "@/db/schema";
-import { eq, gt } from "drizzle-orm";
+import { gt } from "drizzle-orm";
 
   export async function POST(req: Request) {
 try {
@@ -58,3 +58,4 @@ try {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
+

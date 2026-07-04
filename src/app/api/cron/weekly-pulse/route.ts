@@ -12,8 +12,9 @@ async function sendWithRetry(sub: typeof pushSubscriptions.$inferSelect, payload
         payload
       );
       return "ok";
-    } catch (err: any) {
-      if (err?.statusCode === 410 || err?.statusCode === 404) return "dead";
+    } catch (err) {
+      const e = err as { statusCode?: number };
+      if (e?.statusCode === 410 || e?.statusCode === 404) return "dead";
       if (attempt === retries) return "failed";
       await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
     }
@@ -69,3 +70,4 @@ try {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
+

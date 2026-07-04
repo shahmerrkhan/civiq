@@ -59,7 +59,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
   const [explainLoading, setExplainLoading] = useState<number | null>(null);
   const [bookmarked, setBookmarked] = useState<Record<number, boolean>>({});
   const [bookmarkLoading, setBookmarkLoading] = useState<number | null>(null);
-  const [til, setTil] = useState<string | null>(null);
+  const [, setTil] = useState<string | null>(null);
   const [discussLoading, setDiscussLoading] = useState<number | null>(null);
   const [storylineCount, setStorylineCount] = useState(0);
   const [tourActive, setTourActive] = useState(false);
@@ -100,7 +100,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
     fetch("/api/storylines")
       .then(r => r.json())
       .then(d => {
-        const followed = (d.storylines ?? []).filter((s: any) => s.isFollowing).length;
+        const followed = (d.storylines ?? []).filter((s: { isFollowing: boolean }) => s.isFollowing).length;
         setStorylineCount(followed);
       })
       .catch(() => {});
@@ -188,7 +188,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
             <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px" }}>Ontario Feed</div>
             <StreakBadge />
           </div>
-          <div style={{ fontSize: "14px", color: "#444" }}>What's happening in your province today</div>
+          <div style={{ fontSize: "14px", color: "#444" }}>What&apos;s happening in your province today</div>
         </motion.div>
 
           {storylineCount > 0 && (
@@ -212,7 +212,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
                 <div style={{ fontSize: "12px", fontWeight: "700", color: "#f5a623" }}>
                   {storylineCount} {storylineCount === 1 ? "story" : "stories"} you follow
                 </div>
-                <div style={{ fontSize: "12px", color: "#444" }}>— see what's developed</div>
+                <div style={{ fontSize: "12px", color: "#444" }}>— see what&apos;s developed</div>
               </div>
               <div style={{ fontSize: "13px", color: "#444" }}>→</div>
             </motion.div>
@@ -278,7 +278,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
           transition={{ delay: 0.1 }}
             style={{ display: "flex", gap: "8px", marginBottom: "16px", overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none", paddingBottom: "4px" }}
           >
-          {filters.map((f, i) => (
+          {filters.map((f) => (
             <motion.button
               key={f}
               onClick={() => setActiveFilter(f)}
@@ -303,7 +303,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
 
         {loading && (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <div style={{ fontSize: "13px", color: "#555", marginBottom: "4px" }}>Generating today's Ontario feed...</div>
+            <div style={{ fontSize: "13px", color: "#555", marginBottom: "4px" }}>Generating today&apos;s Ontario feed...</div>
             {[1, 2, 3].map(i => (
               <div key={i} className="skeleton" style={{ height: "160px", borderRadius: "16px" }} />
             ))}
@@ -445,7 +445,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
                               transition={{ duration: 0.2 }}
                               style={{ fontSize: "14px", color: "#888", lineHeight: "1.8", fontStyle: "italic", marginBottom: "16px" }}
                             >
-                              "{card.perspectives[activePerspective]}"
+                              &quot;{card.perspectives[activePerspective]}&quot;
                             </motion.div>
                           </AnimatePresence>
 
@@ -592,3 +592,10 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
     </AppLayout>
   );
 }
+
+
+
+
+
+
+

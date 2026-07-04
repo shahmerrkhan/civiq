@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
-import Link from "next/link";
 
 type SwipeCard = {
   id: number;
@@ -79,12 +78,16 @@ export default function SwipeClient() {
   }, []);
 
   useEffect(() => {
+    // Initial data load on mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCards(1);
   }, [fetchCards]);
 
   // Load more when 3 cards from end
   useEffect(() => {
     if (cards.length > 0 && index >= cards.length - 3 && !loadingMore) {
+      // Infinite-scroll pagination trigger, intentional
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingMore(true);
       const nextPage = page + 1;
       setPage(nextPage);
@@ -143,7 +146,7 @@ export default function SwipeClient() {
     isDragging.current = false;
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
+  const onTouchMove = () => {
     isDragging.current = true;
   };
 
@@ -317,7 +320,7 @@ export default function SwipeClient() {
             >
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: "13px", fontWeight: "700", color: "#f0ede6", marginBottom: "3px" }}>
-                  🔥 You've read 5 stories
+                  🔥 You&apos;ve read 5 stories
                 </div>
                 <div style={{ fontSize: "11px", color: "#555", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   Share with friends and grow the movement
@@ -473,7 +476,7 @@ export default function SwipeClient() {
                   transition={{ duration: 0.18 }}
                   style={{ fontSize: "13px", color: "#777", lineHeight: "1.75", fontStyle: "italic" }}
                 >
-                  "{card.perspectives[perspective]}"
+                  &quot;{card.perspectives[perspective]}&quot;
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -550,3 +553,9 @@ export default function SwipeClient() {
     </AppLayout>
   );
 }
+
+
+
+
+
+

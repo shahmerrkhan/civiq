@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { witnessEvents, witnessWatches, userActivity } from "@/db/schema";
 import { eq, desc, and, inArray, sql } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
-import { generateWeeklyWitnessEvents, resolveExpiredWitnessEvents } from "@/lib/witness";
+import { generateWeeklyWitnessEvents } from "@/lib/witness";
 import { WitnessWatchSchema } from "@/lib/schemas";
 
 function getWeekStart() {

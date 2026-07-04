@@ -202,6 +202,8 @@ export default function AppTour({ onDone }: { onDone: () => void }) {
   const current = TOUR_STEPS[step];
 
   useEffect(() => {
+    // Mount flag for tour overlay, intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };

@@ -14,7 +14,7 @@ function getWeekStart() {
   return monday.toISOString().split("T")[0];
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const { userId } = await auth();
 
@@ -167,3 +167,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to submit prediction" }, { status: 500 });
   }
 }
+

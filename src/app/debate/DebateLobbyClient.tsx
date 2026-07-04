@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
 
-type Room = {
+export type Room = {
   id: string;
   card_title: string;
   card_summary: string;
@@ -137,7 +137,7 @@ export default function DebateLobbyClient({ userId, rooms }: { userId: string; r
             <div style={{ fontSize: "32px", marginBottom: "12px" }}>💬</div>
             <div style={{ fontSize: "16px", fontWeight: "700", color: "#f0ede6", marginBottom: "8px" }}>No debates yet</div>
             <div style={{ fontSize: "13px", color: "#444", lineHeight: "1.7", maxWidth: "340px", margin: "0 auto 20px" }}>
-              Open any issue card in your feed and tap "Discuss This" to get matched with someone who sees it differently.
+              Open any issue card in your feed and tap &quot;Discuss This&quot; to get matched with someone who sees it differently.
             </div>
             <Link href="/dashboard" style={{ display: "inline-block", padding: "10px 24px", borderRadius: "10px", backgroundColor: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.25)", color: "#f5a623", fontSize: "13px", fontWeight: "700", textDecoration: "none" }}>
               Browse the feed →
@@ -171,3 +171,4 @@ export default function DebateLobbyClient({ userId, rooms }: { userId: string; r
     </AppLayout>
   );
 }
+

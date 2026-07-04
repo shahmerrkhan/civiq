@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { pollVotes, users, userActivity } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { VoteSchema } from "@/lib/schemas";
 
@@ -25,8 +25,9 @@ export async function POST(req: Request) {
 
     try {
       await db.insert(pollVotes).values({ pollId, userId, optionIndex, userLeaning: leaning });
-    } catch (err: any) {
-      if (err?.code === "23505") return NextResponse.json({ error: "Already voted" }, { status: 409 });
+    } catch (err) {
+      const e = err as { code?: string };
+      if (e?.code === "23505") return NextResponse.json({ error: "Already voted" }, { status: 409 });
       throw err;
     }
 
@@ -42,3 +43,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to record vote" }, { status: 500 });
   }
 }
+
+

@@ -57,7 +57,7 @@ const parsed = JSON.parse(match[0]);
       }).returning();
 
       question = inserted[0];
-    } catch (err) {
+    } catch {
       return NextResponse.json({ error: "Could not generate question" }, { status: 500 });
     }
   }
@@ -159,3 +159,4 @@ await db.insert(dailyAnswers).values({
     return NextResponse.json({ error: "Failed to submit answer" }, { status: 500 });
   }
 }
+

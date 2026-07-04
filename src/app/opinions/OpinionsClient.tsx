@@ -24,7 +24,7 @@ function timeAgo(date: string) {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-type Opinion = {
+export type Opinion = {
   id: string;
   opinion: string;
   createdAt: string;
@@ -244,7 +244,7 @@ export default function OpinionsClient({ opinions }: { opinions: Opinion[] }) {
                                 borderLeft: `2px solid ${color}`,
                                 paddingLeft: "12px",
                               }}>
-                                "{op.opinion}"
+                                &quot;{op.opinion}&quot;
                               </div>
                             </div>
 
@@ -280,3 +280,5 @@ export default function OpinionsClient({ opinions }: { opinions: Opinion[] }) {
     </AppLayout>
   );
 }
+
+

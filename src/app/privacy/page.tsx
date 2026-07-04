@@ -41,7 +41,7 @@ const sections = [
   },
   {
     title: "Users under 18",
-    content: "Civiq is designed for users aged 16 and older. We do not knowingly collect data from children under 13. If you believe a child under 13 has created an account, contact us at the email below and we will delete it promptly.",
+    content: "Civiq is designed for users aged 14 and older. We do not knowingly collect data from children under 14. If you believe a child under 14 has created an account, contact us at the email below and we will delete it promptly.",
   },
   {
     title: "Your rights",
@@ -108,3 +108,5 @@ export default function PrivacyPolicy() {
     </div>
   );
 }
+
+

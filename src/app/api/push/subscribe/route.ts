@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { PushSubscribeSchema } from "@/lib/schemas";
 
 export async function POST(req: Request) {
@@ -28,3 +27,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
+

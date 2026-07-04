@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { userOpinions, contentCards } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import OpinionsClient from "./OpinionsClient";
+import OpinionsClient, { type Opinion } from "./OpinionsClient";
 
 export default async function OpinionsPage() {
   const { userId } = await auth();
@@ -24,5 +24,7 @@ export default async function OpinionsPage() {
     .where(eq(userOpinions.userId, userId))
     .orderBy(userOpinions.createdAt);
 
-  return <OpinionsClient opinions={opinions as any[]} />;
+  return <OpinionsClient opinions={opinions as unknown as Opinion[]} />;
 }
+
+

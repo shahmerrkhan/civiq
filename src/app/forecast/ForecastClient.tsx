@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 
@@ -111,13 +112,6 @@ export default function ForecastClient({ userId }: { userId: string | null }) {
   const openQs = questions.filter(q => q.status === "open");
   const closedQs = questions.filter(q => q.status === "closed");
   const resolvedQs = questions.filter(q => q.status === "resolved");
-
-  const base: React.CSSProperties = {
-    minHeight: "100vh",
-    backgroundColor: "#06060c",
-    fontFamily: "'DM Sans', sans-serif",
-    color: "#ffffff",
-  };
 
   const main: React.CSSProperties = {
     flex: 1,
@@ -439,9 +433,9 @@ function QuestionCard({
                     Make your prediction →
                   </button>
                 ) : (
-                  <a href="/sign-in" style={{ color: "#f5a623", fontSize: "14px", fontWeight: "600" }}>
+                  <Link href="/sign-in" style={{ color: "#f5a623", fontSize: "14px", fontWeight: "600" }}>
                     Sign in to predict →
-                  </a>
+                  </Link>
                 )
               ) : (
                 <button
@@ -757,3 +751,7 @@ function ResolvedCard({ question }: { question: Question }) {
     </div>
   );
 }
+
+
+
+

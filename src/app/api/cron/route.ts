@@ -20,9 +20,10 @@ async function sendWithRetry(sub: typeof pushSubscriptions.$inferSelect, payload
         payload
       );
       return "ok";
-    } catch (err: any) {
+    } catch (err) {
+      const e = err as { statusCode?: number };
       // 410 Gone = subscription expired, delete it
-      if (err?.statusCode === 410 || err?.statusCode === 404) return "dead";
+      if (e?.statusCode === 410 || e?.statusCode === 404) return "dead";
       if (attempt === retries) return "failed";
       // Wait before retry: 500ms, 1000ms
       await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
@@ -78,3 +79,4 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
+

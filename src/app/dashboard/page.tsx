@@ -2,7 +2,6 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { sql } from "@/db";
 import DashboardClient from "./DashboardClient";
-import StreakBadge from "@/components/StreakBadge";
 
 export default async function Dashboard() {
   const { userId } = await auth();
@@ -13,3 +12,4 @@ export default async function Dashboard() {
 
   return <DashboardClient compassPosition={result[0].compass_position} />;
 }
+

@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { polls, pollVotes, contentCards, users } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { eq, sql } from "drizzle-orm";
-import PollsClient from "./PollsClient";
+import PollsClient, { type Poll, type VoteCount } from "./PollsClient";
 
 export default async function PollsPage() {
   const { userId } = await auth();
@@ -47,11 +47,14 @@ export default async function PollsPage() {
 
   return (
     <PollsClient
-      polls={allPolls as any}
-      voteCounts={voteCounts as any}
+      polls={allPolls as unknown as Poll[]}
+      voteCounts={voteCounts as unknown as VoteCount[]}
       userVotes={userVotes}
       userId={userId ?? null}
       compassPosition={compassPosition}
     />
   );
 }
+
+
+

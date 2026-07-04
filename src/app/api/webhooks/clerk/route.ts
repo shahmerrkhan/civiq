@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const body = JSON.stringify(payload);
 
   const wh = new Webhook(WEBHOOK_SECRET);
-  let evt: any;
+  let evt: { type: string; data: Record<string, unknown> };
 
   try {
     evt = wh.verify(body, {
@@ -30,14 +30,14 @@ export async function POST(req: Request) {
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   try {
     if (evt.type === "user.created") {
       const { id, email_addresses, username } = evt.data;
-      const email = email_addresses?.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address
+      const email = email_addresses?.find((e: { id: string; email_address: string }) => e.id === evt.data.primary_email_address_id)?.email_address
         ?? email_addresses?.[0]?.email_address
         ?? "";
 
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 
     if (evt.type === "user.updated") {
       const { id, email_addresses } = evt.data;
-      const email = email_addresses?.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address
+      const email = email_addresses?.find((e: { id: string; email_address: string }) => e.id === evt.data.primary_email_address_id)?.email_address
         ?? email_addresses?.[0]?.email_address
         ?? "";
       if (email) {
@@ -64,3 +64,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true });
 }
+
+

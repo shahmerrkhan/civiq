@@ -3,7 +3,7 @@ import { contentCards, polls, pollVotes, userOpinions, users } from "@/db/schema
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import IssueClient from "./IssueClient";
+import IssueClient, { type IssueCard, type IssuePoll } from "./IssueClient";
 
 export default async function IssuePage({ params }: { params: { id: string } }) {
   const { userId } = await auth();
@@ -49,8 +49,8 @@ export default async function IssuePage({ params }: { params: { id: string } }) 
 
   return (
     <IssueClient
-      card={card[0] as any}
-      polls={pollsWithVotes as any}
+      card={card[0] as unknown as IssueCard}
+      polls={pollsWithVotes as unknown as IssuePoll[]}
       userVotes={userVotes}
       userOpinion={userOpinion}
       userId={userId ?? null}
@@ -58,3 +58,5 @@ export default async function IssuePage({ params }: { params: { id: string } }) 
     />
   );
 }
+
+

@@ -42,7 +42,7 @@ export default function ChallengesClient() {
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState<string | null>(null);
   const [justCompleted, setJustCompleted] = useState<string | null>(null);
-  const [showBadge, setShowBadge] = useState(false);
+  const [, setShowBadge] = useState(false);
 
   useEffect(() => {
     fetch("/api/challenges")
@@ -96,7 +96,7 @@ export default function ChallengesClient() {
               Weekly Challenges
             </div>
             <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#f0ede6", letterSpacing: "-0.5px", margin: 0, lineHeight: 1.2 }}>
-              This Week's Missions
+              This Week&apos;s Missions
             </h1>
             <div style={{ fontSize: "13px", color: "#555", marginTop: "8px" }}>
               Resets Monday · Next drop {getNextMonday()}
@@ -342,3 +342,4 @@ export default function ChallengesClient() {
     </AppLayout>
   );
 }
+

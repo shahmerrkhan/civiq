@@ -52,8 +52,6 @@ export default function StorylinesClient({ userId }: { userId: string | null }) 
   const [filter, setFilter] = useState<"all" | "following">("all");
   const [saved, setSaved] = useState<Record<string, boolean>>({});
 
-  useEffect(() => { fetchStorylines(); }, []);
-
   async function fetchStorylines() {
     setLoading(true);
     try {
@@ -66,7 +64,12 @@ export default function StorylinesClient({ userId }: { userId: string | null }) 
     setLoading(false);
   }
 
+  // Initial data load on mount, intentional
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchStorylines(); }, []);
+
   async function toggleFollow(storylineId: string) {
+    
     if (!userId || storylineId.startsWith("seed-")) return;
     setSubmittingFollow(storylineId);
     try {
@@ -262,7 +265,7 @@ export default function StorylinesClient({ userId }: { userId: string | null }) 
 
                         {saved[s.id] || s.myOpinion ? (
                           <div style={{ padding: "14px 16px", borderRadius: "12px", backgroundColor: "rgba(245,166,35,0.05)", border: "1px solid rgba(245,166,35,0.12)", fontSize: "13px", color: "#ccc", lineHeight: "1.6", fontStyle: "italic" }}>
-                            "{saved[s.id] ? opinionText[s.id] || s.myOpinion : s.myOpinion}"
+                            &quot;{saved[s.id] ? opinionText[s.id] || s.myOpinion : s.myOpinion}&quot;
                           </div>
                         ) : userId ? (
                           <div>
@@ -333,3 +336,4 @@ export default function StorylinesClient({ userId }: { userId: string | null }) 
     </AppLayout>
   );
 }
+

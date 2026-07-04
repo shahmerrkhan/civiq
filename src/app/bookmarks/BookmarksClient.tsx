@@ -22,8 +22,10 @@ function timeAgo(date: string) {
   return `${Math.floor(days / 7)} weeks ago`;
 }
 
+export type Bookmark = { id: string; cardTitle: string; cardSummary: string; cardCategory: string; cardSource: string; savedAt: string };
+
 export default function BookmarksClient({ bookmarks: initial }: {
-  bookmarks: { id: string; cardTitle: string; cardSummary: string; cardCategory: string; cardSource: string; savedAt: string }[]
+  bookmarks: Bookmark[]
 }) {
   const [bookmarks, setBookmarks] = useState(initial);
   const [removing, setRemoving] = useState<string | null>(null);
@@ -128,3 +130,4 @@ export default function BookmarksClient({ bookmarks: initial }: {
     </AppLayout>
   );
 }
+

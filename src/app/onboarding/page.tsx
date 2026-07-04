@@ -349,7 +349,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               transition={{ delay: 0.4 }}
               style={{ fontSize: "15px", color: "#555", lineHeight: "1.7", marginBottom: "40px", maxWidth: "380px", margin: "0 auto 40px" }}
             >
-              {desc} Your feed will reflect this — but you'll always see every perspective on Civiq.
+              {desc} Your feed will reflect this — but you&apos;ll always see every perspective on Civiq.
             </motion.p>
             <ShareCard label={label} />
 
@@ -397,7 +397,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
             {notifDone ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div style={{ fontSize: "22px", fontWeight: "800", letterSpacing: "-0.5px", marginBottom: "8px", color: "#f0ede6" }}>
-                  You're all set
+                  You&apos;re all set
                 </div>
                 <div style={{ fontSize: "14px", color: "#666", lineHeight: "1.7" }}>
                   Taking you to your feed...
@@ -412,7 +412,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
                   Stay in the loop on Ontario
                 </h2>
                 <p style={{ fontSize: "15px", color: "#666", lineHeight: "1.75", marginBottom: "12px", maxWidth: "360px", margin: "0 auto 12px" }}>
-                  Get a morning brief and evening update — what's happening in your province, no spin.
+                  Get a morning brief and evening update — what&apos;s happening in your province, no spin.
                 </p>
                 <p style={{ fontSize: "13px", color: "#444", marginBottom: "36px" }}>
                   Twice a day. Turn off anytime.
@@ -478,7 +478,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               What issues matter most to you?
             </h2>
             <p style={{ fontSize: "14px", color: "#444", marginBottom: "32px", lineHeight: "1.6" }}>
-              Pick as many as you want. We'll prioritize these in your feed.
+              Pick as many as you want. We&apos;ll prioritize these in your feed.
             </p>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "32px" }}>
@@ -643,3 +643,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
     </>
   );
 }
+
+
+
+

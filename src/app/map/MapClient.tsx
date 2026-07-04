@@ -64,6 +64,8 @@ export default function MapClient() {
   }, []);
 
   useEffect(() => {
+    // Data fetch on mount, intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     fetch(`/api/region-votes?issueId=${issueId}`)
       .then(r => r.json())

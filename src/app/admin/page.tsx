@@ -2,7 +2,7 @@ import { db } from "@/db";
 export const dynamic = "force-dynamic";
 import { contentCards, polls, witnessEvents, forecastQuestions, circlePostReports, circlePosts } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
-import AdminClient from "./AdminClient";
+import AdminClient, { type Card, type Poll, type WitnessEvent, type ForecastQuestion, type Report } from "./AdminClient";
 
 export default async function AdminPage() {
   const cards = await db
@@ -40,11 +40,16 @@ export default async function AdminPage() {
 
   return (
     <AdminClient
-      cards={cards as any}
-      polls={allPolls as any}
-      witnessEvents={allWitnessEvents as any}
-      forecastQuestions={allForecastQuestions as any}
-      reports={allReports as any}
+      cards={cards as unknown as Card[]}
+      polls={allPolls as unknown as Poll[]}
+      witnessEvents={allWitnessEvents as unknown as WitnessEvent[]}
+      forecastQuestions={allForecastQuestions as unknown as ForecastQuestion[]}
+      reports={allReports as unknown as Report[]}
     />
   );
 }
+
+
+
+
+

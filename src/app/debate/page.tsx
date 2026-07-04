@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { sql } from "@/db";
-import DebateLobbyClient from "./DebateLobbyClient";
+import DebateLobbyClient, { type Room } from "./DebateLobbyClient";
 
 export default async function DebateLobbyPage() {
   const { userId } = await auth();
@@ -19,5 +19,6 @@ export default async function DebateLobbyPage() {
     LIMIT 20
   `;
 
-  return <DebateLobbyClient userId={userId} rooms={rooms as any} />;
+  return <DebateLobbyClient userId={userId} rooms={rooms as unknown as Room[]} />;
 }
+

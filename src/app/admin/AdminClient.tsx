@@ -30,7 +30,7 @@ const CategoryPicker = ({ value, onChange }: { value: string; onChange: (v: stri
   </div>
 );
 
-type Card = {
+export type Card = {
   id: string;
   title: string;
   summary: string;
@@ -42,7 +42,7 @@ type Card = {
   createdAt: Date;
 };
 
-type Poll = {
+export type Poll = {
   id: string;
   cardId: string | null;
   question: string;
@@ -50,7 +50,7 @@ type Poll = {
   expiresAt: Date | null;
 };
 
-type WitnessEvent = {
+export type WitnessEvent = {
   id: string;
   title: string;
   description: string;
@@ -63,7 +63,7 @@ type WitnessEvent = {
   weekStart: string;
 };
 
-type ForecastQuestion = {
+export type ForecastQuestion = {
   id: string;
   question: string;
   context: string;
@@ -76,7 +76,7 @@ type ForecastQuestion = {
   weekStart: string;
 };
 
-type Report = {
+export type Report = {
   id: string;
   postId: string | null;
   reportedBy: string | null;
@@ -1021,3 +1021,7 @@ function WitnessAdminCard({
     </motion.div>
   );
 }
+
+
+
+

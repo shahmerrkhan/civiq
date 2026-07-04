@@ -1305,7 +1305,8 @@ const MODULE_MAP: Record<string, { title: string; prompt: string; minutes: numbe
 
 export default async function LearnModule({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const module = MODULE_MAP[slug];
-  if (!module) notFound();
-  return <LearnModuleClient module={module} slug={slug} />;
+  const learnModule = MODULE_MAP[slug];
+  if (!learnModule) notFound();
+  return <LearnModuleClient module={learnModule} slug={slug} />;
 }
+

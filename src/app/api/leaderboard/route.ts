@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function GET() {
   try {
@@ -52,7 +49,7 @@ export async function GET() {
       WHERE id = ${userId}
     `;
 
-    const leaderboard = topRows.map((r: any) => ({
+    const leaderboard = topRows.map((r: { id: string; username: string | null; streak_count: number | null; civic_score: number | string }) => ({
       userId: r.id,
       username: r.username || "Anonymous",
       streakCount: r.streak_count ?? 0,
@@ -70,3 +67,4 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to load leaderboard" }, { status: 500 });
   }
 }
+

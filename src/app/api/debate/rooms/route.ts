@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db, sql } from "@/db";
 import { debateRooms } from "@/db/schema";
-import { eq, and, or, isNull } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { DebateRoomSchema } from "@/lib/schemas";
 
 export async function POST(req: Request) {

@@ -198,7 +198,7 @@ function PostCard({ post, onLike, onReply, onReport, depth = 0 }: {
   );
 }
 
-export default function CirclesClient({ userId }: { userId: string }) {
+export default function CirclesClient({}: { userId: string }) {
   const [view, setView] = useState<"list" | "detail">("list");
   const [circles, setCircles] = useState<Circle[]>([]);
   const [selectedCircle, setSelectedCircle] = useState<CircleDetail | null>(null);
@@ -224,6 +224,8 @@ export default function CirclesClient({ userId }: { userId: string }) {
     setLoadingList(false);
   }, []);
 
+  // Fetches on mount; safe direct setState via loadCircles, not a render-cascade risk
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadCircles(); }, [loadCircles]);
 
   // Load circle detail + posts
@@ -702,7 +704,7 @@ export default function CirclesClient({ userId }: { userId: string }) {
               </motion.div>
             ) : (
               <AnimatePresence>
-                {posts.map((post, i) => (
+                {posts.map((post) => (
                   <div key={post.id}>
                     <PostCard
                       post={post}
@@ -747,3 +749,5 @@ export default function CirclesClient({ userId }: { userId: string }) {
     </AppLayout>
   );
 }
+
+

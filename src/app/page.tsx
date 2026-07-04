@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Logo from "@/components/Logo";
@@ -207,7 +208,7 @@ export default function Home() {
   const [wordIndex, setWordIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [installPrompt, setInstallPrompt] = useState<{ prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> } | null>(null);
   const [showInstall, setShowInstall] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSHint, setShowIOSHint] = useState(false);
@@ -218,9 +219,11 @@ export default function Home() {
 
   useEffect(() => {
     const standalone =
-      (window.navigator as any).standalone === true ||
+      (window.navigator as { standalone?: boolean }).standalone === true ||
       window.matchMedia("(display-mode: standalone)").matches;
     if (standalone) {
+      // PWA detection on mount, intentional
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsPWA(true);
       return;
     }
@@ -229,8 +232,8 @@ export default function Home() {
     if (ios) { setIsIOS(true); setShowInstall(true); }
     if (android) {
       const handler = (e: Event) => { e.preventDefault(); setInstallPrompt(e); setShowInstall(true); };
-      window.addEventListener("beforeinstallprompt", handler as any);
-      return () => window.removeEventListener("beforeinstallprompt", handler as any);
+      window.addEventListener("beforeinstallprompt", handler as EventListener);
+      return () => window.removeEventListener("beforeinstallprompt", handler as EventListener);
     }
   }, []);
 
@@ -260,6 +263,8 @@ export default function Home() {
     } else if (deleting && displayed.length > 0) {
       timeout = setTimeout(() => setDisplayed(current.slice(0, displayed.length - 1)), 40);
     } else if (deleting && displayed.length === 0) {
+      // Typewriter animation loop, intentional
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDeleting(false);
       setWordIndex(i => (i + 1) % WORDS.length);
     }
@@ -608,7 +613,7 @@ export default function Home() {
                 }}
               >
                 Tap the <strong style={{ color: "#f5a623" }}>Share</strong> button in Safari, then{" "}
-                <strong style={{ color: "#f5a623" }}>"Add to Home Screen"</strong> to install Civiq.
+                <strong style={{ color: "#f5a623" }}>&quot;Add to Home Screen&quot;</strong> to install Civiq.
               </motion.div>
             )}
 
@@ -718,7 +723,7 @@ export default function Home() {
               transition={{ duration: 0.6 }}
               style={{ marginBottom: "56px" }}
             >
-              <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.12em", textTransform: "uppercase", color: "#f5a623", marginBottom: "12px" }}>What's inside</div>
+              <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.12em", textTransform: "uppercase", color: "#f5a623", marginBottom: "12px" }}>What&apos;s inside</div>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px, 3.5vw, 46px)", fontWeight: "900", letterSpacing: "-1px", color: "#f0ede6", lineHeight: "1.1", maxWidth: "560px" }}>
                 Everything you need to get{" "}
                 <em style={{ fontStyle: "italic", color: "#f5a623" }}>actually</em> informed.
@@ -754,7 +759,7 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             style={{ maxWidth: "640px", margin: "0 auto" }}
           >
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "60px", color: "#f5a623", lineHeight: "1", marginBottom: "16px", opacity: 0.6 }}>"</div>
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "60px", color: "#f5a623", lineHeight: "1", marginBottom: "16px", opacity: 0.6 }}>&quot;</div>
             <blockquote style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(18px, 2.5vw, 26px)", fontWeight: "700", color: "#888", lineHeight: "1.6", letterSpacing: "-0.3px", marginBottom: "24px", fontStyle: "italic" }}>
               What is the first part of politics? Education. The second? Education. And the third? Education.
             </blockquote>
@@ -789,10 +794,12 @@ export default function Home() {
         <div style={{ width: "1px", height: "40px", backgroundColor: "rgba(255,255,255,0.08)" }} />
 
         <a href="https://www.civicclarityfoundation.org" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
-          <img
+          <Image
             src="/ccf-logo.png"
             alt="Civic Clarity Foundation"
-            style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", border: "1px solid rgba(255,255,255,0.08)" }}
+            width={48}
+            height={48}
+            style={{ borderRadius: "50%", objectFit: "cover", border: "1px solid rgba(255,255,255,0.08)" }}
           />
           <div>
             <div style={{ fontSize: "14px", fontWeight: "700", color: "#e8e6e0" }}>Civic Clarity Foundation</div>
@@ -905,3 +912,15 @@ export default function Home() {
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+

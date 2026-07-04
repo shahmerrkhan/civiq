@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { users, userOpinions, pollVotes, userProgress, dailyAnswers } from "@/db/schema";
 import { eq, count } from "drizzle-orm";
-import ProfileClient from "./ProfileClient";
+import ProfileClient, { type ProfileOpinion } from "./ProfileClient";
 
 export default async function Profile() {
   const { userId } = await auth();
@@ -48,9 +48,11 @@ return (
       compassPosition={(dbUser[0].compassPosition as { x: number; y: number }) || null}
       streakCount={dbUser[0].streakCount ?? 0}
       civicScore={civicScore}
-      opinions={opinions as any[]}
+      opinions={opinions as unknown as ProfileOpinion[]}
       pollsVoted={votesCount[0]?.count ?? 0}
       modulesCompleted={progressCount[0]?.count ?? 0}
     />
   );
 }
+
+

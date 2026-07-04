@@ -15,9 +15,32 @@ const PERSPECTIVE_CONFIG = [
   { key: "right", label: "Right", color: "#f87171", icon: "▶" },
 ];
 
+export type IssueCard = {
+  id: string;
+  category: string | null;
+  title: string;
+  summary: string | null;
+  sourceName: string | null;
+  sourceUrl: string | null;
+  perspectives: Record<string, string> | null;
+};
+
+export type PollVote = {
+  pollId: string;
+  optionIndex: number;
+  userLeaning?: string | null;
+};
+
+export type IssuePoll = {
+  id: string;
+  question: string;
+  options: unknown;
+  votes: PollVote[];
+};
+
 export default function IssueClient({ card, polls, userVotes, userOpinion, userId, compassPosition }: {
-  card: any;
-  polls: any[];
+  card: IssueCard;
+  polls: IssuePoll[];
   userVotes: { pollId: string; optionIndex: number }[];
   userOpinion: string | null;
   userId: string | null;
@@ -26,7 +49,7 @@ export default function IssueClient({ card, polls, userVotes, userOpinion, userI
   const [voted, setVoted] = useState<Record<string, number>>(
     Object.fromEntries(userVotes.map((v) => [v.pollId, v.optionIndex]))
   );
-  const [optimisticVotes, setOptimisticVotes] = useState<any[]>(
+  const [optimisticVotes, setOptimisticVotes] = useState<PollVote[]>(
     polls.flatMap((p) => p.votes)
   );
   const [opinion, setOpinion] = useState(userOpinion ?? "");
@@ -243,3 +266,4 @@ export default function IssueClient({ card, polls, userVotes, userOpinion, userI
     </AppLayout>
   );
 }
+

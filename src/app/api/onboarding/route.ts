@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { db, sql } from "@/db";
+import { sql } from "@/db";
 import { NextResponse } from "next/server";
 import { OnboardingSchema } from "@/lib/schemas";
 
@@ -26,3 +26,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Onboarding failed" }, { status: 500 });
   }
 }
+

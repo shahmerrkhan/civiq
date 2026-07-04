@@ -25,6 +25,8 @@ function timeAgo(date: string) {
   return `${Math.floor(days / 30)} months ago`;
 }
 
+export type ProfileOpinion = { id: string; opinion: string; cardId: string; createdAt: string };
+
 export default function ProfileClient({
   name, email, imageUrl, compassPosition,
   streakCount, civicScore, opinions, pollsVoted, modulesCompleted,
@@ -35,7 +37,7 @@ export default function ProfileClient({
   compassPosition: { x: number; y: number } | null;
   streakCount: number;
   civicScore: number;
-  opinions: { id: string; opinion: string; cardId: string; createdAt: string }[];
+  opinions: ProfileOpinion[];
   pollsVoted: number;
   modulesCompleted: number;
 }) {
@@ -521,3 +523,5 @@ const stats = [
     </AppLayout>
   );
 }
+
+
