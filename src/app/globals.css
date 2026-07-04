@@ -4,6 +4,15 @@
   padding: 0;
 }
 
+.cl-formFieldLabel__legalAccepted a {
+  color: #f5a623 !important;
+  text-decoration: underline !important;
+}
+
+.cl-formFieldInput::placeholder {
+  color: #7a7a7a !important;
+}
+
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;

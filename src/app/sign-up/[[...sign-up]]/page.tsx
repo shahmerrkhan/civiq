@@ -98,8 +98,8 @@ export default function SignUpPage() {
               tagInputItem: { color: "#f0ede6" },
               formFieldInputShowPasswordButton: { color: "#888" },
               formFieldLabel__legalAccepted: {
-                color: "#ccc",
-                "& a": { color: "#fff", textDecoration: "underline" },
+                color: "#c4c4c4",
+                fontSize: "13px",
               },
             },
           }}

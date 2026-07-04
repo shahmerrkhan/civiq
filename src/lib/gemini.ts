@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 
 export const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
-const GEMINI_TIMEOUT_MS = 15000;
+const GEMINI_TIMEOUT_MS = 45000;
 
 interface GeminiParams {
   prompt: string;
