@@ -22,25 +22,36 @@ export async function POST(req: Request) {
   const body = JSON.stringify(payload);
 
   const wh = new Webhook(WEBHOOK_SECRET);
-  let evt: { type: string; data: Record<string, unknown> };
+  interface ClerkEmailAddress {
+    id: string;
+    email_address: string;
+  }
 
+  interface ClerkUserData {
+    id: string;
+    username: string | null;
+    email_addresses: ClerkEmailAddress[];
+    primary_email_address_id: string | null;
+  }
+
+  let evt: { type: string; data: ClerkUserData };
+  
   try {
     evt = wh.verify(body, {
       "svix-id": svix_id,
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
-    }) as { type: string; data: Record<string, unknown> };
-  } catch {
+      }) as { type: string; data: ClerkUserData };
+      } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   try {
     if (evt.type === "user.created") {
       const { id, email_addresses, username } = evt.data;
-      const email = email_addresses?.find((e: { id: string; email_address: string }) => e.id === evt.data.primary_email_address_id)?.email_address
-        ?? email_addresses?.[0]?.email_address
+      const email = email_addresses.find((e) => e.id === evt.data.primary_email_address_id)?.email_address
+        ?? email_addresses[0]?.email_address
         ?? "";
-
       await sql`
         INSERT INTO users (id, email, username, onboarding_complete, streak_count, created_at)
         VALUES (${id}, ${email}, ${username ?? null}, false, 0, NOW())
@@ -50,8 +61,8 @@ export async function POST(req: Request) {
 
     if (evt.type === "user.updated") {
       const { id, email_addresses } = evt.data;
-      const email = email_addresses?.find((e: { id: string; email_address: string }) => e.id === evt.data.primary_email_address_id)?.email_address
-        ?? email_addresses?.[0]?.email_address
+      const email = email_addresses.find((e) => e.id === evt.data.primary_email_address_id)?.email_address
+        ?? email_addresses[0]?.email_address
         ?? "";
       if (email) {
         await sql`UPDATE users SET email = ${email} WHERE id = ${id}`;
