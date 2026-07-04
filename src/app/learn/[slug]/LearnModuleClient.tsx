@@ -45,20 +45,44 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
   const [cardKey, setCardKey] = useState(0);
   const touchStartX = useRef<number>(0);
 
+  const [error, setError] = useState(false);
+  const [reloadIndex, setReloadIndex] = useState(0);
+
   useEffect(() => {
+    let cancelled = false;
+
     fetch(`/api/learn/${slug}`)
       .then(r => r.json())
       .then(data => {
+        if (cancelled) return;
         try {
           const parsed = typeof data.content === "string" ? JSON.parse(data.content) : data.content;
-          setCards(Array.isArray(parsed) ? parsed : []);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCards(parsed);
+          } else {
+            setError(true);
+          }
         } catch {
-          setCards([]);
+          setError(true);
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
-  }, [slug]);
+      .catch(() => {
+        if (cancelled) return;
+        setError(true);
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, reloadIndex]);
+
+  const handleRetry = () => {
+    setLoading(true);
+    setError(false);
+    setReloadIndex(i => i + 1);
+  };
 
   const color = categoryColors[module.category] || "#f5a623";
   const safeCards = cards ?? [];
@@ -150,6 +174,28 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
             }}
           />
         ))}
+      </div>
+    </AppLayout>
+  );
+
+  // Error state
+  if (error) return (
+    <AppLayout active="/learn">
+      <div style={{ padding: "40px 60px", maxWidth: "700px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", textAlign: "center" }}>
+        <div style={{ fontSize: "15px", color: "#aaa", marginBottom: "20px" }}>
+          {"Couldn't load this module. Try again?"}
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={handleRetry}
+           style={{
+            padding: "13px 26px", borderRadius: "12px",
+            border: "none", backgroundColor: color,
+            color: "#000", fontSize: "14px", fontWeight: "700",
+            cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+          }}
+        >Try again</motion.button>
       </div>
     </AppLayout>
   );

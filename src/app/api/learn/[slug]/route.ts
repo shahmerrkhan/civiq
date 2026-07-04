@@ -263,36 +263,48 @@ Each card must match exactly:
 
 Last card must be type "question" with front starting with "What do YOU think:" and a provocative Ontario-relevant question on the back.`;
 
-    const raw = await geminiGenerate({
-      prompt: cardPrompt,
-      maxTokens: 2000,
-      grounding: false,
-    });
+    let content: string | null = null;
+    let lastError = "Failed to generate flashcards";
 
-    // Try array match first, then object with cards key
-    let content: string;
-    const arrayMatch = raw.match(/\[[\s\S]*\]/);
-    if (arrayMatch) {
-      // Validate it actually parses
-      try {
-        const parsed = JSON.parse(arrayMatch[0]);
-        if (!Array.isArray(parsed) || parsed.length === 0) throw new Error("Empty array");
-        content = arrayMatch[0];
-      } catch {
-        return NextResponse.json({ error: "Failed to generate flashcards" }, { status: 500 });
+    for (let attempt = 0; attempt < 3 && !content; attempt++) {
+      const raw = await geminiGenerate({
+        prompt: cardPrompt,
+        maxTokens: 3000,
+        grounding: false,
+      });
+
+      const arrayMatch = raw.match(/\[[\s\S]*\]/);
+      if (arrayMatch) {
+        try {
+          const parsed = JSON.parse(arrayMatch[0]);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            content = arrayMatch[0];
+            break;
+          }
+        } catch {
+          lastError = "Malformed JSON from model";
+        }
       }
-    } else {
-      // Try object wrapper fallback
-      const objMatch = raw.match(/\{[\s\S]*\}/);
-      if (!objMatch) return NextResponse.json({ error: "Failed to generate flashcards" }, { status: 500 });
-      try {
-        const parsed = JSON.parse(objMatch[0]);
-        const cards = parsed.cards ?? parsed.flashcards ?? parsed.data;
-        if (!Array.isArray(cards) || cards.length === 0) throw new Error("No cards found");
-        content = JSON.stringify(cards);
-      } catch {
-        return NextResponse.json({ error: "Failed to generate flashcards" }, { status: 500 });
+
+      if (!content) {
+        const objMatch = raw.match(/\{[\s\S]*\}/);
+        if (objMatch) {
+          try {
+            const parsed = JSON.parse(objMatch[0]);
+            const cards = parsed.cards ?? parsed.flashcards ?? parsed.data;
+            if (Array.isArray(cards) && cards.length > 0) {
+              content = JSON.stringify(cards);
+              break;
+            }
+          } catch {
+            lastError = "Malformed JSON from model";
+          }
+        }
       }
+    }
+
+    if (!content) {
+      return NextResponse.json({ error: lastError }, { status: 500 });
     }
 
     await sql`
