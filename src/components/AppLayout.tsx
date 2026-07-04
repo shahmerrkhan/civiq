@@ -82,7 +82,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       });
       localStorage.setItem("civiq_notif_dismissed", "false");
       setNotifPrompt(false);
-    } catch (e) {
+    } catch {
       setNotifPrompt(false);
     }
   };
@@ -90,13 +90,17 @@ export default function AppLayout({ children, active }: { children: React.ReactN
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
-    setMounted(true);
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
   useEffect(() => {
-    fetch("/api/streak")
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/streak", { method: "POST" })
       .then(r => r.json())
       .then(d => setStreak(d.streak || 0))
       .catch(() => {});

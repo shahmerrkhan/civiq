@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { contentCards } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
-import { auth } from "@clerk/nextjs/server";
 import { geminiGenerate } from "@/lib/gemini";
 import { Redis } from "@upstash/redis";
 
@@ -75,7 +74,7 @@ Make each card genuinely interesting. Vary the categories. No duplicates.`,
         stat: c.stat,
         perspectives: c.perspectives,
         deepDive: c.deepdive,
-        approved: true,
+        approved: false,
         publishedAt: new Date(),
       }))
     );

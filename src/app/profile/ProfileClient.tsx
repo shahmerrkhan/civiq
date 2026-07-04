@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import Image from "next/image";
 
 function getLabel(x: number, y: number) {
   if (x < -0.15 && y < -0.15) return { label: "Left Libertarian", color: "#4ade80" };
@@ -51,8 +52,7 @@ export default function ProfileClient({
     ? getLabel(compassPosition.x, compassPosition.y)
     : { label: "Not taken yet", color: "#555" };
 
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [shareReady, setShareReady] = useState(false);
+
   const [sharing, setSharing] = useState(false);
 
   const generateShareCard = async () => {
@@ -178,7 +178,7 @@ export default function ProfileClient({
           text: `I just found out where I stand politically on Ontario issues. Find out where you stand →`,
           files: [file],
         });
-      } catch (_) {}
+      } catch {}
     } else {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -227,7 +227,7 @@ const stats = [
           style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "40px" }}
         >
           {imageUrl ? (
-            <img src={imageUrl} style={{ width: "64px", height: "64px", borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(245,166,35,0.3)" }} />
+            <Image src={imageUrl} alt="" width={64} height={64} style={{ borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(245,166,35,0.3)" }} />
           ) : (
             <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: "rgba(245,166,35,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", fontWeight: "700", color: "#f5a623" }}>
               {name[0]}
@@ -351,7 +351,7 @@ const stats = [
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
             <div style={{ fontSize: "11px", color: "#444", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase" }}>Ontario Leaderboard</div>
             {currentUserRank && (
-              <div style={{ fontSize: "12px", color: "#f5a623", fontWeight: "700" }}>You're #{currentUserRank}</div>
+              <div style={{ fontSize: "12px", color: "#f5a623", fontWeight: "700" }}>{"You're"} #{currentUserRank}</div>
             )}
           </div>
 
@@ -424,7 +424,7 @@ const stats = [
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "13px", color: "#555", marginBottom: "6px", fontWeight: "500" }}>{timeAgo(op.createdAt)}</div>
                     <div style={{ fontSize: "14px", color: "#ccc", lineHeight: "1.6", backgroundColor: "rgba(167,139,250,0.06)", border: "1px solid rgba(167,139,250,0.1)", borderRadius: "10px", padding: "12px 16px" }}>
-                      "{op.opinion}"
+                      {`"${op.opinion}"`}
                     </div>
                   </div>
                 </motion.div>

@@ -3,6 +3,33 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 
+const eventCategories = ["Legislature", "Courts", "Municipal", "Federal", "Budget", "Election", "Environment", "Housing"];
+
+const CategoryPicker = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+    {eventCategories.map(cat => (
+      <button
+        key={cat}
+        type="button"
+        onClick={() => onChange(cat)}
+        style={{
+          padding: "7px 14px",
+          borderRadius: "100px",
+          fontSize: "12px",
+          fontWeight: "700",
+          border: value === cat ? "1px solid #60a5fa" : "1px solid rgba(255,255,255,0.08)",
+          backgroundColor: value === cat ? "rgba(96,165,250,0.15)" : "transparent",
+          color: value === cat ? "#60a5fa" : "#555",
+          cursor: "pointer",
+          fontFamily: "'DM Sans', sans-serif",
+        }}
+      >
+        {cat}
+      </button>
+    ))}
+  </div>
+);
+
 type Card = {
   id: string;
   title: string;
@@ -125,8 +152,8 @@ export default function AdminClient({
   };
 
   const categories = ["Systems", "Ideologies", "Figures", "Canada & World", "Issues"];
-  const eventCategories = ["Legislature", "Courts", "Municipal", "Federal", "Budget", "Election", "Environment", "Housing"];
 
+  
   const categoryColor: Record<string, string> = {
     Systems: "#60a5fa", Ideologies: "#a78bfa", Figures: "#f5a623",
     "Canada & World": "#34d399", Issues: "#fb923c",
@@ -147,7 +174,8 @@ export default function AdminClient({
     setReports(prev => prev.filter(r => r.id !== id));
   };
 
-  const handleDeleteReportedPost = async (postId: string, reportId: string) => {
+  const handleDeleteReportedPost = async (postId: string, _reportId: string) => {
+    void _reportId;
     if (!confirm("Delete this post and all its reports?")) return;
     await fetch("/api/circles/posts", {
       method: "DELETE",
@@ -178,6 +206,38 @@ export default function AdminClient({
     setCards(prev => prev.map(c => c.id === id ? { ...c, approved: false } : c));
     setLoading(null);
   };
+
+  const [editingCard, setEditingCard] = useState<string | null>(null);
+const [editForm, setEditForm] = useState<{ title: string; summary: string; category: string; stat: string; left: string; centre: string; right: string }>({ title: "", summary: "", category: "", stat: "", left: "", centre: "", right: "" });
+
+const startEdit = (card: Card & { stat?: string | null }) => {
+  setEditingCard(card.id);
+  setEditForm({
+    title: card.title,
+    summary: card.summary,
+    category: card.category || "",
+    stat: card.stat || "",
+    left: card.perspectives?.left || "",
+    centre: card.perspectives?.centre || "",
+    right: card.perspectives?.right || "",
+  });
+};
+
+const saveEdit = async (id: string) => {
+  setLoading(id);
+  const body = {
+    id,
+    title: editForm.title,
+    summary: editForm.summary,
+    category: editForm.category,
+    stat: editForm.stat,
+    perspectives: { left: editForm.left, centre: editForm.centre, right: editForm.right },
+  };
+  await fetch("/api/admin/cards", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  setCards(prev => prev.map(c => c.id === id ? { ...c, ...body } : c));
+  setEditingCard(null);
+  setLoading(null);
+};
 
   const handleCreate = async () => {
     if (!createForm.title.trim() || !createForm.summary.trim()) return;
@@ -386,42 +446,54 @@ export default function AdminClient({
                 <a href={card.sourceUrl} target="_blank" rel="noreferrer" style={{ fontSize: "12px", color: "#444", textDecoration: "none" }}>{card.sourceName || card.sourceUrl} ↗</a>
               </div>
             )}
+            {editingCard === card.id ? (
+              <div style={{ marginBottom: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <input value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} placeholder="Title" style={inputStyle} />
+                <textarea value={editForm.summary} onChange={e => setEditForm(f => ({ ...f, summary: e.target.value }))} placeholder="Summary" rows={3} style={{ ...inputStyle, resize: "none" }} />
+                <input value={editForm.category} onChange={e => setEditForm(f => ({ ...f, category: e.target.value }))} placeholder="Category" style={inputStyle} />
+                <input value={editForm.stat} onChange={e => setEditForm(f => ({ ...f, stat: e.target.value }))} placeholder="Stat" style={inputStyle} />
+                <input value={editForm.left} onChange={e => setEditForm(f => ({ ...f, left: e.target.value }))} placeholder="Left perspective" style={inputStyle} />
+                <input value={editForm.centre} onChange={e => setEditForm(f => ({ ...f, centre: e.target.value }))} placeholder="Centre perspective" style={inputStyle} />
+                <input value={editForm.right} onChange={e => setEditForm(f => ({ ...f, right: e.target.value }))} placeholder="Right perspective" style={inputStyle} />
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => saveEdit(card.id)} disabled={loading === card.id}
+                    style={{ padding: "9px 20px", borderRadius: "10px", border: "none", backgroundColor: "#f5a623", color: "#000", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                  >{loading === card.id ? "Saving..." : "Save"}</motion.button>
+                  <motion.button whileTap={{ scale: 0.97 }} onClick={() => setEditingCard(null)}
+                    style={{ padding: "9px 20px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "#555", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                  >Cancel</motion.button>
+                </div>
+              </div>
+            ) : null}
             <div style={{ display: "flex", gap: "8px" }}>
               {!showUnapprove ? (
                 <>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleApprove(card.id)} disabled={loading === card.id}
                     style={{ padding: "9px 20px", borderRadius: "10px", border: "none", backgroundColor: "#4ade80", color: "#000", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loading === card.id ? 0.5 : 1 }}
                   >{loading === card.id ? "..." : "Approve"}</motion.button>
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => startEdit(card)}
+                    style={{ padding: "9px 20px", borderRadius: "10px", border: "1px solid rgba(96,165,250,0.3)", backgroundColor: "rgba(96,165,250,0.08)", color: "#60a5fa", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                  >Edit</motion.button>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleReject(card.id)} disabled={loading === card.id}
                     style={{ padding: "9px 20px", borderRadius: "10px", border: "1px solid rgba(248,113,113,0.3)", backgroundColor: "rgba(248,113,113,0.08)", color: "#f87171", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loading === card.id ? 0.5 : 1 }}
                   >{loading === card.id ? "..." : "Delete"}</motion.button>
                 </>
+              
               ) : (
-                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleUnapprove(card.id)} disabled={loading === card.id}
+                <>
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => startEdit(card)}
+                    style={{ padding: "9px 20px", borderRadius: "10px", border: "1px solid rgba(96,165,250,0.3)", backgroundColor: "rgba(96,165,250,0.08)", color: "#60a5fa", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                  >Edit</motion.button>
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleUnapprove(card.id)} disabled={loading === card.id}
                   style={{ padding: "9px 20px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "#888", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loading === card.id ? 0.5 : 1 }}
                 >{loading === card.id ? "..." : "Unpublish"}</motion.button>
+                </>
               )}
             </div>
           </motion.div>
         );
       })}
     </AnimatePresence>
-  );
-
-  const CategoryPicker = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-      {eventCategories.map(cat => (
-        <motion.button key={cat} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => onChange(cat)}
-          style={{
-            padding: "6px 14px", borderRadius: "100px", fontSize: "12px", fontWeight: "600",
-            border: value === cat ? `1px solid ${categoryColor[cat] || "#f5a623"}` : "1px solid rgba(255,255,255,0.08)",
-            backgroundColor: value === cat ? `${categoryColor[cat] || "#f5a623"}15` : "transparent",
-            color: value === cat ? (categoryColor[cat] || "#f5a623") : "#555",
-            cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-          }}
-        >{cat}</motion.button>
-      ))}
-    </div>
   );
 
   return (
@@ -700,7 +772,7 @@ export default function AdminClient({
                       style={{ backgroundColor: "#0f0f18", border: "1px solid rgba(167,139,250,0.2)", borderRadius: "20px", padding: "28px", width: "100%", maxWidth: "480px", fontFamily: "'DM Sans', sans-serif" }}
                     >
                       <div style={{ fontSize: "16px", fontWeight: "800", color: "#f0ede6", marginBottom: "6px" }}>Manual resolve</div>
-                      <div style={{ fontSize: "13px", color: "#555", marginBottom: "20px" }}>Override Gemini's resolution. This scores all existing predictions immediately.</div>
+                      <div style={{ fontSize: "13px", color: "#555", marginBottom: "20px" }}>{"Override Gemini's resolution. This scores all existing predictions immediately."}</div>
                       <div style={{ marginBottom: "14px" }}>
                         <label style={labelStyle}>Outcome</label>
                         <div style={{ display: "flex", gap: "10px" }}>

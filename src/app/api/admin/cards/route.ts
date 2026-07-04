@@ -68,8 +68,9 @@ export async function GET() {
 export async function PATCH(req: Request) {
   if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const { id, approved } = await req.json();
-    await db.update(contentCards).set({ approved }).where(eq(contentCards.id, id));
+    const body = await req.json();
+    const { id, ...fields } = body;
+    await db.update(contentCards).set(fields).where(eq(contentCards.id, id));
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Admin cards PATCH error:", err);
