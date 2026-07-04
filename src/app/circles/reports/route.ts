@@ -55,7 +55,7 @@ export async function DELETE(req: Request) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const ADMIN_IDS = ["user_3Ebe9C8ppBPw7DLTYbMH52lz5vT", "user_3EhHcsl86ffTPyR3CpgqKS6Prnj"];
+    const ADMIN_IDS = ["user_3FjyZGikYeG9xNJm9uDh06WkLJh", "user_3FlZv0AydohOEdXeSRpOMucj6VD"];
     if (!ADMIN_IDS.includes(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json().catch(() => null);

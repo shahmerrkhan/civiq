@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-const ADMIN_IDS = ["user_3Ebe9C8ppBPw7DLTYbMH52lz5vT", "user_3EhHcsl86ffTPyR3CpgqKS6Prnj"];
+const ADMIN_IDS = ["user_3FjyZGikYeG9xNJm9uDh06WkLJh", "user_3FlZv0AydohOEdXeSRpOMucj6VD"];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
