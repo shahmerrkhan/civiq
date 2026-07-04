@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 import { motion } from "framer-motion";
+import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
 
 const sections = [
@@ -9,7 +10,7 @@ const sections = [
   },
   {
     title: "Eligibility",
-    content: "You must be at least 13 years old to use Civiq. Civiq is intended for users aged 16–25 in Ontario, Canada.",
+    content: "You must be at least 13 years old to use Civiq. Civiq is intended for users aged 16â€“25 in Ontario, Canada.",
   },
   {
     title: "Your content",
@@ -42,16 +43,16 @@ const sections = [
   },
   {
     title: "Contact",
-    content: "Civic Clarity Foundation · rehan.mazid@gmail.com",
+    content: "Civic Clarity Foundation Â· rehan.mazid@gmail.com",
   },
 ];
 
 export default function Terms() {
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#0d0d0d" }}>
+<AppLayout active="">
       <div style={{ maxWidth: "680px", margin: "0 auto", padding: "40px 20px 80px" }}>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <Link href="/dashboard" style={{ fontSize: "12px", color: "#444", textDecoration: "none", display: "inline-block", marginBottom: "32px" }}>← Back</Link>
+          <Link href="/dashboard" style={{ fontSize: "12px", color: "#444", textDecoration: "none", display: "inline-block", marginBottom: "32px" }}>â† Back</Link>
           <div style={{ fontSize: "11px", color: "#f5a623", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>Legal</div>
           <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#fff", marginBottom: "6px", fontFamily: "'DM Sans', sans-serif" }}>Terms of Service</h1>
           <p style={{ fontSize: "13px", color: "#444", marginBottom: "40px" }}>Last updated: June 2025</p>
@@ -81,7 +82,7 @@ export default function Terms() {
                 <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "8px" }}>
                   {section.items.map((item, j) => (
                     <li key={j} style={{ display: "flex", gap: "10px", fontSize: "14px", color: "#888", lineHeight: "1.7" }}>
-                      <span style={{ color: "#f5a623", flexShrink: 0, marginTop: "2px" }}>·</span>
+                      <span style={{ color: "#f5a623", flexShrink: 0, marginTop: "2px" }}>Â·</span>
                       <span>{item}</span>
                     </li>
                   ))}
@@ -91,6 +92,6 @@ export default function Terms() {
           ))}
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }
