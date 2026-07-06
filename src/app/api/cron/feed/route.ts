@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { geminiGenerate } from "@/lib/gemini";
 import { db } from "@/db";
 import { contentCards } from "@/db/schema";
+import { sql } from "drizzle-orm";
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
@@ -11,7 +12,7 @@ export async function GET(req: Request) {
 
   try {
     const raw = await geminiGenerate({
-      prompt: `Generate 2 current Ontario political news cards for young Canadians (16-25). Cover a variety of these categories: Housing, Healthcare, Education, Environment, Economy, Infrastructure. Each must feel like a real, specific issue — not generic.
+      prompt: `Generate 1 current Ontario political news card for young Canadians (16-25). Cover a variety of these categories: Housing, Healthcare, Education, Environment, Economy, Infrastructure. Each must feel like a real, specific issue — not generic.
 
 Return ONLY valid JSON, no markdown, no backticks:
 {
@@ -54,6 +55,12 @@ Make each card genuinely interesting. Vary the categories. No duplicates.`,
       title: string; summary: string; source: string; category: string;
       stat: string; perspectives: { left: string; centre: string; right: string }; deepdive: string;
     }[];
+
+    const countResult = await db.select({ count: sql<number>`count(*)` }).from(contentCards);
+    const cardCount = Number(countResult[0].count);
+    if (cardCount >= 30) {
+      await db.delete(contentCards);
+    }
 
     const inserted = await db.insert(contentCards).values(
       generated.map(c => ({
