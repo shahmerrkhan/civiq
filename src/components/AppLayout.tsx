@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { label: "Pulse", href: "/pulse", icon: "⚡" },
   { label: "About", href: "/about", icon: "🏛️" },
   { label: "Profile", href: "/profile", icon: "👤" },
+  { label: "Donate", href: "/donate", icon: "💛" },
 ];
 
 export default function AppLayout({ children, active }: { children: React.ReactNode; active: string }) {
@@ -462,7 +463,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                 >
                   <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", marginBottom: "16px", paddingLeft: "4px" }}>More</div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                    {NAV_ITEMS.filter(item => ["Challenges", "Learn", "Map", "Stories", "Forecast", "Witness", "My Ontario", "Pulse", "Saved", "Opinions", "About", "Profile"].includes(item.label)).map(item => {
+                    {NAV_ITEMS.filter(item => ["Challenges", "Learn", "Map", "Stories", "Forecast", "Witness", "My Ontario", "Pulse", "Saved", "Opinions", "About", "Profile", "Donate"].includes(item.label)).map(item => {
                       const isActive = active === item.href;
                       return (
                         <Link
