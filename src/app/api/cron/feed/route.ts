@@ -34,8 +34,8 @@ Return ONLY valid JSON, no markdown, no backticks:
 }
 
 Make each card genuinely interesting. Vary the categories. No duplicates.`,
-        maxTokens: 1500,
-        grounding: true,
+      maxTokens: 3000,
+      grounding: true,
     });
 
     const match = raw.match(/\{[\s\S]*\}/);
@@ -45,9 +45,14 @@ Make each card genuinely interesting. Vary the categories. No duplicates.`,
     try {
       JSON.parse(jsonStr);
     } catch {
-      const lastGood = jsonStr.lastIndexOf('"},');
-      if (lastGood > 0) jsonStr = jsonStr.substring(0, lastGood + 2) + "]}";
-      else throw new Error("JSON too malformed");
+      let lastGood = jsonStr.lastIndexOf('"},');
+      if (lastGood > 0) {
+        jsonStr = jsonStr.substring(0, lastGood + 2) + "]}";
+      } else {
+        lastGood = jsonStr.lastIndexOf('"}');
+        if (lastGood > 0) jsonStr = jsonStr.substring(0, lastGood + 2) + "]}";
+        else throw new Error("JSON too malformed");
+      }
     }
 
     const parsed = JSON.parse(jsonStr);
