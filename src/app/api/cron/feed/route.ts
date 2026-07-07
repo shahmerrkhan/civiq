@@ -61,6 +61,8 @@ Make each card genuinely interesting. Vary the categories. No duplicates.`,
       stat: string; perspectives: { left: string; centre: string; right: string }; deepdive: string;
     }[];
 
+    const limited = generated.slice(0, 1);
+
     const countResult = await db.select({ count: sql<number>`count(*)` }).from(contentCards);
     const cardCount = Number(countResult[0].count);
     if (cardCount >= 30) {
@@ -68,7 +70,7 @@ Make each card genuinely interesting. Vary the categories. No duplicates.`,
     }
 
     const inserted = await db.insert(contentCards).values(
-      generated.map(c => ({
+      limited.map(c => ({
         title: c.title,
         summary: c.summary,
         sourceName: c.source,
