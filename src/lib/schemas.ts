@@ -128,3 +128,9 @@ export const CircleLikeSchema = z.object({
 export const CircleJoinSchema = z.object({
   circleId: z.string().uuid(),
 });
+
+export const FeedbackSchema = z.object({
+  email: z.string().email().optional(),
+  category: z.enum(["general", "bug", "idea", "support"]).default("general"),
+  message: z.string().min(5).max(2000),
+});

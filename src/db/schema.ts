@@ -372,3 +372,24 @@ export const circlePostReports = pgTable("circle_post_reports", {
   index("circle_post_reports_user_id_idx").on(t.reportedBy),
   uniqueIndex("circle_post_reports_unique").on(t.postId, t.reportedBy),
 ]);
+export const donations = pgTable("donations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  stripeSessionId: text("stripe_session_id").notNull().unique(),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  email: text("email"),
+  name: text("name"),
+  amountTotal: integer("amount_total").notNull(),
+  currency: text("currency").notNull().default("cad"),
+  status: text("status").notNull().default("completed"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const feedback = pgTable("feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").references(() => users.id),
+  email: text("email"),
+  category: text("category").notNull().default("general"), // general | bug | idea | support
+  message: text("message").notNull(),
+  status: text("status").notNull().default("open"), // open | reviewed | resolved
+  createdAt: timestamp("created_at").defaultNow(),
+}, (t) => [index("feedback_user_id_idx").on(t.userId)]);
