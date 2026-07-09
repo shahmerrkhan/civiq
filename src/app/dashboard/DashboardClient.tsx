@@ -84,7 +84,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
         body: JSON.stringify({
           cardDbId: card.dbId ?? String(card.id),
           cardTitle: card.title,
-          cardSummary: card.summary,
+          cardSummary: card.summary || card.title,
           userLeaning: compassLabel,
         }),
       });

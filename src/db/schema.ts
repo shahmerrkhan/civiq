@@ -8,6 +8,7 @@ export const users = pgTable("users", {
   onboardingComplete: boolean("onboarding_complete").default(false),
   streakCount: integer("streak_count").default(0),
   lastStreakDate: text("last_streak_date"),
+  digestSubscribed: boolean("digest_subscribed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
