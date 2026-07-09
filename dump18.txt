@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,7 +22,7 @@ const QUESTIONS = [
     options: [
       { text: "Let developers build freely with minimal rules", value: { x: 1, y: 0.5 } },
       { text: "Government builds affordable housing directly", value: { x: -1, y: 0 } },
-      { text: "Mixed — some private, some public", value: { x: 0, y: 0 } },
+      { text: "Mixed â€” some private, some public", value: { x: 0, y: 0 } },
       { text: "Focus on renovating existing homes first", value: { x: -0.5, y: -0.5 } },
     ],
   },
@@ -50,9 +50,9 @@ const QUESTIONS = [
     id: 5,
     question: "Should there be a minimum wage increase in Ontario?",
     options: [
-      { text: "Yes, significantly — cost of living is too high", value: { x: -1, y: 0 } },
+      { text: "Yes, significantly â€” cost of living is too high", value: { x: -1, y: 0 } },
       { text: "Small increase tied to inflation only", value: { x: 0, y: 0 } },
-      { text: "No — it hurts small businesses", value: { x: 1, y: 0.5 } },
+      { text: "No â€” it hurts small businesses", value: { x: 1, y: 0.5 } },
       { text: "Replace it with a universal basic income", value: { x: -1, y: -1 } },
     ],
   },
@@ -60,10 +60,10 @@ const QUESTIONS = [
     id: 6,
     question: "How should Ontario handle immigration?",
     options: [
-      { text: "Open and welcoming — we need more people", value: { x: -0.5, y: -1 } },
+      { text: "Open and welcoming â€” we need more people", value: { x: -0.5, y: -1 } },
       { text: "Skilled workers only, strict limits", value: { x: 1, y: 0.5 } },
       { text: "Current levels are fine", value: { x: 0, y: 0 } },
-      { text: "Reduce it — focus on current residents first", value: { x: 1, y: 1 } },
+      { text: "Reduce it â€” focus on current residents first", value: { x: 1, y: 1 } },
     ],
   },
   {
@@ -80,7 +80,7 @@ const QUESTIONS = [
     id: 8,
     question: "What's your view on police funding in Ontario cities?",
     options: [
-      { text: "Increase it — we need more safety", value: { x: 1, y: 1 } },
+      { text: "Increase it â€” we need more safety", value: { x: 1, y: 1 } },
       { text: "Keep it the same", value: { x: 0.5, y: 0 } },
       { text: "Redirect some to mental health services", value: { x: -0.5, y: -0.5 } },
       { text: "Significantly defund and reimagine public safety", value: { x: -1, y: -1 } },
@@ -88,7 +88,7 @@ const QUESTIONS = [
   },
   {
     id: 9,
-    question: "Ontario's carbon tax — your take?",
+    question: "Ontario's carbon tax â€” your take?",
     options: [
       { text: "Essential for fighting climate change", value: { x: -1, y: -0.5 } },
       { text: "Good idea but poorly implemented", value: { x: -0.5, y: 0 } },
@@ -109,12 +109,12 @@ const QUESTIONS = [
 ];
 
 const TOPICS = [
-  { id: "housing", label: "Housing", emoji: "🏠" },
-  { id: "healthcare", label: "Healthcare", emoji: "🏥" },
-  { id: "education", label: "Education", emoji: "📚" },
-  { id: "environment", label: "Environment", emoji: "🌿" },
-  { id: "economy", label: "Economy", emoji: "💰" },
-  { id: "infrastructure", label: "Infrastructure", emoji: "🚇" },
+  { id: "housing", label: "Housing", emoji: "ðŸ " },
+  { id: "healthcare", label: "Healthcare", emoji: "ðŸ¥" },
+  { id: "education", label: "Education", emoji: "ðŸ“š" },
+  { id: "environment", label: "Environment", emoji: "ðŸŒ¿" },
+  { id: "economy", label: "Economy", emoji: "ðŸ’°" },
+  { id: "infrastructure", label: "Infrastructure", emoji: "ðŸš‡" },
 ];
 
 function getLabel(x: number, y: number) {
@@ -131,6 +131,12 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
 
   export default function OnboardingClient() {
   const router = useRouter();
+
+  useEffect(() => {
+    if (localStorage.getItem("civiq_onboarding_done") === "true") {
+      router.push("/dashboard");
+    }
+  }, []);
   const [stage, setStage] = useState<Stage>("welcome");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<{ x: number; y: number }[]>([]);
@@ -269,7 +275,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               Know where<br />you stand.
             </h1>
             <p style={{ fontSize: "16px", color: "#555", lineHeight: "1.7", marginBottom: "12px", maxWidth: "400px", margin: "0 auto 12px" }}>
-              10 questions about real Ontario issues. No right or wrong answers — this helps us personalize your feed.
+              10 questions about real Ontario issues. No right or wrong answers â€” this helps us personalize your feed.
             </p>
             <p style={{ fontSize: "13px", color: "#555", marginBottom: "40px" }}>Takes about 2 minutes.</p>
 
@@ -324,7 +330,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               style={{ fontSize: "56px", marginBottom: "24px" }}
             >
-              🎯
+              ðŸŽ¯
             </motion.div>
             <div style={{ fontSize: "11px", color: "#444", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "16px" }}>
               Your political compass
@@ -343,7 +349,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               transition={{ delay: 0.4 }}
               style={{ fontSize: "15px", color: "#555", lineHeight: "1.7", marginBottom: "40px", maxWidth: "380px", margin: "0 auto 40px" }}
             >
-              {desc} Your feed will reflect this — but you&apos;ll always see every perspective on Civiq.
+              {desc} Your feed will reflect this â€” but you&apos;ll always see every perspective on Civiq.
             </motion.p>
             <ShareCard label={label} />
 
@@ -356,7 +362,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               style={{ marginTop: "24px", backgroundColor: "#f5a623", color: "#000", padding: "16px 48px", borderRadius: "12px", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
               onClick={() => setStage("notifications")}
               >
-              Go to my feed →
+              Go to my feed â†’
             </motion.button>
           </motion.div>
         </div>
@@ -385,7 +391,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               transition={{ delay: 0.15, type: "spring", stiffness: 200 }}
               style={{ fontSize: "56px", marginBottom: "24px" }}
             >
-              {notifDone ? "✅" : "🔔"}
+              {notifDone ? "âœ…" : "ðŸ””"}
             </motion.div>
 
             {notifDone ? (
@@ -406,7 +412,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
                   Stay in the loop on Ontario
                 </h2>
                 <p style={{ fontSize: "15px", color: "#666", lineHeight: "1.75", marginBottom: "12px", maxWidth: "360px", margin: "0 auto 12px" }}>
-                  Get a morning brief and evening update — what&apos;s happening in your province, no spin.
+                  Get a morning brief and evening update â€” what&apos;s happening in your province, no spin.
                 </p>
                 <p style={{ fontSize: "13px", color: "#444", marginBottom: "36px" }}>
                   Twice a day. Turn off anytime.
@@ -499,7 +505,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
                   >
                     <span style={{ fontSize: "22px" }}>{topic.emoji}</span>
                     <span style={{ fontSize: "14px", fontWeight: "600", color: isSelected ? "#f5a623" : "#888" }}>{topic.label}</span>
-                    {isSelected && <span style={{ marginLeft: "auto", fontSize: "14px" }}>✓</span>}
+                    {isSelected && <span style={{ marginLeft: "auto", fontSize: "14px" }}>âœ“</span>}
                   </motion.button>
                 );
               })}
@@ -519,7 +525,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
                 opacity: saving ? 0.7 : 1,
               }}
             >
-              {saving ? "Setting up your feed..." : "See my results →"}
+              {saving ? "Setting up your feed..." : "See my results â†’"}
             </motion.button>
 
             <button
@@ -604,7 +610,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
                         color: isSelected ? "#f5a623" : "#444",
                         backgroundColor: isSelected ? "rgba(245,166,35,0.15)" : "transparent",
                       }}>
-                        {isSelected ? "✓" : String.fromCharCode(65 + i)}
+                        {isSelected ? "âœ“" : String.fromCharCode(65 + i)}
                       </span>
                       {opt.text}
                     </motion.button>
@@ -630,7 +636,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               fontFamily: "'DM Sans', sans-serif",
             }}
           >
-            {step === QUESTIONS.length - 1 ? "See my result →" : "Next →"}
+            {step === QUESTIONS.length - 1 ? "See my result â†’" : "Next â†’"}
           </motion.button>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { storylines, storylineChapters, storylineFollows, storylineOpinions } from "@/db/schema";
 import { eq, desc, sql, and, inArray } from "drizzle-orm";
@@ -70,7 +70,7 @@ export async function GET() {
     const cached = await redis.get<string>(CACHE_KEY).catch(() => null);
 
     if (cached) {
-  baseStorylines = cached as unknown as Awaited<ReturnType<typeof fetchAllStorylines>>;
+      baseStorylines = JSON.parse(cached as string);
     } else {
       baseStorylines = await fetchAllStorylines();
       await redis.set(CACHE_KEY, JSON.stringify(baseStorylines), { ex: CACHE_TTL }).catch(() => {});
