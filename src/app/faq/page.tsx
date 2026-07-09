@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 
 const FAQS = [
@@ -15,52 +17,98 @@ const FAQS = [
 ];
 
 export default function FaqPage() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   return (
     <AppLayout active="/faq">
       <div style={{ minHeight: "100vh", padding: "48px 24px", display: "flex", justifyContent: "center" }}>
         <div style={{ maxWidth: 640, width: "100%" }}>
-          <div style={{
-            fontSize: 11, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase",
-            color: "#444", marginBottom: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center",
-          }}>
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              fontSize: 11, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase",
+              color: "#444", marginBottom: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center",
+            }}
+          >
             Civiq · Help
-          </div>
+          </motion.div>
 
-          <h1 style={{
-            fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 900,
-            color: "#f5a623", textAlign: "center", marginBottom: 40,
-          }}>
+          <motion.h1
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            style={{
+              fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 900,
+              color: "#f5a623", textAlign: "center", marginBottom: 40,
+            }}
+          >
             Frequently Asked Questions
-          </h1>
+          </motion.h1>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {FAQS.map((item, i) => (
-              <details key={i} style={{
-                backgroundColor: "#0d0d18", border: "1px solid rgba(245,166,35,0.15)",
-                borderRadius: 14, padding: "16px 20px",
-              }}>
-                <summary style={{
-                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
-                  fontSize: 15, color: "#eee",
-                }}>
-                  {item.q}
-                </summary>
-                <p style={{
-                  marginTop: 12, fontSize: 14, color: "#888", lineHeight: 1.7,
-                  fontFamily: "'DM Sans', sans-serif",
-                }}>
-                  {item.a}
-                </p>
-              </details>
-            ))}
+            {FAQS.map((item, i) => {
+              const isOpen = openIndex === i;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  onClick={() => setOpenIndex(isOpen ? null : i)}
+                  style={{
+                    backgroundColor: "#0d0d18",
+                    border: isOpen ? "1px solid rgba(245,166,35,0.35)" : "1px solid rgba(245,166,35,0.15)",
+                    borderRadius: 14, padding: "16px 20px", cursor: "pointer",
+                  }}
+                >
+                  <div style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 15, color: "#eee",
+                  }}>
+                    {item.q}
+                    <motion.span
+                      animate={{ rotate: isOpen ? 90 : 0 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ color: "#f5a623", fontSize: 13, marginLeft: 12 }}
+                    >
+                      ▶
+                    </motion.span>
+                  </div>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <p style={{
+                          marginTop: 12, fontSize: 14, color: "#888", lineHeight: 1.7,
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}>
+                          {item.a}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </div>
 
-          <p style={{
-            textAlign: "center", marginTop: 32, fontSize: 13, color: "#555",
-            fontFamily: "'DM Sans', sans-serif",
-          }}>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            style={{
+              textAlign: "center", marginTop: 32, fontSize: 13, color: "#555",
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
             Still stuck? <a href="/contact" style={{ color: "#f5a623" }}>Contact us</a>.
-          </p>
+          </motion.p>
         </div>
       </div>
     </AppLayout>

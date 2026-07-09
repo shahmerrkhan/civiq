@@ -1,4 +1,4 @@
-import { db } from "@/db";
+﻿import { db } from "@/db";
 import { Redis } from "@upstash/redis";
 import { contentCards, polls } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
@@ -69,19 +69,7 @@ export async function PATCH(req: Request) {
   if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = await req.json();
-    const { id, approved, title, summary, category, sourceName, sourceUrl, deepDive, stat } = body;
-    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-
-    const fields: Record<string, unknown> = {};
-    if (approved !== undefined) fields.approved = approved;
-    if (title !== undefined) fields.title = title;
-    if (summary !== undefined) fields.summary = summary;
-    if (category !== undefined) fields.category = category;
-    if (sourceName !== undefined) fields.sourceName = sourceName;
-    if (sourceUrl !== undefined) fields.sourceUrl = sourceUrl;
-    if (deepDive !== undefined) fields.deepDive = deepDive;
-    if (stat !== undefined) fields.stat = stat;
-
+    const { id, ...fields } = body;
     await db.update(contentCards).set(fields).where(eq(contentCards.id, id));
     return NextResponse.json({ ok: true });
   } catch (err) {

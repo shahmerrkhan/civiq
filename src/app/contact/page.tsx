@@ -74,6 +74,7 @@ export default function ContactPage() {
                 style={{
                   padding: "12px 14px", borderRadius: 10, border: "1px solid rgba(245,166,35,0.2)",
                   backgroundColor: "#15151f", color: "#eee", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
+                  colorScheme: "dark",
                 }}
               >
                 <option value="general">General</option>

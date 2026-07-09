@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+﻿import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -25,7 +25,6 @@ const limiters = {
   polls:    { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s"), prefix: "civiq:rl:polls" }),    limit: 20 },
   admin:    { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s"), prefix: "civiq:rl:admin" }),    limit: 60 },
   cron:     { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, "60 s"), prefix: "civiq:rl:cron" }),     limit: 10 },
-  feedback: { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3, "60 s"), prefix: "civiq:rl:feedback" }), limit: 3 },
   default:  { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s"), prefix: "civiq:rl:default" }), limit: 60 },
 };
 
@@ -38,7 +37,6 @@ function getLimiter(pathname: string) {
   if (pathname.startsWith("/api/polls"))         return limiters.polls;
   if (pathname.startsWith("/api/admin"))         return limiters.admin;
   if (pathname.startsWith("/api/cron"))          return limiters.cron;
-  if (pathname.startsWith("/api/feedback"))      return limiters.feedback;
   return limiters.default;
 }
 
