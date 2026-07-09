@@ -3,10 +3,13 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { sql } from "@/db";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+  const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+  if (!STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: "No stripe secret key" }, { status: 500 });
+  }
+  const stripe = new Stripe(STRIPE_SECRET_KEY);
   if (!WEBHOOK_SECRET) {
     return NextResponse.json({ error: "No webhook secret" }, { status: 500 });
   }

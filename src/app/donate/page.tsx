@@ -57,7 +57,7 @@ export default function DonatePage() {
             Civiq is built and run by volunteers. Your donation helps us keep it free and independent for every Ontarian.
           </p>
 
-          
+          <a
             href={DONATE_URL}
             target="_blank"
             rel="noopener noreferrer"
