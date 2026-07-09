@@ -1,4 +1,4 @@
-*, *::before, *::after {
+﻿*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -82,16 +82,3 @@ input, button, textarea {
 .cl-userPreviewSecondaryIdentifier {
   color: #999 !important;
 }
-@media (max-width: 640px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-  .features-grid { grid-template-columns: 1fr !important; }
-  .perspectives-grid { grid-template-columns: 1fr !important; }
-  .stat-grid-3col { grid-template-columns: repeat(2, 1fr) !important; }
-  h1 { font-size: clamp(22px, 6vw, 32px) !important; }
-}
-
-@media (max-width: 380px) {
-  .stats-grid { grid-template-columns: 1fr !important; }
-}
-
-img, video, canvas, svg { max-width: 100%; height: auto; }

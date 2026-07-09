@@ -243,7 +243,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
           </motion.div>
         </Link>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "16px" }}>
+        <div className="stat-grid-3col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "16px" }}>
           {[
             { href: "/witness", icon: "⏳", label: "Witness", sub: "live countdowns", color: "#f87171" },
             { href: "/forecast", icon: "🔮", label: "Forecast", sub: "predict outcomes", color: "#a78bfa" },
@@ -592,6 +592,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
     </AppLayout>
   );
 }
+
 
 
 

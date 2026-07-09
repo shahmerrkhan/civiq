@@ -2,7 +2,7 @@
   "name": "Civiq",
   "short_name": "Civiq",
   "description": "Ontario politics, no spin.",
-  "start_url": "/dashboard",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#06060c",
   "theme_color": "#f5a623",

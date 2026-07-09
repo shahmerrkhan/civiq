@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { UserButton, ClerkLoaded } from "@clerk/nextjs";
@@ -6,26 +6,26 @@ import { motion, AnimatePresence } from "framer-motion";
 import Logo from "@/components/Logo";
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/dashboard", icon: "🏠" },
-  { label: "Challenges", href: "/challenges", icon: "🎯", tour: "challenges" },
-  { label: "Learn", href: "/learn", icon: "📚", tour: "learn" },
-  { label: "Polls", href: "/polls", icon: "🗳️" },
-  { label: "Swipe", href: "/daily", icon: "⚡" },
-  { label: "Circles", href: "/circles", icon: "🔵" },
-  { label: "Debate", href: "/debate", icon: "💬", tour: "debate" },
-  { label: "Map", href: "/map", icon: "🗺️" },
-  { href: "/storylines", icon: "📖", label: "Stories", tour: "storylines" },
-  { label: "Forecast", href: "/forecast", icon: "🔮" },
-  { label: "Witness", href: "/witness", icon: "⏳" },
-  { label: "My Ontario", href: "/ontario", icon: "🍁" },
-  { label: "Saved", href: "/bookmarks", icon: "🔖" },
-  { label: "Opinions", href: "/opinions", icon: "🗒️" },
-  { label: "Pulse", href: "/pulse", icon: "⚡" },
-  { label: "About", href: "/about", icon: "🏛️" },
-  { label: "Profile", href: "/profile", icon: "👤" },
-  { label: "Donate", href: "/donate", icon: "💛" },
-  { label: "FAQ", href: "/faq", icon: "❓" },
-  { label: "Contact", href: "/contact", icon: "✉️" },
+  { label: "Home", href: "/dashboard", icon: "ðŸ " },
+  { label: "Challenges", href: "/challenges", icon: "ðŸŽ¯", tour: "challenges" },
+  { label: "Learn", href: "/learn", icon: "ðŸ“š", tour: "learn" },
+  { label: "Polls", href: "/polls", icon: "ðŸ—³ï¸" },
+  { label: "Swipe", href: "/daily", icon: "âš¡" },
+  { label: "Circles", href: "/circles", icon: "ðŸ”µ" },
+  { label: "Debate", href: "/debate", icon: "ðŸ’¬", tour: "debate" },
+  { label: "Map", href: "/map", icon: "ðŸ—ºï¸" },
+  { href: "/storylines", icon: "ðŸ“–", label: "Stories", tour: "storylines" },
+  { label: "Forecast", href: "/forecast", icon: "ðŸ”®" },
+  { label: "Witness", href: "/witness", icon: "â³" },
+  { label: "My Ontario", href: "/ontario", icon: "ðŸ" },
+  { label: "Saved", href: "/bookmarks", icon: "ðŸ”–" },
+  { label: "Opinions", href: "/opinions", icon: "ðŸ—’ï¸" },
+  { label: "Pulse", href: "/pulse", icon: "âš¡" },
+  { label: "About", href: "/about", icon: "ðŸ›ï¸" },
+  { label: "Profile", href: "/profile", icon: "ðŸ‘¤" },
+  { label: "Donate", href: "/donate", icon: "ðŸ’›" },
+  { label: "FAQ", href: "/faq", icon: "â“" },
+  { label: "Contact", href: "/contact", icon: "âœ‰ï¸" },
 ];
 
 export default function AppLayout({ children, active }: { children: React.ReactNode; active: string }) {
@@ -63,7 +63,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
       if (permission !== "granted") { setNotifPrompt(false); return; }
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!vapidKey) {
-        alert("VAPID key missing — check Vercel env vars");
+        alert("VAPID key missing â€” check Vercel env vars");
         setNotifPrompt(false);
         return;
       }
@@ -296,7 +296,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                   border: "1px solid rgba(245,166,35,0.15)",
                   marginBottom: "14px",
                 }}>
-                  <span style={{ fontSize: "16px" }}>🔥</span>
+                  <span style={{ fontSize: "16px" }}>ðŸ”¥</span>
                   <div>
                     <div style={{ fontSize: "15px", fontWeight: "800", color: "#f5a623", lineHeight: "1" }}>{streak}</div>
                     <div style={{ fontSize: "10px", color: "#777", marginTop: "2px" }}>day streak</div>
@@ -348,7 +348,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                     backgroundColor: "rgba(245,166,35,0.08)",
                     border: "1px solid rgba(245,166,35,0.15)",
                   }}>
-                    <span style={{ fontSize: "14px" }}>🔥</span>
+                    <span style={{ fontSize: "14px" }}>ðŸ”¥</span>
                     <span style={{ fontSize: "13px", fontWeight: "800", color: "#f5a623" }}>{streak}</span>
                   </div>
                 )}
@@ -435,7 +435,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                 fontFamily: "'DM Sans', sans-serif",
               }}
             >
-              <span style={{ fontSize: "18px" }}>☰</span>
+              <span style={{ fontSize: "18px" }}>â˜°</span>
               <span>More</span>
             </button>
           </div>
@@ -516,7 +516,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
         >
           <div>
             <div style={{ fontSize: "13px", fontWeight: "700", color: "#f0ede6", marginBottom: "2px" }}>
-              🔔 Get your Ontario brief
+              ðŸ”” Get your Ontario brief
             </div>
             <div style={{ fontSize: "11px", color: "#666" }}>
               Morning + evening updates. 2 minutes a day.
