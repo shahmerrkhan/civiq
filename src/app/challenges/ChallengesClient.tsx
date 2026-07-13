@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
+import { Newspaper, BookOpen, Vote, NotebookPen, Flame, Award, CheckCircle2 } from "lucide-react";
 
 type Challenge = {
   id: string;
@@ -21,11 +22,11 @@ type ChallengesData = {
   completedCount: number;
 };
 
-const TYPE_META: Record<string, { icon: string; color: string; link: string; linkLabel: string }> = {
-  read: { icon: "📰", color: "#60a5fa", link: "/dashboard", linkLabel: "Go to feed" },
-  learn: { icon: "📚", color: "#a78bfa", link: "/learn", linkLabel: "Go to learn" },
-  vote: { icon: "🗳️", color: "#4ade80", link: "/polls", linkLabel: "Go to polls" },
-  opinion: { icon: "🗒️", color: "#f5a623", link: "/opinions", linkLabel: "Go to opinions" },
+const TYPE_META: Record<string, { icon: React.ElementType; color: string; link: string; linkLabel: string }> = {
+  read: { icon: Newspaper, color: "#60a5fa", link: "/dashboard", linkLabel: "Go to feed" },
+  learn: { icon: BookOpen, color: "#a78bfa", link: "/learn", linkLabel: "Go to learn" },
+  vote: { icon: Vote, color: "#4ade80", link: "/polls", linkLabel: "Go to polls" },
+  opinion: { icon: NotebookPen, color: "#f5a623", link: "/opinions", linkLabel: "Go to opinions" },
 };
 
 function getNextMonday(): string {
@@ -118,7 +119,7 @@ export default function ChallengesClient() {
                   Challenge Streak
                 </div>
                 <div style={{ fontSize: "28px", fontWeight: "800", color: "#f5a623" }}>
-                  🔥 {data.streak}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}><Flame size={22} />{data.streak}</span>
                 </div>
                 <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
                   week{data.streak !== 1 ? "s" : ""} in a row
@@ -165,7 +166,7 @@ export default function ChallengesClient() {
                   display: "flex", alignItems: "center", gap: "12px",
                 }}
               >
-                <span style={{ fontSize: "28px" }}>🏅</span>
+                <Award size={28} color="#f5a623" />
                 <div>
                   <div style={{ fontSize: "14px", fontWeight: "700", color: "#f5a623" }}>
                     Weekly badge earned!
@@ -199,11 +200,8 @@ export default function ChallengesClient() {
                 const wasJustCompleted = justCompleted === challenge.id;
 
                 return (
-                  <motion.div
+                  <div
                     key={challenge.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
                     style={{
                       backgroundColor: isDone ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.03)",
                       border: isDone
@@ -236,7 +234,7 @@ export default function ChallengesClient() {
                         display: "flex", alignItems: "center", justifyContent: "center",
                         fontSize: "20px",
                       }}>
-                        {meta.icon}
+                        <meta.icon size={20} color={meta.color} />
                       </div>
 
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -309,12 +307,10 @@ export default function ChallengesClient() {
                             display: "flex", alignItems: "center", justifyContent: "center",
                             fontSize: "32px",
                           }}
-                        >
-                          ✅
-                        </motion.div>
+                        ><CheckCircle2 size={32} color={meta.color} /></motion.div>
                       )}
                     </AnimatePresence>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -342,5 +338,6 @@ export default function ChallengesClient() {
     </AppLayout>
   );
 }
+
 
 

@@ -3,11 +3,12 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { Newspaper, Zap, BookOpen, Vote, Hourglass, Circle, TrendingUp, MessageSquare, Target, ScrollText, Flame } from "lucide-react";
 
 const STORAGE_KEY = "civiq_tour_done";
 
 type TourStep = {
-  icon: string;
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
   label: string;
   title: string;
   description: string;
@@ -18,7 +19,7 @@ type TourStep = {
 
 const TOUR_STEPS: TourStep[] = [
   {
-    icon: "📰",
+    icon: Newspaper,
     label: "Feed",
     title: "Your Ontario Feed",
     description: "The heartbeat of Civiq. Real Ontario political issues, updated daily.",
@@ -31,7 +32,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#f5a623",
   },
   {
-    icon: "⚡",
+    icon: Zap,
     label: "Swipe Mode",
     title: "Swipe Mode",
     description: "Read the feed faster. TikTok-style cards you can swipe through.",
@@ -44,7 +45,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#f5a623",
   },
   {
-    icon: "📚",
+    icon: BookOpen,
     label: "Learn",
     title: "Learn in 5 Minutes",
     description: "200+ bite-sized modules on politics, ideologies, and Ontario systems.",
@@ -57,7 +58,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#a78bfa",
   },
   {
-    icon: "🗳️",
+    icon: Vote,
     label: "Polls",
     title: "Poll on Real Issues",
     description: "Vote on issues affecting your life and see where you stand.",
@@ -70,7 +71,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#34d399",
   },
   {
-    icon: "⏳",
+    icon: Hourglass,
     label: "Witness",
     title: "Witness",
     description: "Real Ontario political decisions with a live countdown. Know before it happens.",
@@ -83,7 +84,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#f87171",
   },
   {
-    icon: "🔵",
+    icon: Circle,
     label: "Circles",
     title: "Civic Circles",
     description: "Join issue-based groups and share your take with other Civiq users.",
@@ -96,7 +97,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#60a5fa",
   },
   {
-    icon: "🔮",
+    icon: TrendingUp,
     label: "Civic Forecast",
     title: "Civic Forecast",
     description: "Predict what happens in Ontario politics before it happens.",
@@ -109,7 +110,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#a78bfa",
   },
   {
-    icon: "💬",
+    icon: MessageSquare,
     label: "Debate",
     title: "Structured Debate",
     description: "Get matched with someone who disagrees with you.",
@@ -122,7 +123,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#60a5fa",
   },
   {
-    icon: "🎯",
+    icon: Target,
     label: "Challenges",
     title: "Weekly Challenges",
     description: "3 missions drop every Monday to push you outside your comfort zone.",
@@ -135,7 +136,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#f87171",
   },
   {
-    icon: "📖",
+    icon: ScrollText,
     label: "Storylines",
     title: "Storylines",
     description: "Follow Ontario political stories as they develop over time.",
@@ -148,7 +149,7 @@ const TOUR_STEPS: TourStep[] = [
     accentColor: "#fb923c",
   },
   {
-    icon: "🔥",
+    icon: Flame,
     label: "Your Score",
     title: "Civic Score & Streak",
     description: "Your consistency is tracked. Come back every day to keep your streak alive.",
@@ -322,7 +323,7 @@ export default function AppTour({ onDone }: { onDone: () => void }) {
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
               style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", width: "100%" }}
             >
-              <div style={{ fontSize: "48px", lineHeight: 1 }}>{current.icon}</div>
+              <current.icon size={40} strokeWidth={1.5} />
               <div style={{
                 fontSize: "11px", fontWeight: "700",
                 letterSpacing: "0.1em", textTransform: "uppercase",

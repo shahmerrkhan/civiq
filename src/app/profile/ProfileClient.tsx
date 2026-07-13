@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Image from "next/image";
+import { Landmark, Flame, BookOpen, Vote, MessageCircle, Compass, Trophy, Medal } from "lucide-react";
 
 function getLabel(x: number, y: number) {
   if (x < -0.15 && y < -0.15) return { label: "Left Libertarian", color: "#4ade80" };
@@ -26,6 +27,46 @@ function timeAgo(date: string) {
 }
 
 export type ProfileOpinion = { id: string; opinion: string; cardId: string; createdAt: string };
+
+function drawStatIcon(ctx: CanvasRenderingContext2D, type: string, x: number, y: number) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  if (type === "score") {
+    ctx.beginPath();
+    ctx.moveTo(0, 8); ctx.lineTo(16, 0); ctx.lineTo(32, 8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(4, 12); ctx.lineTo(4, 26);
+    ctx.moveTo(16, 12); ctx.lineTo(16, 26);
+    ctx.moveTo(28, 12); ctx.lineTo(28, 26);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, 30); ctx.lineTo(32, 30);
+    ctx.stroke();
+  } else if (type === "streak") {
+    ctx.beginPath();
+    ctx.moveTo(16, 2);
+    ctx.bezierCurveTo(22, 10, 26, 16, 20, 24);
+    ctx.bezierCurveTo(24, 20, 22, 14, 16, 12);
+    ctx.bezierCurveTo(12, 18, 10, 22, 16, 30);
+    ctx.bezierCurveTo(6, 26, 4, 16, 12, 6);
+    ctx.bezierCurveTo(13, 9, 14, 4, 16, 2);
+    ctx.closePath();
+    ctx.stroke();
+  } else if (type === "modules") {
+    ctx.beginPath();
+    ctx.moveTo(16, 6);
+    ctx.lineTo(2, 4); ctx.lineTo(2, 26); ctx.lineTo(16, 28);
+    ctx.lineTo(30, 26); ctx.lineTo(30, 4); ctx.lineTo(16, 6);
+    ctx.moveTo(16, 6); ctx.lineTo(16, 28);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
 
 export default function ProfileClient({
   name, email, imageUrl, compassPosition,
@@ -107,9 +148,9 @@ export default function ProfileClient({
 
     // stats row
     const statsData = [
-      { icon: "🏛️", val: `${civicScore} pts`, sub: "Civic Score" },
-      { icon: "🔥", val: `${streakCount} days`, sub: "Streak" },
-      { icon: "📚", val: `${modulesCompleted}`, sub: "Modules" },
+      { icon: "score", val: `${civicScore} pts`, sub: "Civic Score" },
+      { icon: "streak", val: `${streakCount} days`, sub: "Streak" },
+      { icon: "modules", val: `${modulesCompleted}`, sub: "Modules" },
     ];
     statsData.forEach((s, i) => {
       const x = 80 + i * 300;
@@ -206,10 +247,10 @@ export default function ProfileClient({
       .catch(() => {});
   }, []);
 const stats = [
-    { label: "Day Streak", value: streakCount, icon: "🔥", color: "#f5a623" },
-    { label: "Polls Voted", value: pollsVoted, icon: "🗳️", color: "#60a5fa" },
-    { label: "Modules Done", value: modulesCompleted, icon: "📚", color: "#4ade80" },
-    { label: "Opinions Logged", value: opinions.length, icon: "💬", color: "#a78bfa" },
+    { label: "Day Streak", value: streakCount, icon: Flame, color: "#f5a623" },
+    { label: "Polls Voted", value: pollsVoted, icon: Vote, color: "#60a5fa" },
+    { label: "Modules Done", value: modulesCompleted, icon: BookOpen, color: "#4ade80" },
+    { label: "Opinions Logged", value: opinions.length, icon: MessageCircle, color: "#a78bfa" },
   ];
 
   return (
@@ -267,7 +308,7 @@ const stats = [
               +20 per module · +10 per poll · +15 per opinion · +25 daily correct
             </div>
           </div>
-          <div style={{ fontSize: "48px", opacity: 0.6 }}>🏛️</div>
+          <div style={{ opacity: 0.6 }}><Landmark size={48} /></div>
         </motion.div>
 
         {/* Stats row */}
@@ -279,12 +320,9 @@ const stats = [
 
           >
           {stats.map((stat, i) => (
-            <motion.div
+            <div
               key={stat.label}
               className="stat-card"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.05 }}
               style={{
                 backgroundColor: "rgba(255,255,255,0.02)",
                 border: "1px solid rgba(255,255,255,0.06)",
@@ -293,10 +331,10 @@ const stats = [
                 textAlign: "center",
               }}
             >
-              <div style={{ fontSize: "22px", marginBottom: "6px" }}>{stat.icon}</div>
+              <div style={{ marginBottom: "6px" }}><stat.icon size={22} color={stat.color} /></div>
               <div style={{ fontSize: "26px", fontWeight: "800", color: stat.color, letterSpacing: "-1px" }}>{stat.value}</div>
               <div style={{ fontSize: "11px", color: "#444", fontWeight: "600", marginTop: "4px", letterSpacing: "0.04em", textTransform: "uppercase" }}>{stat.label}</div>
-            </motion.div>
+            </div>
           ))}
         </motion.div>
 
@@ -362,14 +400,10 @@ const stats = [
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {leaderboard.slice(0, 10).map((u, i) => {
-                const medals = ["🥇", "🥈", "🥉"];
                 const rank = i + 1;
                 return (
-                  <motion.div
+                  <div
                     key={u.userId}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.04 }}
                     style={{
                       display: "flex", alignItems: "center", gap: "12px",
                       padding: "10px 14px", borderRadius: "12px",
@@ -378,18 +412,18 @@ const stats = [
                     }}
                   >
                     <div style={{ fontSize: rank <= 3 ? "18px" : "13px", fontWeight: "700", color: "#555", width: "24px", textAlign: "center", flexShrink: 0 }}>
-                      {rank <= 3 ? medals[rank - 1] : `${rank}`}
+                      {rank === 1 ? <Trophy size={18} color="#f5a623" /> : rank <= 3 ? <Medal size={18} color={rank === 2 ? "#c0c0c0" : "#cd7f32"} /> : `${rank}`}
                     </div>
                     <div style={{ flex: 1, fontSize: "14px", fontWeight: u.isCurrentUser ? "700" : "500", color: u.isCurrentUser ? "#f5a623" : "#ccc" }}>
                       {u.isCurrentUser ? "You" : u.username}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       {u.streakCount > 0 && (
-                        <div style={{ fontSize: "12px", color: "#f5a623", fontWeight: "600" }}>🔥 {u.streakCount}</div>
+                        <div style={{ fontSize: "12px", color: "#f5a623", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}><Flame size={12} />{u.streakCount}</div>
                       )}
                       <div style={{ fontSize: "13px", fontWeight: "700", color: "#888" }}>{u.civicScore} pts</div>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -407,7 +441,7 @@ const stats = [
 
           {opinions.length === 0 ? (
             <div style={{ textAlign: "center", padding: "32px 0" }}>
-              <div style={{ fontSize: "32px", marginBottom: "12px" }}>💬</div>
+              <div style={{ marginBottom: "12px" }}><MessageCircle size={32} color="#555" /></div>
               <div style={{ fontSize: "15px", color: "#555", marginBottom: "8px" }}>No opinions logged yet</div>
               <div style={{ fontSize: "13px", color: "#555" }}>When you read a feed card and log your take, it shows up here.</div>
             </div>
@@ -415,11 +449,8 @@ const stats = [
             <div style={{ position: "relative" }}>
               <div style={{ position: "absolute", left: "7px", top: 0, bottom: 0, width: "1px", backgroundColor: "rgba(255,255,255,0.06)" }} />
               {opinions.map((op, i) => (
-                <motion.div
+                <div
                   key={op.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04 }}
                   style={{ display: "flex", gap: "20px", marginBottom: "24px", position: "relative" }}
                 >
                   <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#a78bfa", border: "2px solid #06060c", flexShrink: 0, marginTop: "3px", position: "relative", zIndex: 1 }} />
@@ -429,7 +460,7 @@ const stats = [
                       {`"${op.opinion}"`}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -447,7 +478,7 @@ const stats = [
 
             {/* Compass identity */}
             <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "14px 16px", borderRadius: "12px", backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-              <div style={{ fontSize: "22px" }}>🧭</div>
+              <div><Compass size={22} /></div>
               <div>
                 <div style={{ fontSize: "13px", fontWeight: "700", color: skipped ? "#555" : color }}>
                   {skipped ? "No compass yet" : label}
@@ -459,13 +490,13 @@ const stats = [
             {/* Engagement summary */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
               {[
-                { icon: "📚", label: "Modules completed", value: modulesCompleted, color: "#4ade80" },
-                { icon: "🗳️", label: "Polls voted", value: pollsVoted, color: "#60a5fa" },
-                { icon: "💬", label: "Opinions logged", value: opinions.length, color: "#a78bfa" },
-                { icon: "🔥", label: "Day streak", value: streakCount, color: "#f5a623" },
+                { icon: BookOpen, label: "Modules completed", value: modulesCompleted, color: "#4ade80" },
+                { icon: Vote, label: "Polls voted", value: pollsVoted, color: "#60a5fa" },
+                { icon: MessageCircle, label: "Opinions logged", value: opinions.length, color: "#a78bfa" },
+                { icon: Flame, label: "Day streak", value: streakCount, color: "#f5a623" },
               ].map(item => (
                 <div key={item.label} style={{ padding: "12px 14px", borderRadius: "10px", backgroundColor: `${item.color}08`, border: `1px solid ${item.color}15` }}>
-                  <div style={{ fontSize: "18px", marginBottom: "4px" }}>{item.icon}</div>
+                  <div style={{ marginBottom: "4px" }}><item.icon size={18} color={item.color} /></div>
                   <div style={{ fontSize: "20px", fontWeight: "800", color: item.color, letterSpacing: "-0.5px" }}>{item.value}</div>
                   <div style={{ fontSize: "11px", color: "#444", fontWeight: "600", marginTop: "2px" }}>{item.label}</div>
                 </div>
@@ -523,5 +554,7 @@ const stats = [
     </AppLayout>
   );
 }
+
+
 
 

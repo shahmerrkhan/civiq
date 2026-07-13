@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
 import StreakBadge from "@/components/StreakBadge";
 import AppTour, { TourButton } from "@/components/AppTour";
+import { BookOpen, Zap, Hourglass, Sparkles, MessageCircle, Bookmark, Info, Brain, MapPin } from "lucide-react";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Infrastructure: "#60a5fa",
@@ -175,6 +176,8 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
       <style>{`
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        .feed-card { transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
+        .feed-card:hover { transform: translateY(-2px); }
       `}</style>
   <div style={{ flex: 1, padding: "clamp(20px, 5vw, 40px) clamp(16px, 4vw, 24px)", maxWidth: "820px", width: "100%", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
 
@@ -208,7 +211,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "14px" }}>📖</span>
+                <BookOpen size={14} color="#f5a623" />
                 <div style={{ fontSize: "12px", fontWeight: "700", color: "#f5a623" }}>
                   {storylineCount} {storylineCount === 1 ? "story" : "stories"} you follow
                 </div>
@@ -235,7 +238,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ fontSize: "14px" }}>⚡</span>
+              <Zap size={14} color="#f5a623" />
               <div style={{ fontSize: "12px", fontWeight: "700", color: "#f5a623" }}>Swipe Mode</div>
               <div style={{ fontSize: "12px", color: "#444" }}>— read faster</div>
             </div>
@@ -245,15 +248,12 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
 
         <div className="stat-grid-3col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "16px" }}>
           {[
-            { href: "/witness", icon: "⏳", label: "Witness", sub: "live countdowns", color: "#f87171" },
-            { href: "/forecast", icon: "🔮", label: "Forecast", sub: "predict outcomes", color: "#a78bfa" },
-            { href: "/circles", icon: "🔵", label: "Circles", sub: "join the debate", color: "#60a5fa" },
+            { href: "/witness", icon: Hourglass, label: "Witness", sub: "live countdowns", color: "#f87171" },
+            { href: "/forecast", icon: Sparkles, label: "Forecast", sub: "predict outcomes", color: "#a78bfa" },
+            { href: "/circles", icon: MessageCircle, label: "Circles", sub: "join the debate", color: "#60a5fa" },
           ].map((item, i) => (
             <Link key={item.href} href={item.href} style={{ textDecoration: "none" }}>
               <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.12 + i * 0.05 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
                 style={{
@@ -264,7 +264,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
                   cursor: "pointer", gap: "4px",
                 }}
               >
-                <span style={{ fontSize: "18px" }}>{item.icon}</span>
+                <item.icon size={18} color={item.color} />
                 <div style={{ fontSize: "11px", fontWeight: "700", color: item.color }}>{item.label}</div>
                 <div style={{ fontSize: "10px", color: "#333" }}>{item.sub}</div>
               </motion.div>
@@ -320,13 +320,9 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
               const expanded = activeCard === card.id;
               const color = CATEGORY_COLORS[card.category] || CATEGORY_COLORS.default;
               return (
-                <motion.div
+                <div
                   key={card.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ delay: i * 0.07, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  whileHover={typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches ? { y: -2, transition: { duration: 0.2 } } : {}}
+                  className="feed-card"
                   onClick={() => { setActiveCard(expanded ? null : card.id); setShowDeepDive(null); }}
                   style={{
                     backgroundColor: expanded ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
@@ -381,7 +377,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
                       padding: "2px",
                     }}
                   >
-                    {bookmarked[card.id] ? "🔖" : "🏷️"}
+                    {bookmarked[card.id] ? <Bookmark size={16} fill="currentColor" /> : <Bookmark size={16} />}
                   </motion.button>
                 </div>
 
@@ -406,7 +402,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
                               color: "#888",
                               lineHeight: "1.6",
                             }}>
-                              <span style={{ color: "#f5a623", fontWeight: "700", marginRight: "6px" }}>📍 Affects you:</span>
+                              <span style={{ color: "#f5a623", fontWeight: "700", marginRight: "6px", display: "inline-flex", alignItems: "center", gap: "4px" }}><MapPin size={12} />Affects you:</span>
                               {CATEGORY_STATS[card.category]}
                             </div>
                           )}
@@ -479,7 +475,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
                                 fontWeight: "600",
                               }}
                             >
-                              {explainLoading === card.id ? "Explaining..." : explainCard === card.id && explainText[card.id] ? "Hide explanation" : "🧠 Explain this"}
+                              {explainLoading === card.id ? "Explaining..." : explainCard === card.id && explainText[card.id] ? "Hide explanation" : <><Brain size={13} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Explain this</>}
                             </motion.button>
 
                             <motion.button
@@ -495,7 +491,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
                                 fontWeight: "600",
                               }}
                             >
-                              {discussLoading === card.id ? "Matching..." : "⚡ Discuss"}
+                              {discussLoading === card.id ? "Matching..." : <><Zap size={13} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Discuss</>}
                             </motion.button>
                           </div>
 
@@ -581,7 +577,7 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
+                </div>
               );
             })}
           </motion.div>
@@ -592,6 +588,10 @@ export default function DashboardClient({ compassPosition }: { compassPosition: 
     </AppLayout>
   );
 }
+
+
+
+
 
 
 

@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { Flame, HelpCircle, Frown, Lightbulb, Bookmark, Share2, BarChart2 } from "lucide-react";
 
 type SwipeCard = {
   id: number;
@@ -36,10 +37,10 @@ const CATEGORY_BG: Record<string, string> = {
 };
 
 const REACTIONS = [
-  { emoji: "🔥", label: "Big deal" },
-  { emoji: "🤔", label: "Complex" },
-  { emoji: "😤", label: "Angry" },
-  { emoji: "💡", label: "Learned" },
+  { id: "fire", icon: Flame, label: "Big deal" },
+  { id: "complex", icon: HelpCircle, label: "Complex" },
+  { id: "angry", icon: Frown, label: "Angry" },
+  { id: "learned", icon: Lightbulb, label: "Learned" },
 ];
 
 export default function SwipeClient() {
@@ -320,7 +321,7 @@ export default function SwipeClient() {
             >
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: "13px", fontWeight: "700", color: "#f0ede6", marginBottom: "3px" }}>
-                  🔥 You&apos;ve read 5 stories
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Flame size={13} />You&apos;ve read 5 stories</span>
                 </div>
                 <div style={{ fontSize: "11px", color: "#555", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   Share with friends and grow the movement
@@ -353,7 +354,7 @@ export default function SwipeClient() {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  Share 🔗
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Share2 size={13} />Share</span>
                 </button>
               </div>
             </motion.div>
@@ -421,7 +422,7 @@ export default function SwipeClient() {
                   onClick={handleBookmark}
                   style={{ background: "none", border: "none", cursor: "pointer", fontSize: "18px", opacity: bookmarked ? 1 : 0.3, transition: "opacity 0.2s" }}
                 >
-                  🔖
+                  <Bookmark size={18} fill={bookmarked ? "currentColor" : "none"} />
                 </button>
               </div>
             </div>
@@ -445,7 +446,8 @@ export default function SwipeClient() {
                 fontSize: "13px", color: "#888", lineHeight: "1.6",
                 marginBottom: "12px", fontStyle: "italic",
             }}>
-                📊 {card.stat}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}><BarChart2 size={14} />{card.stat}</span>
+
               </div>
             )}
 
@@ -513,15 +515,15 @@ export default function SwipeClient() {
               <div className="swipe-actions" style={{ display: "flex", gap: "6px", marginBottom: "10px" }}>
               {REACTIONS.map(r => (
                 <button
-                  key={r.emoji}
+                  key={r.id}
                   className="reaction-btn"
-                  onClick={() => setReaction(reaction === r.emoji ? null : r.emoji)}
+                  onClick={() => setReaction(reaction === r.id ? null : r.id)}
                   style={{
-                    borderColor: reaction === r.emoji ? color : undefined,
-                    backgroundColor: reaction === r.emoji ? `${color}15` : undefined,
+                    borderColor: reaction === r.id ? color : undefined,
+                    backgroundColor: reaction === r.id ? `${color}15` : undefined,
                   }}
                 >
-                  <span style={{ fontSize: "18px" }}>{r.emoji}</span>
+                  <r.icon size={18} />
                   <span style={{ fontSize: "10px", color: "#777", fontWeight: "600" }}>{r.label}</span>
                 </button>
               ))}
@@ -553,6 +555,8 @@ export default function SwipeClient() {
     </AppLayout>
   );
 }
+
+
 
 
 

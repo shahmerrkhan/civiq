@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
+import { Hourglass, Sparkles, Vote, BookOpen, MessageCircle, Bookmark, Zap, Flame } from "lucide-react";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -26,7 +27,7 @@ function timeAgo(date: string) {
   return `${Math.floor(d / 30)}mo ago`;
 }
 
-function StatBox({ icon, value, label, color }: { icon: string; value: string | number; label: string; color: string }) {
+function StatBox({ icon: Icon, value, label, color }: { icon: React.ElementType; value: string | number; label: string; color: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -37,7 +38,7 @@ function StatBox({ icon, value, label, color }: { icon: string; value: string | 
         display: "flex", flexDirection: "column", gap: "4px",
       }}
     >
-      <div style={{ fontSize: "20px" }}>{icon}</div>
+      <div style={{ fontSize: "20px" }}><Icon size={20} color={color} /></div>
       <div style={{ fontSize: "22px", fontWeight: "800", color, letterSpacing: "-0.5px" }}>{value}</div>
       <div style={{ fontSize: "11px", color: "#444", fontWeight: "600" }}>{label}</div>
     </motion.div>
@@ -74,14 +75,14 @@ const LEANING_COLORS: Record<string, string> = {
   left: "#60a5fa", centre: "#a78bfa", right: "#f87171",
 };
 
-const ACTION_LABELS: Record<string, { label: string; icon: string; color: string }> = {
-  witness_watch:    { label: "Events watched",     icon: "⏳", color: "#f87171" },
-  forecast_predict: { label: "Forecasts made",     icon: "🔮", color: "#a78bfa" },
-  poll_vote:        { label: "Polls voted",         icon: "🗳️", color: "#60a5fa" },
-  learn_complete:   { label: "Modules completed",   icon: "📚", color: "#4ade80" },
-  opinion_submit:   { label: "Opinions logged",     icon: "💬", color: "#818cf8" },
-  bookmark:         { label: "Items bookmarked",    icon: "🔖", color: "#f5a623" },
-  swipe:            { label: "Cards swiped",        icon: "⚡", color: "#34d399" },
+const ACTION_LABELS: Record<string, { label: string; icon: React.ElementType; color: string }> = {
+  witness_watch:    { label: "Events watched",     icon: Hourglass, color: "#f87171" },
+  forecast_predict: { label: "Forecasts made",     icon: Sparkles, color: "#a78bfa" },
+  poll_vote:        { label: "Polls voted",         icon: Vote, color: "#60a5fa" },
+  learn_complete:   { label: "Modules completed",   icon: BookOpen, color: "#4ade80" },
+  opinion_submit:   { label: "Opinions logged",     icon: MessageCircle, color: "#818cf8" },
+  bookmark:         { label: "Items bookmarked",    icon: Bookmark, color: "#f5a623" },
+  swipe:            { label: "Cards swiped",        icon: Zap, color: "#34d399" },
 };
 
 export default function OntarioClient() {
@@ -221,10 +222,10 @@ export default function OntarioClient() {
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.35, ease }}
               style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "12px" }}
             >
-              <StatBox icon="🔥" value={data.user.streakCount} label="Day streak" color="#f5a623" />
-              <StatBox icon="📚" value={data.modulesCompleted} label="Modules done" color="#4ade80" />
-              <StatBox icon="🗳️" value={data.pollsVoted} label="Polls voted" color="#60a5fa" />
-              <StatBox icon="🔖" value={data.bookmarksCount} label="Bookmarked" color="#fb923c" />
+              <StatBox icon={Flame} value={data.user.streakCount} label="Day streak" color="#f5a623" />
+              <StatBox icon={BookOpen} value={data.modulesCompleted} label="Modules done" color="#4ade80" />
+              <StatBox icon={Vote} value={data.pollsVoted} label="Polls voted" color="#60a5fa" />
+              <StatBox icon={Bookmark} value={data.bookmarksCount} label="Bookmarked" color="#fb923c" />
             </motion.div>
 
             {/* Tabs */}
@@ -246,7 +247,7 @@ export default function OntarioClient() {
                     cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                   }}
                 >
-                  {t === "overview" ? "Overview" : t === "forecast" ? "🔮 Forecast" : "⚡ Activity"}
+                  {t === "overview" ? "Overview" : t === "forecast" ? <><Sparkles size={12} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Forecast</> : <><Zap size={12} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Activity</>}
                 </button>
               ))}
             </motion.div>
@@ -268,7 +269,7 @@ export default function OntarioClient() {
                     ) : (
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                         {data.joinedCircles.map((c, i) => (
-                          <motion.div key={c.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
+                          <div key={c.id}>
                             <Link href={`/circles`} style={{ textDecoration: "none" }}>
                               <div className="ont-card" style={{
                                 display: "flex", alignItems: "center", gap: "12px",
@@ -293,7 +294,7 @@ export default function OntarioClient() {
                                 )}
                               </div>
                             </Link>
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     )}
@@ -312,7 +313,7 @@ export default function OntarioClient() {
                         {data.followedStorylines.map((s, i) => {
                           const statusColor = s.status === "active" ? "#4ade80" : s.status === "passed" ? "#60a5fa" : "#f87171";
                           return (
-                            <motion.div key={s.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
+                            <div key={s.id}>
                               <div className="ont-card" style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                                   <div style={{ width: "7px", height: "7px", borderRadius: "50%", backgroundColor: statusColor, flexShrink: 0 }} />
@@ -320,7 +321,7 @@ export default function OntarioClient() {
                                   <span style={{ fontSize: "10px", color: statusColor, fontWeight: "700", textTransform: "uppercase" }}>{s.status}</span>
                                 </div>
                               </div>
-                            </motion.div>
+                            </div>
                           );
                         })}
                       </div>
@@ -333,12 +334,12 @@ export default function OntarioClient() {
                       <div style={{ fontSize: "11px", color: "#444", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>Recent Opinions</div>
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                         {data.opinions.slice(0, 3).map((op, i) => (
-                          <motion.div key={op.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                          <div key={op.id}
                             style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: "rgba(167,139,250,0.04)", border: "1px solid rgba(167,139,250,0.1)" }}
                           >
                             <div style={{ fontSize: "13px", color: "#aaa", lineHeight: "1.6", marginBottom: "6px" }}>&quot;{op.opinion}&quot;</div>
                             <div style={{ fontSize: "11px", color: "#333" }}>{timeAgo(op.createdAt)}</div>
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -403,7 +404,7 @@ export default function OntarioClient() {
                         const borderColor = correct ? "rgba(74,222,128,0.2)" : wrong ? "rgba(248,113,113,0.2)" : "rgba(255,255,255,0.06)";
                         const dotColor = correct ? "#4ade80" : wrong ? "#f87171" : "#555";
                         return (
-                          <motion.div key={p.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+                          <div key={p.id}
                             style={{ padding: "14px 16px", borderRadius: "12px", backgroundColor: "rgba(255,255,255,0.02)", border: `1px solid ${borderColor}` }}
                           >
                             <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
@@ -417,7 +418,7 @@ export default function OntarioClient() {
                                   <span style={{ fontSize: "11px", color: "#555" }}>{p.confidence}% confidence</span>
                                   {resolved && (
                                     <span style={{ fontSize: "11px", fontWeight: "700", color: correct ? "#4ade80" : "#f87171" }}>
-                                      {correct ? `✓ Correct · +${p.pointsEarned ?? p.confidence} pts` : "✗ Wrong"}
+                                      {correct ? `Correct · +${p.pointsEarned ?? p.confidence} pts` : "Wrong"}
                                     </span>
                                   )}
                                   {!resolved && (
@@ -426,7 +427,7 @@ export default function OntarioClient() {
                                 </div>
                               </div>
                             </div>
-                          </motion.div>
+                          </div>
                         );
                       })}
                     </div>
@@ -449,13 +450,13 @@ export default function OntarioClient() {
                           : data.actionCounts[action] ?? 0;
                         if (count === 0) return null;
                         return (
-                          <motion.div key={action} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                          <div key={action}
                             style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px", borderRadius: "12px", backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}
                           >
-                            <span style={{ fontSize: "18px" }}>{cfg.icon}</span>
+                            <cfg.icon size={18} color={cfg.color} />
                             <div style={{ flex: 1, fontSize: "13px", color: "#aaa", fontWeight: "600" }}>{cfg.label}</div>
                             <div style={{ fontSize: "16px", fontWeight: "800", color: cfg.color }}>{count}</div>
-                          </motion.div>
+                          </div>
                         );
                       })}
                     </div>
@@ -467,7 +468,7 @@ export default function OntarioClient() {
                       <div style={{ fontSize: "11px", color: "#444", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>Events You Watched</div>
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                         {data.watches.map((w, i) => (
-                          <motion.div key={w.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
+                          <div key={w.id}
                             style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: "rgba(248,113,113,0.04)", border: "1px solid rgba(248,113,113,0.1)" }}
                           >
                             <div style={{ fontSize: "13px", fontWeight: "600", color: "#ccc", marginBottom: "4px" }}>{w.title}</div>
@@ -475,7 +476,7 @@ export default function OntarioClient() {
                               <span style={{ fontSize: "11px", color: "#f87171", fontWeight: "700" }}>{w.category}</span>
                               <span style={{ fontSize: "11px", color: w.status === "resolved" ? "#4ade80" : "#f5a623", fontWeight: "700", textTransform: "uppercase" }}>{w.status}</span>
                             </div>
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -496,4 +497,9 @@ export default function OntarioClient() {
     </AppLayout>
   );
 }
+
+
+
+
+
 

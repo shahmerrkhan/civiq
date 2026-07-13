@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { recordActivity, getStreakData } from "@/lib/streak";
+import { Flame } from "lucide-react";
 
 export default function StreakBadge() {
   const [streak, setStreak] = useState(0);
@@ -40,8 +41,9 @@ export default function StreakBadge() {
         userSelect: "none",
       }}
     >
-      🔥 {streak} day{streak !== 1 ? "s" : ""}
+<Flame size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />{streak} day{streak !== 1 ? "s" : ""}
     </div>
   );
 }
+
 

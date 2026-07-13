@@ -2,12 +2,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { Landmark, Brain, User, Globe, Zap, DollarSign, Lightbulb, ScrollText } from "lucide-react";
 
 const PATHS = [
   {
     category: "Systems",
     color: "#60a5fa",
-    icon: "🏛️",
+    icon: Landmark,
     modules: [
       { title: "How Ontario's Legislature Works", minutes: 5, slug: "how-ontarios-legislature-works" },
       { title: "What Does an MPP Actually Do?", minutes: 4, slug: "what-does-an-mpp-actually-do" },
@@ -44,7 +45,7 @@ const PATHS = [
   {
     category: "Ideologies",
     color: "#a78bfa",
-    icon: "🧠",
+    icon: Brain,
     modules: [
       { title: "What is Capitalism?", minutes: 5, slug: "what-is-capitalism" },
       { title: "What is Socialism?", minutes: 5, slug: "what-is-socialism" },
@@ -77,7 +78,7 @@ const PATHS = [
   {
     category: "Figures",
     color: "#f5a623",
-    icon: "👤",
+    icon: User,
     modules: [
       { title: "Che Guevara: Revolutionary or War Criminal?", minutes: 7, slug: "che-guevara" },
       { title: "Pierre Trudeau and the Charter", minutes: 6, slug: "pierre-trudeau" },
@@ -118,7 +119,7 @@ const PATHS = [
   {
     category: "Canada & World",
     color: "#34d399",
-    icon: "🌍",
+    icon: Globe,
     modules: [
       { title: "How Canada's Federal Government Works", minutes: 6, slug: "federal-government" },
       { title: "What Does the Prime Minister Actually Do?", minutes: 5, slug: "prime-minister-role" },
@@ -159,7 +160,7 @@ const PATHS = [
   {
     category: "Issues",
     color: "#fb923c",
-    icon: "⚡",
+    icon: Zap,
     modules: [
       { title: "Climate Change and Politics", minutes: 6, slug: "climate-change-politics" },
       { title: "What is Universal Basic Income?", minutes: 5, slug: "universal-basic-income" },
@@ -200,7 +201,7 @@ const PATHS = [
   {
     category: "Economy",
     color: "#f472b6",
-    icon: "💰",
+    icon: DollarSign,
     modules: [
       { title: "How Inflation Works", minutes: 5, slug: "how-inflation-works" },
       { title: "What is the Bank of Canada?", minutes: 5, slug: "bank-of-canada" },
@@ -229,7 +230,7 @@ const PATHS = [
   {
     category: "Philosophy & Ethics",
     color: "#38bdf8",
-    icon: "💡",
+    icon: Lightbulb,
     modules: [
       { title: "What is Democracy?", minutes: 5, slug: "what-is-democracy" },
       { title: "What is Justice?", minutes: 5, slug: "what-is-justice" },
@@ -244,7 +245,7 @@ const PATHS = [
   {
     category: "History",
     color: "#e879f9",
-    icon: "📜",
+    icon: ScrollText,
     modules: [
       { title: "The Cold War Explained", minutes: 7, slug: "cold-war" },
       { title: "How World War II Changed Politics", minutes: 7, slug: "ww2-politics" },
@@ -408,7 +409,7 @@ export default function Learn() {
                 whileTap={{ scale: 0.97 }}
                 onClick={() => handleFilterChange(f)}
                 style={{
-                  padding: "7px 18px", borderRadius: "100px",
+                  padding: "7px 18px", borderRadius: "8px",
                   fontSize: "13px", fontWeight: "600",
                   border: activeFilter === f ? `1px solid ${filterColors[f]}` : "1px solid rgba(255,255,255,0.08)",
                   backgroundColor: activeFilter === f ? `${filterColors[f]}15` : "transparent",
@@ -444,14 +445,14 @@ export default function Learn() {
                   return (
                     <div style={{ marginBottom: "16px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                        <span style={{ fontSize: "20px" }}>{path.icon}</span>
+                        <path.icon size={20} strokeWidth={1.75} color={path.color} />
                         <span style={{ fontSize: "16px", fontWeight: "700", color: path.color }}>{path.category}</span>
                         <span style={{ fontSize: "12px", color: "#555" }}>{totalInCategory} modules</span>
                         {allDone && (
                           <motion.span
                             initial={{ scale: 0 }} animate={{ scale: 1 }}
-                            style={{ fontSize: "11px", fontWeight: "700", color: "#4ade80", backgroundColor: "#4ade8015", border: "1px solid #4ade8030", padding: "2px 8px", borderRadius: "100px" }}
-                          >Complete 🎉</motion.span>
+                            style={{ fontSize: "11px", fontWeight: "700", color: "#4ade80", backgroundColor: "#4ade8015", border: "1px solid #4ade8030", padding: "2px 8px", borderRadius: "6px" }}
+                          >Complete</motion.span>
                         )}
                         <span style={{ fontSize: "12px", color: allDone ? "#4ade80" : "#444", marginLeft: "auto", fontWeight: "600" }}>
                           {completedInCategory}/{totalInCategory}

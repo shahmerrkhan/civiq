@@ -1,31 +1,32 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { UserButton, ClerkLoaded } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "@/components/Logo";
+import { Home, Target, BookOpen, Vote, Zap, Circle, MessageSquare, Map, ScrollText, TrendingUp, Landmark, Bookmark, MessageCircle, Heart, HelpCircle, Mail, User, Hourglass, Flame, Bell, Menu } from "lucide-react";
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/dashboard", icon: "🏠" },
-  { label: "Challenges", href: "/challenges", icon: "🎯", tour: "challenges" },
-  { label: "Learn", href: "/learn", icon: "📚", tour: "learn" },
-  { label: "Polls", href: "/polls", icon: "🗳️" },
-  { label: "Swipe", href: "/daily", icon: "⚡" },
-  { label: "Circles", href: "/circles", icon: "🔵" },
-  { label: "Debate", href: "/debate", icon: "💬", tour: "debate" },
-  { label: "Map", href: "/map", icon: "🗺️" },
-  { href: "/storylines", icon: "📖", label: "Stories", tour: "storylines" },
-  { label: "Forecast", href: "/forecast", icon: "🔮" },
-  { label: "Witness", href: "/witness", icon: "⏳" },
-  { label: "My Ontario", href: "/ontario", icon: "🍁" },
-  { label: "Saved", href: "/bookmarks", icon: "🔖" },
-  { label: "Opinions", href: "/opinions", icon: "🗒️" },
-  { label: "Pulse", href: "/pulse", icon: "⚡" },
-  { label: "About", href: "/about", icon: "🏛️" },
-  { label: "Profile", href: "/profile", icon: "👤" },
-  { label: "Donate", href: "/donate", icon: "💛" },
-  { label: "FAQ", href: "/faq", icon: "❓" },
-  { label: "Contact", href: "/contact", icon: "✉️" },
+  { label: "Home", href: "/dashboard", icon: Home },
+  { label: "Challenges", href: "/challenges", icon: Target, tour: "challenges" },
+  { label: "Learn", href: "/learn", icon: BookOpen, tour: "learn" },
+  { label: "Polls", href: "/polls", icon: Vote },
+  { label: "Swipe", href: "/daily", icon: Zap },
+  { label: "Circles", href: "/circles", icon: Circle },
+  { label: "Debate", href: "/debate", icon: MessageSquare, tour: "debate" },
+  { label: "Map", href: "/map", icon: Map },
+  { href: "/storylines", icon: ScrollText, label: "Stories", tour: "storylines" },
+  { label: "Forecast", href: "/forecast", icon: TrendingUp },
+  { label: "Witness", href: "/witness", icon: Hourglass },
+  { label: "My Ontario", href: "/ontario", icon: Landmark },
+  { label: "Saved", href: "/bookmarks", icon: Bookmark },
+  { label: "Opinions", href: "/opinions", icon: MessageCircle },
+  { label: "Pulse", href: "/pulse", icon: Zap },
+  { label: "About", href: "/about", icon: Landmark },
+  { label: "Profile", href: "/profile", icon: User },
+  { label: "Donate", href: "/donate", icon: Heart },
+  { label: "FAQ", href: "/faq", icon: HelpCircle },
+  { label: "Contact", href: "/contact", icon: Mail },
 ];
 
 export default function AppLayout({ children, active }: { children: React.ReactNode; active: string }) {
@@ -235,7 +236,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
               {NAV_ITEMS.map((item, i) => {
                 const isActive = active === item.href;
                 return (
-                  <motion.div key={item.label} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
+                  <div key={item.label}>
                     <Link
                       href={item.href}
                       className="nav-link"
@@ -267,7 +268,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                           transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         />
                       )}
-                      <span style={{ position: "relative", fontSize: "15px" }}>{item.icon}</span>
+                      <span style={{ position: "relative" }}><item.icon size={15} /></span>
                       <span style={{ position: "relative" }}>{item.label}</span>
                       {isActive && (
                         <div style={{
@@ -278,7 +279,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                         }} />
                       )}
                     </Link>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -296,7 +297,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                   border: "1px solid rgba(245,166,35,0.15)",
                   marginBottom: "14px",
                 }}>
-                  <span style={{ fontSize: "16px" }}>🔥</span>
+                  <Flame size={16} color="#f5a623" />
                   <div>
                     <div style={{ fontSize: "15px", fontWeight: "800", color: "#f5a623", lineHeight: "1" }}>{streak}</div>
                     <div style={{ fontSize: "10px", color: "#777", marginTop: "2px" }}>day streak</div>
@@ -304,7 +305,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                 </div>
               )}
               {mounted && <ClerkLoaded>
-                <UserButton appearance={{ variables: { colorBackground: "#1a1a24", colorText: "#e8e6e0", colorTextSecondary: "#999", colorInputBackground: "#242430", colorInputText: "#e8e6e0", colorNeutral: "#888" }, elements: { userButtonPopoverCard: { backgroundColor: "#1a1a24", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }, userButtonPopoverActionButton: { color: "#ccc" }, userButtonPopoverActionButtonText: { color: "#ccc" }, userButtonPopoverActionButtonIcon: { color: "#888" }, userButtonPopoverFooter: { display: "none" } } }} />
+                <UserButton appearance={{ variables: { colorBackground: "#1a1a24", colorForeground: "#e8e6e0", colorMutedForeground: "#999", colorInput: "#242430", colorInputForeground: "#e8e6e0", colorNeutral: "#888" }, elements: { userButtonPopoverCard: { backgroundColor: "#1a1a24", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }, userButtonPopoverActionButton: { color: "#ccc" }, userButtonPopoverActionButtonText: { color: "#ccc" }, userButtonPopoverActionButtonIcon: { color: "#888" }, userButtonPopoverFooter: { display: "none" } } }} />
               </ClerkLoaded>}
             </div>
           </div>
@@ -348,12 +349,12 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                     backgroundColor: "rgba(245,166,35,0.08)",
                     border: "1px solid rgba(245,166,35,0.15)",
                   }}>
-                    <span style={{ fontSize: "14px" }}>🔥</span>
+                    <Flame size={14} color="#f5a623" />
                     <span style={{ fontSize: "13px", fontWeight: "800", color: "#f5a623" }}>{streak}</span>
                   </div>
                 )}
                 {mounted && <ClerkLoaded>
-                <UserButton appearance={{ variables: { colorBackground: "#1a1a24", colorText: "#e8e6e0", colorTextSecondary: "#999", colorInputBackground: "#242430", colorInputText: "#e8e6e0", colorNeutral: "#888" }, elements: { userButtonPopoverCard: { backgroundColor: "#1a1a24", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }, userButtonPopoverActionButton: { color: "#ccc" }, userButtonPopoverActionButtonText: { color: "#ccc" }, userButtonPopoverActionButtonIcon: { color: "#888" }, userButtonPopoverFooter: { display: "none" } } }} />
+                <UserButton appearance={{ variables: { colorBackground: "#1a1a24", colorForeground: "#e8e6e0", colorMutedForeground: "#999", colorInput: "#242430", colorInputForeground: "#e8e6e0", colorNeutral: "#888" }, elements: { userButtonPopoverCard: { backgroundColor: "#1a1a24", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }, userButtonPopoverActionButton: { color: "#ccc" }, userButtonPopoverActionButtonText: { color: "#ccc" }, userButtonPopoverActionButtonIcon: { color: "#888" }, userButtonPopoverFooter: { display: "none" } } }} />
                 </ClerkLoaded>}
               </div>
             </div>
@@ -407,7 +408,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                     overflow: "visible",
                   }}
                 >
-                  <span style={{ fontSize: "18px" }}>{item.icon}</span>
+                  <item.icon size={18} />
                   <span>{item.label}</span>
                   {isActive && (
                     <motion.div
@@ -435,7 +436,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                 fontFamily: "'DM Sans', sans-serif",
               }}
             >
-              <span style={{ fontSize: "18px" }}>☰</span>
+              <Menu size={18} />
               <span>More</span>
             </button>
           </div>
@@ -482,7 +483,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
                             textDecoration: "none",
                           }}
                         >
-                          <span style={{ fontSize: "18px" }}>{item.icon}</span>
+                          <item.icon size={18} />
                           {item.label}
                         </Link>
                       );
@@ -516,7 +517,7 @@ export default function AppLayout({ children, active }: { children: React.ReactN
         >
           <div>
             <div style={{ fontSize: "13px", fontWeight: "700", color: "#f0ede6", marginBottom: "2px" }}>
-              🔔 Get your Ontario brief
+<span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}><Bell size={14} />Get your Ontario brief</span>
             </div>
             <div style={{ fontSize: "11px", color: "#666" }}>
               Morning + evening updates. 2 minutes a day.
@@ -550,4 +551,5 @@ export default function AppLayout({ children, active }: { children: React.ReactN
     </>
   );
 }
+
 

@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from 'react';
 import ShareCard from "./ShareCard";
+import { Home, HeartPulse, BookOpen, Leaf, DollarSign, TrainFront, Target, Bell, CheckCircle2 } from "lucide-react";
 
 const QUESTIONS = [
   {
@@ -109,12 +110,12 @@ const QUESTIONS = [
 ];
 
 const TOPICS = [
-  { id: "housing", label: "Housing", emoji: "🏠" },
-  { id: "healthcare", label: "Healthcare", emoji: "🏥" },
-  { id: "education", label: "Education", emoji: "📚" },
-  { id: "environment", label: "Environment", emoji: "🌿" },
-  { id: "economy", label: "Economy", emoji: "💰" },
-  { id: "infrastructure", label: "Infrastructure", emoji: "🚇" },
+  { id: "housing", label: "Housing", icon: Home },
+  { id: "healthcare", label: "Healthcare", icon: HeartPulse },
+  { id: "education", label: "Education", icon: BookOpen },
+  { id: "environment", label: "Environment", icon: Leaf },
+  { id: "economy", label: "Economy", icon: DollarSign },
+  { id: "infrastructure", label: "Infrastructure", icon: TrainFront },
 ];
 
 function getLabel(x: number, y: number) {
@@ -324,7 +325,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               style={{ fontSize: "56px", marginBottom: "24px" }}
             >
-              🎯
+              <Target size={56} color="#f5a623" />
             </motion.div>
             <div style={{ fontSize: "11px", color: "#444", fontWeight: "700", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "16px" }}>
               Your political compass
@@ -385,7 +386,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
               transition={{ delay: 0.15, type: "spring", stiffness: 200 }}
               style={{ fontSize: "56px", marginBottom: "24px" }}
             >
-              {notifDone ? "✅" : "🔔"}
+              {notifDone ? <CheckCircle2 size={56} color="#4ade80" /> : <Bell size={56} color="#f5a623" />}
             </motion.div>
 
             {notifDone ? (
@@ -481,9 +482,6 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
                 return (
                   <motion.button
                     key={topic.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => toggleTopic(topic.id)}
                     style={{
@@ -497,7 +495,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
                       transition: "all 0.2s ease",
                     }}
                   >
-                    <span style={{ fontSize: "22px" }}>{topic.emoji}</span>
+                    <topic.icon size={22} color={isSelected ? "#f5a623" : "#888"} />
                     <span style={{ fontSize: "14px", fontWeight: "600", color: isSelected ? "#f5a623" : "#888" }}>{topic.label}</span>
                     {isSelected && <span style={{ marginLeft: "auto", fontSize: "14px" }}>✓</span>}
                   </motion.button>
@@ -637,6 +635,7 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
     </>
   );
 }
+
 
 
 

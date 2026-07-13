@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Logo from "@/components/Logo";
 import { useAuth } from "@clerk/nextjs";
+import { Compass, Newspaper, Vote, BookOpen, Hourglass, TrendingUp, Circle, MessageSquare, Target, BookMarked, Map, Smartphone } from "lucide-react";
 
 const TICKER_ITEMS = [
   "Ontario Bill 212 · Education Funding",
@@ -29,77 +30,77 @@ const STATS = [
 
 const FEATURES = [
   {
-    icon: "🧭",
+    icon: Compass,
     title: "Know where you stand",
     desc: "A political compass quiz built around real Ontario issues — not American ones.",
     color: "rgba(245,166,35,0.08)",
     border: "rgba(245,166,35,0.2)",
   },
   {
-    icon: "📰",
+    icon: Newspaper,
     title: "Live Ontario feed",
     desc: "Active bills and issues with left, centre, and right perspectives laid out side by side.",
     color: "rgba(96,165,250,0.06)",
     border: "rgba(96,165,250,0.15)",
   },
   {
-    icon: "🗳️",
+    icon: Vote,
     title: "Poll on real issues",
     desc: "Vote on issues affecting your life and see where Gen Z actually stands.",
     color: "rgba(167,139,250,0.06)",
     border: "rgba(167,139,250,0.15)",
   },
   {
-    icon: "📚",
+    icon: BookOpen,
     title: "Learn in 5 minutes",
     desc: "200+ bite-sized modules on government, ideologies, and the figures who shaped history.",
     color: "rgba(52,211,153,0.06)",
     border: "rgba(52,211,153,0.15)",
   },
   {
-    icon: "⏳",
+    icon: Hourglass,
     title: "Witness",
     desc: "Live countdowns on real Ontario political decisions — bills, rulings, elections. Know before it happens.",
     color: "rgba(248,113,113,0.06)",
     border: "rgba(248,113,113,0.15)",
   },
   {
-    icon: "🔮",
+    icon: TrendingUp,
     title: "Civic Forecast",
     desc: "Predict what happens in Ontario politics. Set your confidence, earn points, climb the leaderboard.",
     color: "rgba(167,139,250,0.06)",
     border: "rgba(167,139,250,0.15)",
   },
   {
-    icon: "🔵",
+    icon: Circle,
     title: "Civic Circles",
     desc: "Join issue-based groups. Post your take, reply to others, and see how the left, centre and right split.",
     color: "rgba(96,165,250,0.06)",
     border: "rgba(96,165,250,0.15)",
   },
   {
-    icon: "💬",
+    icon: MessageSquare,
     title: "Structured debate",
     desc: "Get matched with someone who disagrees. Steelman their view first — then argue.",
     color: "rgba(251,146,60,0.06)",
     border: "rgba(251,146,60,0.15)",
   },
   {
-    icon: "🎯",
+    icon: Target,
     title: "Weekly challenges",
     desc: "3 missions every Monday designed to push you outside your political comfort zone.",
     color: "rgba(245,166,35,0.06)",
     border: "rgba(245,166,35,0.15)",
   },
   {
-    icon: "📖",
+    icon: BookMarked,
     title: "Follow storylines",
     desc: "Track ongoing Ontario political stories chapter by chapter as they develop.",
     color: "rgba(167,139,250,0.06)",
     border: "rgba(167,139,250,0.15)",
   },
   {
-    icon: "🗺️",
+    icon: Map,
     title: "Regional map",
     desc: "See how different parts of Ontario vote on the issues that matter to you.",
     color: "rgba(52,211,153,0.06)",
@@ -388,12 +389,7 @@ export default function Home() {
         .nav-link-item:hover { color: #aaa; }
 
         .shimmer-text {
-          background: linear-gradient(90deg, #f5a623 0%, #ffd280 40%, #f5a623 60%, #e8921a 100%);
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: shimmer 3s linear infinite;
+          color: #f5a623;
         }
 
         .scroll-indicator { animation: float 2.5s ease-in-out infinite; }
@@ -519,7 +515,7 @@ export default function Home() {
               transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "40px", alignSelf: "flex-start" }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 14px", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "100px", backgroundColor: "rgba(245,166,35,0.06)", fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 14px", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "6px", backgroundColor: "rgba(245,166,35,0.06)", fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623" }}>
                 <span className="pulse-dot" />
                 Ontario Civic Platform · Powered by CCF
               </div>
@@ -602,7 +598,7 @@ export default function Home() {
                     cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                   }}
                 >
-                  📲 Add to Home Screen
+                  <Smartphone size={16} /> Add to Home Screen
                 </motion.button>
               )}
             </motion.div>
@@ -697,21 +693,21 @@ export default function Home() {
         {/* STATS */}
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(10,10,16,0.8)", position: "relative", zIndex: 5 }}>
           <div style={{ maxWidth: "1160px", margin: "0 auto" }}>
-            <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
+            <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr" }}>
               {STATS.map((s, i) => (
-                <motion.div
+                <div
                   key={s.label}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.5 }}
-                  style={{ padding: "40px 24px", textAlign: "center", borderRight: i < 2 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
+                  style={{
+                    padding: "40px 24px",
+                    textAlign: i === 0 ? "left" : "center",
+                    borderRight: i < 2 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                  }}
                 >
-                  <div className="stat-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: "44px", fontWeight: "900", letterSpacing: "-1.5px", lineHeight: "1", marginBottom: "8px" }}>
-                    <span className="shimmer-text">{s.num}</span>
+                  <div className="stat-num" style={{ fontFamily: "'Playfair Display', serif", fontSize: i === 0 ? "52px" : "40px", fontWeight: "900", letterSpacing: "-1.5px", lineHeight: "1", marginBottom: "8px", color: "#f5a623" }}>
+                    {s.num}
                   </div>
                   <div style={{ fontSize: "12px", color: "#555", fontWeight: "600", letterSpacing: "0.04em" }}>{s.label}</div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -735,20 +731,16 @@ export default function Home() {
             </motion.div>
 
               <div className="features-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "14px" }}>
-                {FEATURES.map((f, i) => (         
-                <motion.div
+                {FEATURES.map((f) => (
+                <div
                   key={f.title}
                   className="feature-card"
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08, duration: 0.55 }}
                   style={{ backgroundColor: f.color, borderColor: f.border }}
                 >
-                  <div style={{ fontSize: "26px", marginBottom: "16px" }}>{f.icon}</div>
+                  <f.icon size={22} strokeWidth={1.75} style={{ marginBottom: "16px", color: "#f5a623" }} />
                   <div style={{ fontSize: "15px", fontWeight: "700", color: "#e0ddd8", marginBottom: "8px", lineHeight: "1.3" }}>{f.title}</div>
                   <div style={{ fontSize: "13px", color: "#444", lineHeight: "1.7" }}>{f.desc}</div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>

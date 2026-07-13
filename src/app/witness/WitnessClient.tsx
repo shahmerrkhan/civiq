@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { CheckCircle2, XCircle, Hourglass, Ban, Pin, HelpCircle, Circle } from "lucide-react";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -31,13 +32,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   Municipal: "#34d399",
 };
 
-const OUTCOME_CONFIG: Record<string, { label: string; color: string; emoji: string }> = {
-  passed:    { label: "Passed",    color: "#4ade80", emoji: "✅" },
-  failed:    { label: "Failed",    color: "#f87171", emoji: "❌" },
-  delayed:   { label: "Delayed",   color: "#facc15", emoji: "⏳" },
-  cancelled: { label: "Cancelled", color: "#f87171", emoji: "🚫" },
-  occurred:  { label: "Occurred",  color: "#60a5fa", emoji: "📌" },
-  unknown:   { label: "Unknown",   color: "#555",    emoji: "❓" },
+const OUTCOME_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  passed:    { label: "Passed",    color: "#4ade80", icon: CheckCircle2 },
+  failed:    { label: "Failed",    color: "#f87171", icon: XCircle },
+  delayed:   { label: "Delayed",   color: "#facc15", icon: Hourglass },
+  cancelled: { label: "Cancelled", color: "#f87171", icon: Ban },
+  occurred:  { label: "Occurred",  color: "#60a5fa", icon: Pin },
+  unknown:   { label: "Unknown",   color: "#555",    icon: HelpCircle },
 };
 
 function CountdownRing({ daysLeft, hoursLeft, isUrgent }: { daysLeft: number; hoursLeft: number; isUrgent: boolean }) {
@@ -154,8 +155,8 @@ export default function WitnessClient({ userId }: { userId: string | null }) {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 18 }}
-              style={{ fontSize: "28px" }}
-            >⏳</motion.span>
+              style={{ display: "inline-flex" }}
+            ><Hourglass size={28} /></motion.span>
             <h1 style={{ fontSize: "24px", fontWeight: "800", letterSpacing: "-0.5px", margin: 0 }}>
               Witness
             </h1>
@@ -186,7 +187,7 @@ export default function WitnessClient({ userId }: { userId: string | null }) {
               animate={{ opacity: [1, 0.4, 1] }}
               transition={{ duration: 1.2, repeat: Infinity }}
               style={{ fontSize: "16px" }}
-            >🔴</motion.span>
+            ><Circle size={16} fill="#f87171" color="#f87171" /></motion.span>
             <span style={{ fontSize: "13px", color: "#f87171", fontWeight: "600" }}>
               {upcoming.filter(e => e.isUrgent).length} event{upcoming.filter(e => e.isUrgent).length > 1 ? "s" : ""} happening within 48 hours
             </span>
@@ -241,11 +242,8 @@ export default function WitnessClient({ userId }: { userId: string | null }) {
               </div>
             ) : (
               list.map((event, i) => (
-                <motion.div
+                <div
                   key={event.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.06, duration: 0.35, ease }}
                   className="witness-card"
                   style={{
                     backgroundColor: "rgba(255,255,255,0.02)",
@@ -276,7 +274,10 @@ export default function WitnessClient({ userId }: { userId: string | null }) {
                           fontSize: "22px",
                         }}
                       >
-                        {OUTCOME_CONFIG[event.outcome ?? "unknown"]?.emoji ?? "❓"}
+                        {(() => {
+                          const OutcomeIcon = OUTCOME_CONFIG[event.outcome ?? "unknown"]?.icon ?? HelpCircle;
+                          return <OutcomeIcon size={22} />;
+                        })()}
                       </motion.div>
                     )}
 
@@ -399,7 +400,7 @@ export default function WitnessClient({ userId }: { userId: string | null }) {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
+                </div>
               ))
             )}
           </motion.div>

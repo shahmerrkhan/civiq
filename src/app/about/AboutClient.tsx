@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
+import { Scale, GraduationCap, Search, Landmark, Smartphone } from "lucide-react";
 
 const FADE_UP = {
   hidden: { opacity: 0, y: 20 },
@@ -14,17 +15,17 @@ const FADE_UP = {
 
 const PILLARS = [
   {
-    icon: "⚖️",
+    icon: Scale,
     label: "Non-partisan",
     description: "Every perspective shown — left, centre, right. CCF was built on this principle and Civiq inherits it. We never take sides.",
   },
   {
-    icon: "🎓",
+    icon: GraduationCap,
     label: "Youth-first",
     description: "Designed for 16–25 year olds. Not simplified — accessible. CCF has already proven youth can influence policy at the national level.",
   },
   {
-    icon: "🔍",
+    icon: Search,
     label: "Transparent",
     description: "Sources cited, perspectives labelled, no hidden agenda. Governmental transparency is the foundation CCF was built on.",
   },
@@ -54,7 +55,7 @@ export default function AboutClient({ isSignedIn }: { isSignedIn: boolean }) {
         {/* Badge */}
         <motion.div variants={FADE_UP} initial="hidden" animate="show" custom={0} style={{ marginBottom: "28px" }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(245,166,35,0.08)", border: "1px solid rgba(245,166,35,0.18)", borderRadius: "100px", padding: "5px 14px", fontSize: "11px", fontWeight: "700", color: "#f5a623", letterSpacing: "0.07em", textTransform: "uppercase" }}>
-            🏛️ A Civic Clarity Foundation Initiative
+            <Landmark size={14} style={{ marginRight: "2px" }} /> A Civic Clarity Foundation Initiative
           </span>
         </motion.div>
 
@@ -88,7 +89,7 @@ export default function AboutClient({ isSignedIn }: { isSignedIn: boolean }) {
           <div style={{ background: "linear-gradient(135deg, rgba(245,166,35,0.06) 0%, rgba(245,166,35,0.02) 100%)", border: "1px solid rgba(245,166,35,0.14)", borderRadius: "22px", padding: "32px" }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: "20px", flexWrap: "wrap", marginBottom: "24px" }}>
               <div style={{ width: "54px", height: "54px", borderRadius: "14px", backgroundColor: "rgba(245,166,35,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "26px", flexShrink: 0 }}>
-                🏛️
+                <Landmark size={26} />
               </div>
               <div>
                 <div style={{ fontSize: "21px", fontWeight: "800", letterSpacing: "-0.5px", marginBottom: "4px" }}>Civic Clarity Foundation</div>
@@ -124,7 +125,7 @@ export default function AboutClient({ isSignedIn }: { isSignedIn: boolean }) {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: "12px", alignItems: "center" }}>
               <div style={{ backgroundColor: "rgba(245,166,35,0.05)", border: "1px solid rgba(245,166,35,0.12)", borderRadius: "14px", padding: "22px" }}>
-                <div style={{ fontSize: "22px", marginBottom: "10px" }}>🏛️</div>
+                <div style={{ marginBottom: "10px" }}><Landmark size={22} /></div>
                 <div style={{ fontSize: "15px", fontWeight: "800", marginBottom: "6px", letterSpacing: "-0.3px" }}>CCF</div>
                 <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7" }}>
                   The institution. Credibility, government partnerships, national advocacy, and content integrity oversight. CCF ensures Civiq stays genuinely non-partisan.
@@ -132,7 +133,7 @@ export default function AboutClient({ isSignedIn }: { isSignedIn: boolean }) {
               </div>
               <div style={{ fontSize: "18px", color: "#555", textAlign: "center" as const, padding: "0 4px" }}>|</div>
               <div style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "14px", padding: "22px" }}>
-                <div style={{ fontSize: "22px", marginBottom: "10px" }}>📱</div>
+                <div style={{ marginBottom: "10px" }}><Smartphone size={22} /></div>
                 <div style={{ fontSize: "15px", fontWeight: "800", marginBottom: "6px", letterSpacing: "-0.3px" }}>Civiq</div>
                 <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7" }}>
                   The product. CCF&apos;s mission made tangible — a platform Gen Z can actually open, use, and learn from.
@@ -170,11 +171,11 @@ export default function AboutClient({ isSignedIn }: { isSignedIn: boolean }) {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px" }}>
             {PILLARS.map((item, i) => (
-              <motion.div key={item.label} variants={FADE_UP} initial="hidden" animate="show" custom={6.5 + i * 0.3} className="pillar-card" style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "24px", transition: "background-color 0.2s ease" }}>
-                <div style={{ fontSize: "28px", marginBottom: "12px" }}>{item.icon}</div>
+              <div key={item.label} className="pillar-card" style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "24px", transition: "background-color 0.2s ease" }}>
+                <div style={{ marginBottom: "12px" }}><item.icon size={28} color="#f5a623" /></div>
                 <div style={{ fontSize: "15px", fontWeight: "700", marginBottom: "8px", letterSpacing: "-0.2px" }}>{item.label}</div>
                 <div style={{ fontSize: "13px", color: "#555", lineHeight: "1.7" }}>{item.description}</div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </motion.div>
@@ -212,4 +213,5 @@ export default function AboutClient({ isSignedIn }: { isSignedIn: boolean }) {
     </AppLayout>
   );
 }
+
 
