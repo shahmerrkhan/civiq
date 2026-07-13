@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
+import { MessageCircle } from "lucide-react";
 
 export type Room = {
   id: string;
@@ -134,7 +135,7 @@ export default function DebateLobbyClient({ userId, rooms }: { userId: string; r
         {rooms.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
             style={{ padding: "48px 24px", borderRadius: "16px", backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", textAlign: "center", marginBottom: "32px" }}>
-            <div style={{ fontSize: "32px", marginBottom: "12px" }}>💬</div>
+            <div style={{ marginBottom: "12px", display: "flex", justifyContent: "center" }}><MessageCircle size={32} color="#555" /></div>
             <div style={{ fontSize: "16px", fontWeight: "700", color: "#f0ede6", marginBottom: "8px" }}>No debates yet</div>
             <div style={{ fontSize: "13px", color: "#444", lineHeight: "1.7", maxWidth: "340px", margin: "0 auto 20px" }}>
               Open any issue card in your feed and tap &quot;Discuss This&quot; to get matched with someone who sees it differently.

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { Sparkles, Flame, Lightbulb, Dices, Trophy, Medal } from "lucide-react";
 
 type MyPrediction = {
   id: string;
@@ -124,7 +125,7 @@ export default function ForecastClient({ userId }: { userId: string | null }) {
       <AppLayout active="/forecast">
         <div style={{ ...main, display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "32px", marginBottom: "16px" }}>🔮</div>
+            <div style={{ marginBottom: "16px" }}><Sparkles size={32} color="#f5a623" /></div>
             <div style={{ color: "#444", fontSize: "14px" }}>Loading forecasts...</div>
           </div>
         </div>
@@ -145,7 +146,7 @@ export default function ForecastClient({ userId }: { userId: string | null }) {
         {/* Header */}
         <div style={{ marginBottom: "32px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
-            <span style={{ fontSize: "28px" }}>🔮</span>
+            <span style={{ display: "inline-flex" }}><Sparkles size={28} color="#f5a623" /></span>
             <h1 style={{ fontSize: "24px", fontWeight: "800", letterSpacing: "-0.5px" }}>
               Civic Forecast
             </h1>
@@ -280,7 +281,7 @@ export default function ForecastClient({ userId }: { userId: string | null }) {
                     color: i < 3 ? ["#f5a623", "#aaa", "#cd7f32"][i] : "#444",
                     flexShrink: 0,
                   }}>
-                    {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
+                    {i < 3 ? [<Trophy key="t" size={16} color="#f5a623" />, <Medal key="m" size={16} color="#aaa" />, <Medal key="b" size={16} color="#cd7f32" />][i] : i + 1}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: "14px", fontWeight: "700", color: i === 0 ? "#f5a623" : "#ddd", marginBottom: "2px" }}>
@@ -612,10 +613,10 @@ function QuestionCard({
                     transition: "all 0.15s ease",
                   }}>
                     {pendingConfidence >= 85
-                      ? `🔥 High conviction — ${pendingConfidence} pts if you're right`
+                      ? <><Flame size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />High conviction — {pendingConfidence} pts if you're right</>
                       : pendingConfidence >= 70
-                      ? `💡 Moderate confidence — ${pendingConfidence} pts if correct`
-                      : `🎲 Low confidence — ${pendingConfidence} pts if correct`}
+                      ? <><Lightbulb size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Moderate confidence — {pendingConfidence} pts if correct</>
+                      : <><Dices size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Low confidence — {pendingConfidence} pts if correct</>}
                   </div>
 
                   <div style={{ display: "flex", gap: "10px" }}>

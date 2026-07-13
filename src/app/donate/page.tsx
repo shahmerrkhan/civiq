@@ -1,5 +1,6 @@
 ﻿"use client";
 import AppLayout from "@/components/AppLayout";
+import { Heart } from "lucide-react";
 
 const DONATE_URL = "https://buy.stripe.com/eVq6oIdp7due0SN9dF9bO00";
 
@@ -32,7 +33,7 @@ export default function DonatePage() {
             pointerEvents: "none",
           }} />
 
-          <div style={{ fontSize: 40, marginBottom: 16 }}>💛</div>
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}><Heart size={40} color="#f5a623" fill="#f5a623" /></div>
 
           <div style={{
             fontSize: 11, fontWeight: 800, letterSpacing: "0.14em",
@@ -89,7 +90,7 @@ export default function DonatePage() {
             fontSize: 12, color: "#444",
             fontFamily: "'DM Sans', sans-serif",
           }}>
-            Ontario, Canada · Civic Clarity Foundation
+            Waterloo, Ontario, Canada · Civic Clarity Foundation
           </p>
         </div>
       </div>

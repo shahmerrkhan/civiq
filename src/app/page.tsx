@@ -508,19 +508,6 @@ export default function Home() {
         >
           <div className="hero-section" style={{ maxWidth: "1160px", margin: "0 auto", padding: "100px 48px 90px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
 
-            {/* badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "40px", alignSelf: "flex-start" }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 14px", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "6px", backgroundColor: "rgba(245,166,35,0.06)", fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623" }}>
-                <span className="pulse-dot" />
-                Ontario Civic Platform · Powered by CCF
-              </div>
-            </motion.div>
-
             {/* headline */}
             <div style={{ marginBottom: "32px" }}>
               <motion.h1
@@ -631,64 +618,6 @@ export default function Home() {
 
           </div>
         </motion.div>
-
-        {/* PREVIEW CARD — floating mock */}
-            <div style={{ position: "relative", zIndex: 5, display: "flex", justifyContent: "center", padding: "0 16px 56px", marginTop: "0" }}>
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              width: "100%", maxWidth: "560px",
-              backgroundColor: "rgba(14,14,22,0.95)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              borderRadius: "24px",
-              padding: "28px",
-              backdropFilter: "blur(20px)",
-              boxShadow: "0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)",
-            }}
-          >
-            {/* mock top bar */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-              <div style={{ fontSize: "10px", fontWeight: "800", letterSpacing: "0.1em", textTransform: "uppercase", color: "#f5a623", display: "flex", alignItems: "center", gap: "7px" }}>
-                <span className="pulse-dot" style={{ width: "6px", height: "6px" }} />
-                Today in Ontario
-              </div>
-              <div style={{ fontSize: "11px", color: "#666", fontWeight: "600" }}>{new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</div>
-            </div>
-
-            {[
-              { tag: "HOUSING", title: "Ford government cuts municipal review powers", time: "2h ago", dot: "#f5a623" },
-              { tag: "EDUCATION", title: "Bill 212 passes third reading in legislature", time: "4h ago", dot: "#60a5fa" },
-              { tag: "BUDGET", title: "Province announces $3.2B infrastructure spend", time: "6h ago", dot: "#a78bfa" },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 + i * 0.08, duration: 0.5 }}
-                style={{ paddingBottom: i < 2 ? "16px" : 0, marginBottom: i < 2 ? "16px" : 0, borderBottom: i < 2 ? "1px solid rgba(255,255,255,0.04)" : "none" }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "7px" }}>
-                  <span style={{
-                    fontSize: "9px", fontWeight: "800", letterSpacing: "0.08em",
-                    color: item.dot, backgroundColor: `${item.dot}18`,
-                    padding: "2px 8px", borderRadius: "3px",
-                  }}>{item.tag}</span>
-                  <span style={{ fontSize: "11px", color: "#666" }}>{item.time}</span>
-                </div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: "#aaa", lineHeight: "1.5" }}>{item.title}</div>
-              </motion.div>
-            ))}
-
-            <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: "12px", color: "#666" }}>Your political position</span>
-              <Link href="/sign-up" style={{ fontSize: "12px", fontWeight: "700", color: "#f5a623", textDecoration: "none" }}>Take the quiz →</Link>
-            </div>
-          </motion.div>
-        </div>
 
         {/* STATS */}
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)", backgroundColor: "rgba(10,10,16,0.8)", position: "relative", zIndex: 5 }}>
@@ -899,7 +828,7 @@ export default function Home() {
         {/* FOOTER */}
         <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "28px 48px", backgroundColor: "rgba(6,6,12,0.98)", position: "relative", zIndex: 5 }}>
           <div className="footer-inner" style={{ maxWidth: "1160px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-            <div style={{ fontSize: "12px", color: "#1e1e1e" }}>Built by Shahmeer · Powered by Civic Clarity Foundation · Ontario, Canada</div>
+            <div style={{ fontSize: "12px", color: "#1e1e1e" }}>Powered by Civic Clarity Foundation · Waterloo, Ontario, Canada</div>
             <div style={{ fontSize: "12px", color: "#1e1e1e" }}>© 2025 Civiq. All rights reserved.</div>
           </div>
         </footer>

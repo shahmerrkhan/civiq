@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { Flame, Eye, Lightbulb } from "lucide-react";
 
 const HEAT_COLORS: Record<string, string> = {
   rising: "#f59e0b",
@@ -12,7 +13,7 @@ const HEAT_COLORS: Record<string, string> = {
 const HEAT_LABELS: Record<string, string> = {
   rising: "↑ Rising",
   cooling: "↓ Cooling",
-  exploding: "🔥 Exploding",
+  exploding: "Exploding",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -115,7 +116,8 @@ export default function PulsePage() {
                         padding: "3px 10px", borderRadius: "100px",
                         letterSpacing: "0.05em", textTransform: "uppercase",
                       }}>{item.category}</span>
-                      <span style={{ fontSize: "12px", fontWeight: "600", color: HEAT_COLORS[item.heat] || "#f5a623" }}>
+                      <span style={{ fontSize: "12px", fontWeight: "600", color: HEAT_COLORS[item.heat] || "#f5a623", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                        {item.heat === "exploding" && <Flame size={12} />}
                         {HEAT_LABELS[item.heat]}
                       </span>
                     </div>
@@ -127,8 +129,8 @@ export default function PulsePage() {
 
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 {[
-                  { label: "👀 Watch This", content: pulse.watchThis, color: "#60a5fa" },
-                  { label: "💡 Did You Know", content: pulse.didYouKnow, color: "#a78bfa" },
+                  { label: "Watch This", content: pulse.watchThis, color: "#60a5fa", icon: Eye },
+                  { label: "Did You Know", content: pulse.didYouKnow, color: "#a78bfa", icon: Lightbulb },
                 ].map((item, i) => (
                   <motion.div
                     key={i}
@@ -141,7 +143,8 @@ export default function PulsePage() {
                       borderRadius: "16px", padding: "20px 24px",
                     }}
                   >
-                    <div style={{ fontSize: "12px", fontWeight: "700", color: item.color, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "8px" }}>
+                    <div style={{ fontSize: "12px", fontWeight: "700", color: item.color, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <item.icon size={13} />
                       {item.label}
                     </div>
                     <div style={{ fontSize: "14px", color: "#777", lineHeight: "1.7" }}>{item.content}</div>

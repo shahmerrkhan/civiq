@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/AppLayout";
+import { PartyPopper } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -208,9 +209,9 @@ export default function LearnModuleClient({ module, slug }: { module: Module; sl
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 18 }}
-          style={{ fontSize: "64px", marginBottom: "24px" }}
+          style={{ marginBottom: "24px", display: "flex", justifyContent: "center" }}
         >
-          🎉
+          <PartyPopper size={64} color="#f5a623" />
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 16 }}

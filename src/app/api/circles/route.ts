@@ -11,16 +11,16 @@ async function seedCirclesIfEmpty() {
   if (existing.length > 0) return;
 
   const defaults = [
-    { slug: "housing-crisis", title: "Housing Crisis", description: "Rent, zoning, affordability, and the future of Ontario's housing market.", category: "Economy", emoji: "🏠" },
-    { slug: "healthcare", title: "Healthcare", description: "Wait times, privatization, OHIP, and what Ontario's health system actually needs.", category: "Healthcare", emoji: "🏥" },
-    { slug: "climate-action", title: "Climate Action", description: "Carbon tax, greenbelt, transit, and Ontario's environmental future.", category: "Environment", emoji: "🌿" },
-    { slug: "education", title: "Education", description: "Funding cuts, curriculum changes, OSAP, and what schools in Ontario should look like.", category: "Education", emoji: "📚" },
-    { slug: "doug-ford-watch", title: "Doug Ford Watch", description: "PC government policies, decisions, controversies, and their real impact.", category: "Politics", emoji: "🏛️" },
-    { slug: "indigenous-rights", title: "Indigenous Rights", description: "Land rights, treaties, MMIWG, and the relationship between Ontario and First Nations.", category: "Justice", emoji: "🪶" },
-    { slug: "immigration", title: "Immigration", description: "Student visas, permanent residency, refugee policy, and Ontario's newcomer experience.", category: "Society", emoji: "🌍" },
-    { slug: "cost-of-living", title: "Cost of Living", description: "Groceries, gas, wages, and why everything in Ontario feels more expensive.", category: "Economy", emoji: "💸" },
-    { slug: "police-justice", title: "Police & Justice", description: "Reform, accountability, carding, and what justice actually looks like in Ontario.", category: "Justice", emoji: "⚖️" },
-    { slug: "transit", title: "Transit & Infrastructure", description: "TTC, Metrolinx, GO, highways, and how Ontario moves people (or doesn't).", category: "Infrastructure", emoji: "🚇" },
+    { slug: "housing-crisis", title: "Housing Crisis", description: "Rent, zoning, affordability, and the future of Ontario's housing market.", category: "Economy", emoji: "Home" },
+    { slug: "healthcare", title: "Healthcare", description: "Wait times, privatization, OHIP, and what Ontario's health system actually needs.", category: "Healthcare", emoji: "HeartPulse" },
+    { slug: "climate-action", title: "Climate Action", description: "Carbon tax, greenbelt, transit, and Ontario's environmental future.", category: "Environment", emoji: "Leaf" },
+    { slug: "education", title: "Education", description: "Funding cuts, curriculum changes, OSAP, and what schools in Ontario should look like.", category: "Education", emoji: "BookOpen" },
+    { slug: "doug-ford-watch", title: "Doug Ford Watch", description: "PC government policies, decisions, controversies, and their real impact.", category: "Politics", emoji: "Landmark" },
+    { slug: "indigenous-rights", title: "Indigenous Rights", description: "Land rights, treaties, MMIWG, and the relationship between Ontario and First Nations.", category: "Justice", emoji: "Feather" },
+    { slug: "immigration", title: "Immigration", description: "Student visas, permanent residency, refugee policy, and Ontario's newcomer experience.", category: "Society", emoji: "Globe" },
+    { slug: "cost-of-living", title: "Cost of Living", description: "Groceries, gas, wages, and why everything in Ontario feels more expensive.", category: "Economy", emoji: "Banknote" },
+    { slug: "police-justice", title: "Police & Justice", description: "Reform, accountability, carding, and what justice actually looks like in Ontario.", category: "Justice", emoji: "Scale" },
+    { slug: "transit", title: "Transit & Infrastructure", description: "TTC, Metrolinx, GO, highways, and how Ontario moves people (or doesn't).", category: "Infrastructure", emoji: "TrainFront" },
   ];
 
   await db.insert(circles).values(defaults);

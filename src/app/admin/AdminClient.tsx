@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { Mail, Megaphone, Bot, Zap, Sparkles } from "lucide-react";
 
 const eventCategories = ["Legislature", "Courts", "Municipal", "Federal", "Budget", "Election", "Environment", "Housing"];
 
@@ -512,7 +513,7 @@ const saveEdit = async (id: string) => {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={handleSendDigest} disabled={sendingDigest}
                 style={{ padding: "9px 18px", borderRadius: "10px", border: "1px solid rgba(245,166,35,0.3)", backgroundColor: "rgba(245,166,35,0.08)", color: "#f5a623", fontSize: "13px", fontWeight: "700", cursor: sendingDigest ? "not-allowed" : "pointer", fontFamily: "'DM Sans', sans-serif", opacity: sendingDigest ? 0.6 : 1 }}
-              >{sendingDigest ? "Sending..." : "📧 Send weekly digest"}</motion.button>
+              >{sendingDigest ? "Sending..." : <><Mail size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "6px" }} />Send weekly digest</>}</motion.button>
               {digestMsg && <div style={{ fontSize: "12px", color: "#4ade80" }}>{digestMsg}</div>}
             </div>
           </div>
@@ -522,7 +523,7 @@ const saveEdit = async (id: string) => {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
           style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(245,166,35,0.15)", borderRadius: "16px", padding: "20px 24px", marginBottom: "28px" }}
         >
-          <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623", marginBottom: "16px" }}>📣 Send notification blast</div>
+          <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623", marginBottom: "16px", display: "flex", alignItems: "center", gap: "6px" }}><Megaphone size={14} />Send notification blast</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <input value={blastForm.title} onChange={e => setBlastForm(f => ({ ...f, title: e.target.value }))} placeholder="Notification title..." style={inputStyle} />
             <input value={blastForm.body} onChange={e => setBlastForm(f => ({ ...f, body: e.target.value }))} placeholder="Notification body text..." style={inputStyle} />
@@ -674,7 +675,7 @@ const saveEdit = async (id: string) => {
               {witnessEvents.filter(e => e.status === "pending").length > 0 && (
                 <div style={{ marginBottom: "28px" }}>
                   <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623", marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    🤖 AI-generated — needs review ({witnessEvents.filter(e => e.status === "pending").length})
+                    <Bot size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />AI-generated — needs review ({witnessEvents.filter(e => e.status === "pending").length})
                   </div>
                   {witnessEvents.filter(e => e.status === "pending").map((event, i) => (
                     <motion.div key={event.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
@@ -734,7 +735,7 @@ const saveEdit = async (id: string) => {
 
               {/* Create forecast form */}
               <div style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(167,139,250,0.15)", borderRadius: "16px", padding: "20px 24px", marginBottom: "28px" }}>
-                <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#a78bfa", marginBottom: "16px" }}>🔮 New forecast question</div>
+                <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#a78bfa", marginBottom: "16px", display: "flex", alignItems: "center", gap: "6px" }}><Sparkles size={14} />New forecast question</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                   <div><label style={labelStyle}>Question (Yes/No)</label><input value={forecastForm.question} onChange={e => setForecastForm(f => ({ ...f, question: e.target.value }))} placeholder="Will Doug Ford call an early election before September?" style={inputStyle} /></div>
                   <div><label style={labelStyle}>Context</label><textarea value={forecastForm.context} onChange={e => setForecastForm(f => ({ ...f, context: e.target.value }))} placeholder="2–3 sentences of background..." rows={3} style={{ ...inputStyle, resize: "none" }} /></div>
@@ -805,7 +806,7 @@ const saveEdit = async (id: string) => {
               {forecastQuestions.filter(q => q.status === "pending").length > 0 && (
                 <div style={{ marginBottom: "28px" }}>
                   <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#f5a623", marginBottom: "14px" }}>
-                    🤖 AI-generated — needs review ({forecastQuestions.filter(q => q.status === "pending").length})
+                    <Bot size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />AI-generated — needs review ({forecastQuestions.filter(q => q.status === "pending").length})
                   </div>
                   {forecastQuestions.filter(q => q.status === "pending").map((q, i) => (
                     <motion.div key={q.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
@@ -864,7 +865,7 @@ const saveEdit = async (id: string) => {
                       <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                         onClick={() => setResolveData({ id: q.id, outcome: "true", explanation: "" })}
                         style={{ padding: "8px 16px", borderRadius: "10px", border: "1px solid rgba(167,139,250,0.3)", backgroundColor: "rgba(167,139,250,0.08)", color: "#a78bfa", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
-                      >⚡ Manual resolve</motion.button>
+                      >{}<Zap size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Manual resolve</motion.button>
                     )}
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleDeleteForecast(q.id)} disabled={loading === q.id}
                       style={{ padding: "8px 16px", borderRadius: "10px", border: "1px solid rgba(248,113,113,0.2)", backgroundColor: "rgba(248,113,113,0.06)", color: "#f87171", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loading === q.id ? 0.5 : 1 }}
@@ -1012,7 +1013,7 @@ function WitnessAdminCard({
         {event.status !== "resolved" && (
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setShowResolve(v => !v)}
             style={{ padding: "8px 16px", borderRadius: "10px", border: "1px solid rgba(248,113,113,0.25)", backgroundColor: "rgba(248,113,113,0.06)", color: "#f87171", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
-          >⚡ Resolve</motion.button>
+          >{}<Zap size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Resolve</motion.button>
         )}
         <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => onDelete(event.id)} disabled={loading === event.id}
           style={{ padding: "8px 16px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", color: "#555", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", opacity: loading === event.id ? 0.5 : 1 }}

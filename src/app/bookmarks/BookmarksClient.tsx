@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { Tag } from "lucide-react";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Infrastructure: "#60a5fa",
@@ -62,7 +63,7 @@ export default function BookmarksClient({ bookmarks: initial }: {
             animate={{ opacity: 1 }}
             style={{ textAlign: "center", padding: "64px 0" }}
           >
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>🏷️</div>
+            <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center" }}><Tag size={48} color="#555" /></div>
             <div style={{ fontSize: "16px", color: "#555", marginBottom: "8px" }}>No saved articles yet</div>
             <div style={{ fontSize: "13px", color: "#555" }}>Tap the bookmark icon on any feed card to save it here.</div>
           </motion.div>

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { Users } from "lucide-react";
 
 type Chapter = {
   id: string;
@@ -215,7 +216,7 @@ export default function StorylinesClient({ userId }: { userId: string | null }) 
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "12px", color: "#444", flexWrap: "wrap" }}>
-                  <span>👥 {s.followers} following</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Users size={13} />{s.followers} following</span>
                   {s.myOpinion && <span style={{ color: "#f5a623" }}>✓ You logged a take</span>}
                   {s.isFollowing && <span style={{ color: "#4ade80" }}>✓ Following</span>}
                   {s.latestChapter && (

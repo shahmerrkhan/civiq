@@ -2,6 +2,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import { Home, HeartPulse, Leaf, BookOpen, Landmark, Feather, Globe, Banknote, Scale, TrainFront, type LucideIcon } from "lucide-react";
+
+const CIRCLE_ICONS: Record<string, LucideIcon> = {
+  Home, HeartPulse, Leaf, BookOpen, Landmark, Feather, Globe, Banknote, Scale, TrainFront,
+};
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -482,9 +487,8 @@ export default function CirclesClient({}: { userId: string }) {
                         backgroundColor: `${catColor}12`,
                         border: `1px solid ${catColor}25`,
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "22px",
-                      }}>
-                        {circle.emoji}
+                        }}>
+                        {(() => { const Icon = CIRCLE_ICONS[circle.emoji] || Home; return <Icon size={22} color={catColor} />; })()}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px", flexWrap: "wrap" }}>
@@ -560,7 +564,7 @@ export default function CirclesClient({}: { userId: string }) {
           </button>
           {d && (
             <>
-              <span style={{ fontSize: "20px" }}>{d.circle.emoji}</span>
+              <span style={{ display: "inline-flex" }}>{(() => { const Icon = CIRCLE_ICONS[d.circle.emoji] || Home; return <Icon size={20} />; })()}</span>
               <span style={{ fontSize: "16px", fontWeight: "700", color: "#f0ede6", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {d.circle.title}
               </span>

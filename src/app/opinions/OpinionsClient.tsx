@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
+import { NotebookPen } from "lucide-react";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Infrastructure: "#60a5fa",
@@ -74,7 +75,7 @@ export default function OpinionsClient({ opinions }: { opinions: Opinion[] }) {
             animate={{ opacity: 1 }}
             style={{ textAlign: "center", padding: "80px 0" }}
           >
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>🗒️</div>
+            <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center" }}><NotebookPen size={48} color="#555" /></div>
             <div style={{ fontSize: "16px", color: "#555", marginBottom: "8px" }}>Nothing here yet</div>
             <div style={{ fontSize: "13px", color: "#555", marginBottom: "28px" }}>
               Open any issue from the feed and log what you think about it.
