@@ -14,14 +14,6 @@ export default function SignUpPage() {
       gap: "32px",
     }}>
       <div style={{ textAlign: "center" }}>
-        <div style={{
-          fontSize: "10px",
-          fontWeight: "700",
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          color: "#f5a623",
-          marginBottom: "10px",
-        }}>Ontario Civic Platform</div>
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: "28px",

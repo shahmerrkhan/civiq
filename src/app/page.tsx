@@ -610,7 +610,7 @@ export default function Home() {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2 }}
               className="scroll-indicator"
-              style={{ position: "absolute", bottom: "40px", left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}
+              style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}
             >
               <div style={{ fontSize: "10px", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: "700" }}>Scroll</div>
               <div style={{ width: "1px", height: "32px", background: "linear-gradient(to bottom, #666, transparent)" }} />
