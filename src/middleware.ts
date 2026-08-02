@@ -113,6 +113,50 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   if (isProtectedRoute(request)) await auth.protect();
+},
+{
+  // Nonce-based Content-Security-Policy, generated fresh per request.
+  //
+  // strict: true makes Clerk drop the `https:`/`http:` wildcards from
+  // script-src and add 'strict-dynamic' plus a per-request nonce. Under
+  // CSP Level 3, 'strict-dynamic' causes browsers to IGNORE 'unsafe-inline'
+  // and every host-source expression in script-src, so only the nonced
+  // scripts (and what they load) can execute. 'unsafe-inline' remains in the
+  // serialized header purely as a fallback for CSP1/CSP2-era browsers, which
+  // is the standard strict-CSP pattern. 'unsafe-eval' is added by Clerk only
+  // outside production, where React needs it for error overlays.
+  contentSecurityPolicy: {
+    strict: true,
+    // If a CSP violation ever breaks something in production, flip this to
+    // true: it switches to Content-Security-Policy-Report-Only, so violations
+    // are reported but nothing is blocked. Revert once the gap is patched.
+    reportOnly: false,
+    directives: {
+      "default-src": ["'self'"],
+      // style-src must keep 'unsafe-inline': nonces only apply to <style>
+      // elements, not to inline style="" attributes, and this UI is built on
+      // ~1400 React inline style props that are serialized as attributes
+      // during SSR. Dropping it would render every page unstyled.
+      "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      "font-src": ["'self'", "https://fonts.gstatic.com"],
+      "img-src": ["'self'", "blob:", "data:", "https://img.clerk.com", "https://*.clerk.com"],
+      "connect-src": [
+        "'self'",
+        "https://*.clerk.accounts.dev",
+        "https://clerk.getciviq.org",
+        "https://*.ingest.sentry.io",
+        "https://*.ingest.us.sentry.io",
+        "wss:",
+      ],
+      "frame-src": ["'self'", "https://challenges.cloudflare.com", "https://*.clerk.accounts.dev"],
+      "worker-src": ["'self'", "blob:"],
+      "object-src": ["'none'"],
+      "base-uri": ["'self'"],
+      "form-action": ["'self'"],
+      "frame-ancestors": ["'self'"],
+      "upgrade-insecure-requests": [],
+    },
+  },
 });
 
 export const config = {

@@ -22,23 +22,9 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
   },
-  {
-    key: "Content-Security-Policy",
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://clerk.getciviq.org https://*.clerk.accounts.dev https://challenges.cloudflare.com https://static.cloudflareinsights.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' blob: data: https://img.clerk.com https://*.clerk.com",
-      "connect-src 'self' https://*.clerk.accounts.dev https://clerk.getciviq.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://generativelanguage.googleapis.com https://cloudflareinsights.com wss:",
-      "frame-src 'self' https://challenges.cloudflare.com https://*.clerk.accounts.dev",
-      "worker-src 'self' blob:",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "upgrade-insecure-requests",
-    ].join("; "),
-  },
+  // Content-Security-Policy is NOT set here. It is generated per-request in
+  // src/middleware.ts so each response carries a fresh nonce; a static header
+  // cannot contain one.
 ];
 const nextConfig: NextConfig = {
   images: {

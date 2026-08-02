@@ -4,6 +4,13 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
+// Nonce-based CSP requires dynamic rendering: Next.js injects the per-request
+// nonce during SSR, so a page prerendered at build time would ship script tags
+// with no nonce and be blocked by 'strict-dynamic'. Applied at the root so it
+// also covers the "use client" pages, which cannot export route config
+// themselves (/contact, /donate, /faq, /learn, /onboarding).
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Civiq",
   description: "Your civic IQ, levelled up.",
@@ -28,6 +35,11 @@ export default function RootLayout({
 }) {
   return (
       <ClerkProvider
+  // `dynamic` swaps Clerk's build-time script tag for DynamicClerkScripts,
+  // which reads the per-request X-Nonce header and stamps the nonce onto the
+  // clerk-js <script>. Without it that script carries no nonce and
+  // 'strict-dynamic' blocks it, breaking sign-in entirely.
+  dynamic
   localization={{
     unstable__errors: {
       form_password_pwned: "This password has shown up in a known data breach. Pick something unique to you and try again.",
