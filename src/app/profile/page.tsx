@@ -51,6 +51,7 @@ return (
       opinions={opinions as unknown as ProfileOpinion[]}
       pollsVoted={votesCount[0]?.count ?? 0}
       modulesCompleted={progressCount[0]?.count ?? 0}
+      digestSubscribed={dbUser[0].digestSubscribed === true}
     />
   );
 }

@@ -71,6 +71,7 @@ function drawStatIcon(ctx: CanvasRenderingContext2D, type: string, x: number, y:
 export default function ProfileClient({
   name, email, imageUrl, compassPosition,
   streakCount, civicScore, opinions, pollsVoted, modulesCompleted,
+  digestSubscribed: initialDigestSubscribed,
 }: {
   name: string;
   email: string;
@@ -81,7 +82,33 @@ export default function ProfileClient({
   opinions: ProfileOpinion[];
   pollsVoted: number;
   modulesCompleted: number;
+  digestSubscribed: boolean;
 }) {
+  const [digestSubscribed, setDigestSubscribed] = useState(initialDigestSubscribed);
+  const [digestLoading, setDigestLoading] = useState(false);
+  const [digestMsg, setDigestMsg] = useState("");
+
+  const updateDigest = async (next: boolean) => {
+    setDigestLoading(true);
+    setDigestMsg("");
+    const previous = digestSubscribed;
+    setDigestSubscribed(next);
+    try {
+      const res = await fetch("/api/digest/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscribed: next }),
+      });
+      if (!res.ok) throw new Error();
+      setDigestMsg(next ? "Subscribed. You'll get the next weekly digest." : "Unsubscribed. You won't receive any more digests.");
+    } catch {
+      setDigestSubscribed(previous);
+      setDigestMsg("Couldn't save that. Please try again.");
+    }
+    setDigestLoading(false);
+    setTimeout(() => setDigestMsg(""), 4000);
+  };
+
   function getCivicLabel(score: number) {
     if (score >= 500) return { label: "Civic Champion", color: "#f5a623" };
     if (score >= 300) return { label: "Political Junkie", color: "#a78bfa" };
@@ -513,6 +540,40 @@ const stats = [
 
           </div>
         </motion.div>
+        </motion.div>
+
+      {/* Email preferences */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "24px 28px", marginTop: "20px" }}
+        >
+          <div style={{ fontSize: "11px", color: "#444", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "6px" }}>Email Preferences</div>
+          <div style={{ fontSize: "13px", color: "#555", marginBottom: "16px", lineHeight: "1.6" }}>
+            The weekly Ontario digest — one email a week. You can turn this off at any time.
+          </div>
+
+          <label
+            htmlFor="digest-toggle"
+            style={{ display: "flex", alignItems: "center", gap: "12px", cursor: digestLoading ? "wait" : "pointer" }}
+          >
+            <input
+              id="digest-toggle"
+              type="checkbox"
+              checked={digestSubscribed}
+              disabled={digestLoading}
+              onChange={(e) => updateDigest(e.target.checked)}
+              style={{ width: 18, height: 18, accentColor: "#f5a623", cursor: digestLoading ? "wait" : "pointer" }}
+            />
+            <span style={{ fontSize: "14px", fontWeight: "600", color: digestSubscribed ? "#f5a623" : "#888" }}>
+              {digestSubscribed ? "Subscribed to the weekly digest" : "Not subscribed"}
+            </span>
+          </label>
+
+          {digestMsg && (
+            <div style={{ fontSize: "12px", color: "#555", marginTop: "10px" }}>{digestMsg}</div>
+          )}
         </motion.div>
 
       {/* Delete Account */}

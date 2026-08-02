@@ -1,19 +1,44 @@
 import { Resend } from "resend";
 import { sql } from "@/db";
 import { NextResponse } from "next/server";
+import { isCronAuthorized } from "@/lib/cron";
+import { isAdmin } from "@/lib/admin";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
-export async function GET(req: Request) {
-  try {
-    const authHeader = req.headers.get("authorization");
-    const { userId } = await import("@clerk/nextjs/server").then(m => m.auth());
-    const isAdmin = process.env.ADMIN_USER_IDS?.split(",").includes(userId ?? "");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && !isAdmin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
-    const users = await sql`SELECT email FROM users WHERE email != ''`;
+// Vercel Cron calls this on a schedule.
+export async function GET(req: Request) {
+  if (!isCronAuthorized(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return sendDigest();
+}
+
+// Admin-triggered send. Deliberately POST, not GET: a GET that mails every
+// subscriber can be fired by a top-level cross-site navigation while an admin
+// is signed in.
+export async function POST(req: Request) {
+  if (!isCronAuthorized(req) && !(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return sendDigest();
+}
+
+async function sendDigest() {
+  try {
+    const users = await sql`
+      SELECT email FROM users
+      WHERE email <> '' AND email IS NOT NULL AND digest_subscribed = true
+    `;
     
 const recentCards = await sql`
       SELECT title, summary, category, perspectives
@@ -72,10 +97,10 @@ const recentCards = await sql`
             const color = categoryColors[card.category] || "#f5a623";
             return `
             <div class="card">
-              <span class="category" style="color: ${color}; background-color: ${color}20;">${card.category}</span>
-              <div class="card-title">${card.title}</div>
-              <div class="card-summary">${card.summary}</div>
-              <div class="perspective">${card.perspectives?.centre || ""}</div>
+              <span class="category" style="color: ${color}; background-color: ${color}20;">${escapeHtml(card.category)}</span>
+              <div class="card-title">${escapeHtml(card.title)}</div>
+              <div class="card-summary">${escapeHtml(card.summary)}</div>
+              <div class="perspective">${escapeHtml(card.perspectives?.centre || "")}</div>
             </div>
             `;
           }).join("")}
@@ -83,7 +108,8 @@ const recentCards = await sql`
           <a href="https://getciviq.org" class="cta">Read the full feed →</a>
           
           <div class="footer">
-            You're getting this because you signed up for Civiq.<br>
+            You're getting this because you subscribed to the Civiq weekly digest.
+            <a href="https://getciviq.org/profile" style="color:#f5a623;">Manage your email preferences</a>.<br>
             Built by Shahmeer · Powered by Civic Clarity Foundation · Ontario, Canada
           </div>
         </div>
@@ -91,21 +117,34 @@ const recentCards = await sql`
       </html>
     `;
 
+    const subject = `This week in Ontario politics 🏛️ · ${new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" })}`;
+    const recipients = users.map((u) => u.email as string).filter(Boolean);
+
+    // Send concurrently in bounded batches — a serial await-per-user loop times
+    // out the serverless function once the list grows.
+    const BATCH_SIZE = 25;
     let sent = 0;
-    for (const user of users) {
-      if (!user.email) continue;
-      await resend.emails.send({
-        from: "Civiq Weekly <digest@getciviq.org>",
-        to: user.email,
-        subject: `This week in Ontario politics 🏛️ · ${new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric" })}`,
-        html,
-      });
-      sent++;
+    let failed = 0;
+
+    for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+      const batch = recipients.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(
+        batch.map((to) =>
+          resend.emails.send({
+            from: "Civiq Weekly <digest@getciviq.org>",
+            to,
+            subject,
+            html,
+          })
+        )
+      );
+      sent += results.filter((r) => r.status === "fulfilled").length;
+      failed += results.filter((r) => r.status === "rejected").length;
     }
 
-    return NextResponse.json({ success: true, sent });
+    return NextResponse.json({ success: true, sent, failed });
   } catch (err) {
     console.error("digest error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to send digest" }, { status: 500 });
   }
 }

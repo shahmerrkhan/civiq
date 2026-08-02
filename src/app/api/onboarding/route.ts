@@ -11,13 +11,15 @@ export async function POST(req: Request) {
     const body = await req.json();
     const parsed = OnboardingSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
-    const { compassPosition } = parsed.data;
+    const { compassPosition, digestSubscribed } = parsed.data;
 
     await sql`
-      INSERT INTO users (id, email, compass_position, onboarding_complete)
-      VALUES (${userId}, '', ${JSON.stringify(compassPosition)}, true)
+      INSERT INTO users (id, email, compass_position, onboarding_complete, digest_subscribed)
+      VALUES (${userId}, '', ${JSON.stringify(compassPosition)}, true, ${digestSubscribed})
       ON CONFLICT (id) DO UPDATE
-      SET compass_position = ${JSON.stringify(compassPosition)}, onboarding_complete = true
+      SET compass_position = ${JSON.stringify(compassPosition)},
+          onboarding_complete = true,
+          digest_subscribed = ${digestSubscribed}
     `;
 
     return NextResponse.json({ success: true });

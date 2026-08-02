@@ -142,6 +142,8 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
   const [direction, setDirection] = useState(1);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifDone, setNotifDone] = useState(false);
+  // Must start false: express opt-in, never pre-ticked.
+  const [digestOptIn, setDigestOptIn] = useState(false);
 
   const handleEnableNotifications = async () => {
     setNotifLoading(true);
@@ -217,20 +219,17 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
     };
     setResult(final);
 
-    await Promise.all([
-      fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          compassPosition: final,
-          topics: selectedTopics,
-        }),
+    // digestOptIn is only ever true if the user actively ticked the box —
+    // CASL requires express consent, so it must never default to subscribed.
+    await fetch("/api/onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        compassPosition: final,
+        topics: selectedTopics,
+        digestSubscribed: digestOptIn,
       }),
-      fetch("/api/digest/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      }),
-    ]);
+    });
 
     setSaving(false);
     setStage("result");
@@ -502,6 +501,35 @@ type Stage = "welcome" | "quiz" | "topics" | "result" | "notifications";
                 );
               })}
             </div>
+
+            {/* Express opt-in for the weekly email. Unticked by default. */}
+            <label
+              htmlFor="digest-opt-in"
+              style={{
+                display: "flex", alignItems: "flex-start", gap: "12px",
+                padding: "16px",
+                borderRadius: "14px",
+                border: digestOptIn ? "1px solid rgba(245,166,35,0.4)" : "1px solid rgba(255,255,255,0.08)",
+                backgroundColor: digestOptIn ? "rgba(245,166,35,0.06)" : "rgba(255,255,255,0.02)",
+                cursor: "pointer",
+                marginBottom: "20px",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <input
+                id="digest-opt-in"
+                type="checkbox"
+                checked={digestOptIn}
+                onChange={(e) => setDigestOptIn(e.target.checked)}
+                style={{ width: 18, height: 18, marginTop: 2, accentColor: "#f5a623", cursor: "pointer", flexShrink: 0 }}
+              />
+              <span style={{ fontSize: "13px", color: "#888", lineHeight: "1.6" }}>
+                Email me the weekly Ontario digest.
+                <span style={{ display: "block", color: "#555", fontSize: "12px", marginTop: "2px" }}>
+                  One email a week. Unsubscribe anytime from your profile.
+                </span>
+              </span>
+            </label>
 
             <motion.button
               whileHover={{ scale: 1.01 }}
