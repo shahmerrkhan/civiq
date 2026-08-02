@@ -15,9 +15,29 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
+// Generation is paid Gemini usage triggered by an unauthenticated GET, so it
+// is bounded three ways: a cooldown between runs, a hard daily cap, and the
+// pool check in GET() which now counts pending cards too.
+const GENERATION_COOLDOWN_SECONDS = 30 * 60; // at most one run per 30 min
+const MAX_GENERATIONS_PER_DAY = 12;
+
 async function generateAndSave(count: number) {
-  const locked = await redis.set("civiq:feed:generating", "1", { nx: true, ex: 60 });
+  // Day-bucketed spend cap. Checked before the cooldown so a stuck cooldown
+  // key can never be worked around.
+  const dayKey = `civiq:feed:gencount:${new Date().toISOString().slice(0, 10)}`;
+  const used = Number((await redis.get<number>(dayKey).catch(() => 0)) ?? 0);
+  if (used >= MAX_GENERATIONS_PER_DAY) return;
+
+  // NOT released on success: the key doubles as the cooldown window, so a
+  // completed run cannot immediately re-trigger on the very next request.
+  const locked = await redis.set("civiq:feed:generating", "1", {
+    nx: true,
+    ex: GENERATION_COOLDOWN_SECONDS,
+  });
   if (!locked) return;
+
+  await redis.incr(dayKey).catch(() => {});
+  await redis.expire(dayKey, 86400).catch(() => {});
 
   try {
     const raw = await geminiGenerate({
@@ -78,8 +98,11 @@ Make each card genuinely interesting. Vary the categories. No duplicates.`,
         publishedAt: new Date(),
       }))
     );
-  } finally {
-    await redis.del("civiq:feed:generating");
+  } catch (err) {
+    // Only clear the lock on failure, so a crashed run doesn't block
+    // generation for the whole cooldown window.
+    await redis.del("civiq:feed:generating").catch(() => {});
+    throw err;
   }
 }
 
@@ -88,8 +111,13 @@ export async function GET(req: Request) {
     // Feed is public — no auth required
     
     const { searchParams } = new URL(req.url);
-    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
-    const limit = Math.min(20, parseInt(searchParams.get("limit") ?? String(CARDS_PER_PAGE)));
+    // parseInt returns NaN for junk input, which propagates into .limit()/.offset().
+    const rawPage = Number.parseInt(searchParams.get("page") ?? "1", 10);
+    const rawLimit = Number.parseInt(searchParams.get("limit") ?? String(CARDS_PER_PAGE), 10);
+    const page = Number.isFinite(rawPage) ? Math.max(1, rawPage) : 1;
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(20, Math.max(1, rawLimit))
+      : CARDS_PER_PAGE;
     const offset = (page - 1) * limit;
 
     const [{ total }] = await db
@@ -97,9 +125,17 @@ export async function GET(req: Request) {
       .from(contentCards)
       .where(eq(contentCards.approved, true));
 
-    if (total < MIN_POOL) {
-      await generateAndSave(MIN_POOL - total);
-    } else if (total < MIN_POOL + 10) {
+    // Generation writes approved:false rows, so deciding whether to generate
+    // from the approved count alone meant the trigger could never be satisfied
+    // and every request re-ran a paid grounded generation. Count the pending
+    // backlog too — cards already waiting on review are supply, not demand.
+    const [{ pool }] = await db
+      .select({ pool: sql<number>`cast(count(*) as int)` })
+      .from(contentCards);
+
+    if (pool < MIN_POOL) {
+      await generateAndSave(MIN_POOL - pool);
+    } else if (pool < MIN_POOL + 10) {
       generateAndSave(10).catch(console.error);
     }
 
