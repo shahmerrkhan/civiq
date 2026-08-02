@@ -7,6 +7,15 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
@@ -28,7 +37,11 @@ export async function POST(req: Request) {
       from: "Civiq Feedback <feedback@getciviq.org>",
       to: "rehan.mazid@gmail.com",
       subject: `New feedback: ${category}`,
-      html: `<p><strong>Category:</strong> ${category}</p><p><strong>From:</strong> ${email ?? "Anonymous"}</p><p><strong>Message:</strong></p><p>${message}</p>`,
+      html:
+        `<p><strong>Category:</strong> ${escapeHtml(category)}</p>` +
+        `<p><strong>From:</strong> ${escapeHtml(email ?? "Anonymous")}</p>` +
+        `<p><strong>User:</strong> ${escapeHtml(userId ?? "signed out")}</p>` +
+        `<p><strong>Message:</strong></p><p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
     }).catch((err) => console.error("Feedback email failed:", err));
 
     return NextResponse.json({ submitted: true });
