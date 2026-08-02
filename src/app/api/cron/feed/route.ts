@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
+import { isCronAuthorized } from "@/lib/cron";
 import { geminiGenerate } from "@/lib/gemini";
 import { db } from "@/db";
 import { contentCards } from "@/db/schema";
 import { sql } from "drizzle-orm";
 
 export async function GET(req: Request) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

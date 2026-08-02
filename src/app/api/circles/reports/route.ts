@@ -3,6 +3,9 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { circlePostReports, circlePosts } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { isAdmin } from "@/lib/admin";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +15,7 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => null);
     const { postId, reason } = body ?? {};
 
-    if (!postId || typeof postId !== "string") {
+    if (typeof postId !== "string" || !UUID_RE.test(postId)) {
       return NextResponse.json({ error: "Missing postId" }, { status: 400 });
     }
     if (!reason || typeof reason !== "string" || reason.trim().length < 1) {
@@ -55,12 +58,13 @@ export async function DELETE(req: Request) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const ADMIN_IDS = ["user_3FjyZGikYeG9xNJm9uDh06WkLJh", "user_3FlZv0AydohOEdXeSRpOMucj6VD"];
-    if (!ADMIN_IDS.includes(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json().catch(() => null);
     const { id } = body ?? {};
-    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    if (typeof id !== "string" || !UUID_RE.test(id)) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
 
     await db.delete(circlePostReports).where(eq(circlePostReports.id, id));
     return NextResponse.json({ dismissed: true });

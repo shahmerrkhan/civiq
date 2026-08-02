@@ -36,11 +36,25 @@ export async function POST(req: Request) {
 
     if (!cardId || !opinion?.trim()) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-    await db.insert(userOpinions).values({
-      userId,
-      cardId,
-      opinion: sanitizeHtml(opinion.trim(), { allowedTags: [], allowedAttributes: {} }),
-    }).onConflictDoNothing();
+    const clean = sanitizeHtml(opinion.trim(), { allowedTags: [], allowedAttributes: {} });
+    if (!clean) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+
+    // One opinion per card per user. Without this, re-POSTing the same card
+    // inserts a new row and mints 15 XP each time.
+    const existing = await db
+      .select({ id: userOpinions.id })
+      .from(userOpinions)
+      .where(and(eq(userOpinions.userId, userId), eq(userOpinions.cardId, cardId)))
+      .limit(1);
+
+    if (existing[0]) {
+      await db.update(userOpinions)
+        .set({ opinion: clean })
+        .where(eq(userOpinions.id, existing[0].id));
+      return NextResponse.json({ success: true, updated: true, pointsAwarded: 0 });
+    }
+
+    await db.insert(userOpinions).values({ userId, cardId, opinion: clean });
 
     await db.insert(userActivity).values({
       userId,

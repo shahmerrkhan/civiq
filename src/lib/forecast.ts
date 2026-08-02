@@ -3,9 +3,28 @@ import { forecastQuestions, forecastPredictions, forecastLeaderboard, pushSubscr
 import { eq, and, isNull } from "drizzle-orm";
 import webpush from "web-push";
 import { geminiGenerate } from "@/lib/gemini";
+import { withLock } from "@/lib/lock";
 
 // ─── Generate 3 new predictions for the week ─────────────────────────────────
 export async function generateWeeklyForecasts(weekStart: string) {
+  const existing = await db
+    .select()
+    .from(forecastQuestions)
+    .where(eq(forecastQuestions.weekStart, weekStart));
+
+  if (existing.length >= 3) return existing;
+
+  // This runs off a public GET, so concurrent first-of-the-week requests would
+  // otherwise each fire their own grounded generation.
+  return withLock(
+    `civiq:lock:forecast:${weekStart}`,
+    120,
+    () => doGenerateWeeklyForecasts(weekStart),
+    existing
+  );
+}
+
+async function doGenerateWeeklyForecasts(weekStart: string) {
   const existing = await db
     .select()
     .from(forecastQuestions)
@@ -198,11 +217,14 @@ async function scorePredictions(questionId: string, outcome: boolean) {
 // ─── Push notifications on resolution ────────────────────────────────────────
 async function notifyResolution(questionId: string) {
   try {
-    if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return;
+    // The public key is only ever set as NEXT_PUBLIC_VAPID_PUBLIC_KEY; reading
+    // VAPID_PUBLIC_KEY silently disabled these notifications entirely.
+    const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? process.env.VAPID_PUBLIC_KEY;
+    if (!vapidPublic || !process.env.VAPID_PRIVATE_KEY) return;
 
     webpush.setVapidDetails(
-      "mailto:civiq@civicclarityfoundation.org",
-      process.env.VAPID_PUBLIC_KEY,
+      process.env.VAPID_EMAIL ?? "mailto:civiq@civicclarityfoundation.org",
+      vapidPublic,
       process.env.VAPID_PRIVATE_KEY
     );
 

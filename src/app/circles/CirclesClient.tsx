@@ -356,12 +356,18 @@ export default function CirclesClient({}: { userId: string }) {
     const reason = prompt("Why are you reporting this post?\n\n• Hate speech\n• Misinformation\n• Spam\n• Harassment\n• Other");
     if (!reason?.trim()) return;
     try {
-      await fetch("/api/circles/reports", {
+      const res = await fetch("/api/circles/reports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ postId, reason: reason.trim() }),
       });
-      alert("Report submitted. We'll review it shortly.");
+      if (res.ok) {
+        alert("Report submitted. We'll review it shortly.");
+      } else if (res.status === 409) {
+        alert("You've already reported this post.");
+      } else {
+        alert("Failed to submit report. Please try again.");
+      }
     } catch {
       alert("Failed to submit report. Please try again.");
     }

@@ -39,6 +39,7 @@ Return ONLY a JSON object, no markdown:
 
     return NextResponse.json({ til: parsed.fact, category: parsed.category });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("TIL error:", err);
+    return NextResponse.json({ error: "Could not load today's fact" }, { status: 500 });
   }
 }

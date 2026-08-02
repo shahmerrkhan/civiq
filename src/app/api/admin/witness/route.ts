@@ -1,34 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { witnessEvents } from "@/db/schema";
 import { eq } from "drizzle-orm";
-
-const ADMIN_IDS = ["user_3FjyZGikYeG9xNJm9uDh06WkLJh", "user_3FlZv0AydohOEdXeSRpOMucj6VD"];
-
-async function checkAdmin() {
-  const { userId } = await auth();
-  return userId && ADMIN_IDS.includes(userId);
-}
+import { isAdmin } from "@/lib/admin";
+import {
+  AdminWitnessCreateSchema,
+  AdminWitnessPatchSchema,
+  AdminIdSchema,
+} from "@/lib/schemas";
 
 export async function POST(req: NextRequest) {
-  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const body = await req.json();
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const parsed = AdminWitnessCreateSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+
   const [event] = await db.insert(witnessEvents).values({
-    title: body.title,
-    description: body.description,
-    category: body.category,
-    deadlineAt: new Date(body.deadlineAt),
-    sourceUrl: body.sourceUrl || null,
-    weekStart: body.weekStart,
+    title: parsed.data.title,
+    description: parsed.data.description,
+    category: parsed.data.category,
+    deadlineAt: parsed.data.deadlineAt,
+    sourceUrl: parsed.data.sourceUrl || null,
+    weekStart: parsed.data.weekStart,
     status: "pending",
   }).returning();
+
   return NextResponse.json({ event });
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { id, outcome, outcomeExplanation, approvePending } = await req.json();
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const parsed = AdminWitnessPatchSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+  const { id, outcome, outcomeExplanation, approvePending } = parsed.data;
 
   if (approvePending) {
     const [event] = await db.update(witnessEvents)
@@ -46,8 +51,11 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { id } = await req.json();
-  await db.delete(witnessEvents).where(eq(witnessEvents.id, id));
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const parsed = AdminIdSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+
+  await db.delete(witnessEvents).where(eq(witnessEvents.id, parsed.data.id));
   return NextResponse.json({ ok: true });
 }

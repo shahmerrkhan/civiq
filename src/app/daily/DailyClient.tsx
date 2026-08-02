@@ -27,7 +27,7 @@ export default function DailyClient() {
 const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch("/api/daily")
+    fetch("/api/cron/daily")
       .then(r => r.json())
       .then(d => {
         if (d.error || !d.question) { setError(true); setLoading(false); return; }
@@ -49,7 +49,7 @@ const [error, setError] = useState(false);
     if (selected === null || !data || submitting) return;
     setSubmitting(true);
     try {
-      const res = await fetch("/api/daily", {
+      const res = await fetch("/api/cron/daily", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questionId: data.question.id, answerIndex: selected }),
@@ -57,7 +57,7 @@ const [error, setError] = useState(false);
       const r = await res.json();
       setResult(r);
       // Refresh to get updated distribution
-      const updated = await fetch("/api/daily").then(x => x.json());
+      const updated = await fetch("/api/cron/daily").then(x => x.json());
       setData(updated);
     } catch {}
     setSubmitting(false);

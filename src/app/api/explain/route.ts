@@ -30,6 +30,7 @@ Plain English explanation:`,
 
     return NextResponse.json({ explanation: explanation.trim() });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Explain error:", err);
+    return NextResponse.json({ error: "Could not generate explanation" }, { status: 500 });
   }
 }

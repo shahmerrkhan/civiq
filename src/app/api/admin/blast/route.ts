@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import webpush from "web-push";
 import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
-
-const ADMIN_IDS = ["user_3FjyZGikYeG9xNJm9uDh06WkLJh", "user_3FlZv0AydohOEdXeSRpOMucj6VD"];
+import { isAdmin } from "@/lib/admin";
+import { AdminBlastSchema } from "@/lib/schemas";
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId || !ADMIN_IDS.includes(userId)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     webpush.setVapidDetails(
@@ -19,10 +17,11 @@ export async function POST(req: Request) {
       process.env.VAPID_PRIVATE_KEY!
     );
 
-    const { title, body, url } = await req.json();
-    if (!title?.trim() || !body?.trim()) {
+    const parsed = AdminBlastSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) {
       return NextResponse.json({ error: "Title and body required" }, { status: 400 });
     }
+    const { title, body, url } = parsed.data;
 
     const subs = await db.select().from(pushSubscriptions);
     if (!subs.length) return NextResponse.json({ sent: 0, failed: 0 });

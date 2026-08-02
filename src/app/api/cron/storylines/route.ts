@@ -3,10 +3,19 @@ import { db } from "@/db";
 import { storylines, storylineChapters } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { geminiGenerate } from "@/lib/gemini";
+import { isCronAuthorized } from "@/lib/cron";
+
+// Vercel Cron issues GET requests; POST is kept for manual invocation.
+export async function GET(req: Request) {
+  return run(req);
+}
 
 export async function POST(req: Request) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  return run(req);
+}
+
+async function run(req: Request) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

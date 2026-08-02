@@ -1,34 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { forecastQuestions, forecastPredictions, forecastLeaderboard } from "@/db/schema";
-import { eq } from "drizzle-orm";
-
-const ADMIN_IDS = ["user_3FjyZGikYeG9xNJm9uDh06WkLJh", "user_3FlZv0AydohOEdXeSRpOMucj6VD"];
-
-async function checkAdmin() {
-  const { userId } = await auth();
-  return userId && ADMIN_IDS.includes(userId);
-}
+import { and, eq, isNull } from "drizzle-orm";
+import { isAdmin } from "@/lib/admin";
+import {
+  AdminForecastCreateSchema,
+  AdminForecastPatchSchema,
+  AdminIdSchema,
+} from "@/lib/schemas";
 
 export async function POST(req: NextRequest) {
-  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const body = await req.json();
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const parsed = AdminForecastCreateSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+
   const [question] = await db.insert(forecastQuestions).values({
-    question: body.question,
-    context: body.context,
-    category: body.category,
-    closesAt: new Date(body.closesAt),
-    resolvesAt: new Date(body.resolvesAt),
-    weekStart: body.weekStart,
+    question: parsed.data.question,
+    context: parsed.data.context,
+    category: parsed.data.category,
+    closesAt: parsed.data.closesAt,
+    resolvesAt: parsed.data.resolvesAt,
+    weekStart: parsed.data.weekStart,
     status: "pending",
   }).returning();
   return NextResponse.json({ question });
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { id, outcome, outcomeExplanation, approvePending } = await req.json();
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const parsed = AdminForecastPatchSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+  const { id, outcome, outcomeExplanation, approvePending } = parsed.data;
 
   if (approvePending) {
     const [question] = await db.update(forecastQuestions)
@@ -44,8 +48,15 @@ export async function PATCH(req: NextRequest) {
     .where(eq(forecastQuestions.id, id))
     .returning();
 
-  // Score all predictions for this question
-  const predictions = await db.select().from(forecastPredictions).where(eq(forecastPredictions.questionId, id));
+  if (typeof outcome !== "boolean") {
+    return NextResponse.json({ error: "outcome is required to resolve" }, { status: 400 });
+  }
+
+  // Score only predictions that have not been scored yet, so re-resolving a
+  // question does not double-credit the leaderboard.
+  const predictions = await db.select().from(forecastPredictions).where(
+    and(eq(forecastPredictions.questionId, id), isNull(forecastPredictions.pointsEarned))
+  );
 
   for (const pred of predictions) {
     const correct = pred.prediction === outcome;
@@ -80,8 +91,14 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { id } = await req.json();
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const parsed = AdminIdSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+  const { id } = parsed.data;
+
+  // Predictions FK-reference the question; remove them first.
+  await db.delete(forecastPredictions).where(eq(forecastPredictions.questionId, id));
   await db.delete(forecastQuestions).where(eq(forecastQuestions.id, id));
   return NextResponse.json({ ok: true });
 }

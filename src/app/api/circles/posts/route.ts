@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { circlePosts, circlePostLikes, circleMembers, users } from "@/db/schema";
-import { eq, desc, and, sql, inArray } from "drizzle-orm";
+import { circlePosts, circlePostLikes, circlePostReports, circleMembers, users } from "@/db/schema";
+import { eq, desc, and, or, sql, inArray } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
-import { CirclePostSchema, CircleLikeSchema } from "@/lib/schemas";
+import { CirclePostSchema, CircleLikeSchema, CirclePostDeleteSchema } from "@/lib/schemas";
+import { isAdmin } from "@/lib/admin";
 import sanitizeHtml from "sanitize-html";
 
 export async function GET(req: NextRequest) {
@@ -150,5 +151,48 @@ export async function PATCH(req: NextRequest) {
   } catch (err) {
     console.error("Circles posts PATCH error:", err);
     return NextResponse.json({ error: "Failed to update post" }, { status: 500 });
+  }
+}
+
+// Moderation / author delete. Removes the post, its replies, and every
+// dependent row first so the FK constraints don't reject the delete.
+export async function DELETE(req: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const body = await req.json().catch(() => null);
+    const parsed = CirclePostDeleteSchema.safeParse(body);
+    if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    const { id } = parsed.data;
+
+    const post = await db
+      .select({ id: circlePosts.id, userId: circlePosts.userId })
+      .from(circlePosts)
+      .where(eq(circlePosts.id, id))
+      .limit(1);
+
+    if (!post[0]) return NextResponse.json({ error: "Post not found" }, { status: 404 });
+
+    if (post[0].userId !== userId && !(await isAdmin())) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const replies = await db
+      .select({ id: circlePosts.id })
+      .from(circlePosts)
+      .where(eq(circlePosts.parentId, id));
+    const ids = [id, ...replies.map((r) => r.id)];
+
+    await db.delete(circlePostLikes).where(inArray(circlePostLikes.postId, ids));
+    await db.delete(circlePostReports).where(inArray(circlePostReports.postId, ids));
+    await db.delete(circlePosts).where(
+      or(eq(circlePosts.id, id), eq(circlePosts.parentId, id))
+    );
+
+    return NextResponse.json({ deleted: true, removed: ids.length });
+  } catch (err) {
+    console.error("Circles posts DELETE error:", err);
+    return NextResponse.json({ error: "Failed to delete post" }, { status: 500 });
   }
 }

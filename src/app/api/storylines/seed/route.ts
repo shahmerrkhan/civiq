@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { storylines, storylineChapters } from "@/db/schema";
 import { geminiGenerate } from "@/lib/gemini";
+import { isCronAuthorized } from "@/lib/cron";
 
 const STORYLINE_TOPICS = [
   { title: "Ontario's Municipal Zoning Overhaul", slug: "municipal-zoning-bill-185", status: "active", category: "Housing" },
@@ -45,8 +46,7 @@ Requirements:
 }
 
 export async function POST(req: Request) {
-  const { secret } = await req.json();
-  if (secret !== process.env.CRON_SECRET) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,38 +1,14 @@
 import { db } from "@/db";
-import { Redis } from "@upstash/redis";
 import { contentCards, polls } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { auth, clerkClient } from "@clerk/nextjs/server";
-
-const ADMIN_EMAILS = ["m.shahmeer.khan8@gmail.com", "rehan.mazid@gmail.com"];
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
-
-async function checkAdmin(): Promise<boolean> {
-  const { userId } = await auth();
-  if (!userId) return false;
-
-  const cacheKey = `civiq:admin:${userId}`;
-  const cached = await redis.get<boolean>(cacheKey).catch(() => null);
-  if (cached !== null) return cached;
-
-  const client = await clerkClient();
-  const user = await client.users.getUser(userId);
-  const email = user.emailAddresses?.[0]?.emailAddress ?? "";
-  const isAdmin = ADMIN_EMAILS.includes(email);
-
-  await redis.set(cacheKey, isAdmin, { ex: 300 }).catch(() => {});
-  return isAdmin;
-}
+import { isAdmin } from "@/lib/admin";
+import { AdminCardUpdateSchema, AdminCardCreateSchema, AdminIdSchema } from "@/lib/schemas";
 
 export const revalidate = 0;
 
 export async function GET() {
-  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   try {
     const cards = await db
       .select()
@@ -66,11 +42,11 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
-  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   try {
-    const body = await req.json();
-    const { id, approved, title, summary, category, sourceName, sourceUrl, deepDive, stat } = body;
-    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    const parsed = AdminCardUpdateSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    const { id, approved, title, summary, category, sourceName, sourceUrl, deepDive, stat } = parsed.data;
 
     const fields: Record<string, unknown> = {};
     if (approved !== undefined) fields.approved = approved;
@@ -82,6 +58,10 @@ export async function PATCH(req: Request) {
     if (deepDive !== undefined) fields.deepDive = deepDive;
     if (stat !== undefined) fields.stat = stat;
 
+    if (Object.keys(fields).length === 0) {
+      return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+    }
+
     await db.update(contentCards).set(fields).where(eq(contentCards.id, id));
     return NextResponse.json({ ok: true });
   } catch (err) {
@@ -91,9 +71,12 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  if (!await checkAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   try {
-    const { id } = await req.json();
+    const parsed = AdminIdSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    const { id } = parsed.data;
+
     await db.delete(polls).where(eq(polls.cardId, id));
     await db.delete(contentCards).where(eq(contentCards.id, id));
     return NextResponse.json({ ok: true });
@@ -103,3 +86,40 @@ export async function DELETE(req: Request) {
   }
 }
 
+
+export async function POST(req: Request) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  try {
+    const parsed = AdminCardCreateSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    const d = parsed.data;
+
+    const [card] = await db.insert(contentCards).values({
+      title: d.title,
+      summary: d.summary,
+      category: d.category ?? null,
+      sourceName: d.sourceName ?? null,
+      sourceUrl: d.sourceUrl || null,
+      stat: d.stat ?? null,
+      deepDive: d.deepDive ?? null,
+      perspectives: d.perspectives ?? null,
+      approved: false,
+      publishedAt: new Date(),
+    }).returning();
+
+    let poll = null;
+    const options = (d.pollOptions ?? []).filter((o) => o.trim());
+    if (d.pollQuestion?.trim() && options.length >= 2) {
+      [poll] = await db.insert(polls).values({
+        cardId: card.id,
+        question: d.pollQuestion.trim(),
+        options,
+      }).returning();
+    }
+
+    return NextResponse.json({ card: { ...card, poll } });
+  } catch (err) {
+    console.error("Admin cards POST error:", err);
+    return NextResponse.json({ error: "Failed to create card" }, { status: 500 });
+  }
+}

@@ -97,7 +97,22 @@ export async function POST(req: NextRequest) {
     }
 
     await db.insert(witnessWatches).values({ userId, eventId });
-    await db.insert(userActivity).values({ userId, action: "witness_watch", meta: { eventId, xp: 10 } });
+
+    // Award XP only the first time this user watches this event — otherwise
+    // toggling watch/unwatch mints unlimited XP.
+    const alreadyAwarded = await db
+      .select({ id: userActivity.id })
+      .from(userActivity)
+      .where(and(
+        eq(userActivity.userId, userId),
+        eq(userActivity.action, "witness_watch"),
+        sql`${userActivity.meta}->>'eventId' = ${eventId}`
+      ))
+      .limit(1);
+
+    if (alreadyAwarded.length === 0) {
+      await db.insert(userActivity).values({ userId, action: "witness_watch", meta: { eventId, xp: 10 } });
+    }
 
     // Update streak atomically
     const today = new Date().toISOString().slice(0, 10);

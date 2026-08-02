@@ -26,6 +26,9 @@ const limiters = {
   admin:    { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s"), prefix: "civiq:rl:admin" }),    limit: 60 },
   cron:     { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, "60 s"), prefix: "civiq:rl:cron" }),     limit: 10 },
   feedback: { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3, "60 s"), prefix: "civiq:rl:feedback" }), limit: 3 },
+  // Public and can trigger paid Gemini generation. 20/min is well above the
+  // ~2-3 calls a real reader makes while paging the feed.
+  feed:     { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s"), prefix: "civiq:rl:feed" }),     limit: 20 },
   default:  { limiter: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s"), prefix: "civiq:rl:default" }), limit: 60 },
 };
 
@@ -37,8 +40,12 @@ function getLimiter(pathname: string) {
   if (pathname.startsWith("/api/opinions"))      return limiters.opinions;
   if (pathname.startsWith("/api/polls"))         return limiters.polls;
   if (pathname.startsWith("/api/admin"))         return limiters.admin;
+  // /api/cron/daily is the user-facing daily quiz, not a cron job — it must not
+  // share the 10/min cron budget or shared-NAT users (schools, mobile) get 429s.
+  if (pathname.startsWith("/api/cron/daily"))    return limiters.default;
   if (pathname.startsWith("/api/cron"))          return limiters.cron;
   if (pathname.startsWith("/api/feedback"))      return limiters.feedback;
+  if (pathname.startsWith("/api/feed"))          return limiters.feed;
   return limiters.default;
 }
 
@@ -54,6 +61,10 @@ const BLOCKED_IPS = new Set<string>([
   // Add bad actor IPs here as needed, e.g. "123.456.789.0"
 ]);
 
+// Signed webhooks authenticate themselves and arrive from a small pool of
+// provider IPs — IP rate limiting here would silently drop user provisioning.
+const RATE_LIMIT_EXEMPT = ["/api/webhooks/"];
+
 export default clerkMiddleware(async (auth, request) => {
   const pathname = request.nextUrl.pathname;
 
@@ -63,15 +74,25 @@ export default clerkMiddleware(async (auth, request) => {
     if (BLOCKED_IPS.has(ip)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    const routeKey = pathname.split("/").slice(0, 4).join("/");
-    const { limiter, limit } = getLimiter(pathname);
-    const { success, remaining } = await limiter.limit(`${ip}:${routeKey}`);
 
-    if (!success) {
-      return NextResponse.json(
-        { error: "Too many requests. Slow down." },
-        { status: 429, headers: { "X-RateLimit-Limit": String(limit), "X-RateLimit-Remaining": "0", "Retry-After": "60" } }
-      );
+    let remaining = -1;
+    if (!RATE_LIMIT_EXEMPT.some((p) => pathname.startsWith(p))) {
+      const routeKey = pathname.split("/").slice(0, 4).join("/");
+      const { limiter, limit } = getLimiter(pathname);
+
+      // Fail open: if Upstash is unreachable, serve the request rather than
+      // 500-ing every API route in the product.
+      const result = await limiter
+        .limit(`${ip}:${routeKey}`)
+        .catch(() => ({ success: true, remaining: -1 }));
+
+      if (!result.success) {
+        return NextResponse.json(
+          { error: "Too many requests. Slow down." },
+          { status: 429, headers: { "X-RateLimit-Limit": String(limit), "X-RateLimit-Remaining": "0", "Retry-After": "60" } }
+        );
+      }
+      remaining = result.remaining;
     }
 
     const writeMethods = ["POST", "PATCH", "DELETE", "PUT"];

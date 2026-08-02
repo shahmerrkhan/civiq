@@ -6,6 +6,12 @@ export const OnboardingSchema = z.object({
     x: z.number(),
     y: z.number(),
   }),
+  // Express consent for the weekly email (CASL). Absent means not subscribed.
+  digestSubscribed: z.boolean().default(false),
+});
+
+export const DigestSubscribeSchema = z.object({
+  subscribed: z.boolean(),
 });
 
 export const OpinionSchema = z.object({
@@ -14,8 +20,8 @@ export const OpinionSchema = z.object({
 });
 
 export const VoteSchema = z.object({
-  pollId: z.string(),
-  optionIndex: z.number().int().min(0),
+  pollId: z.string().uuid(),
+  optionIndex: z.number().int().min(0).max(19),
 });
 
 export const DailyAnswerSchema = z.object({
@@ -38,9 +44,23 @@ export const ReactionSchema = z.object({
   reaction: z.enum(["fire", "thinking", "disagree", "bookmark"]),
 });
 
+// Must stay in sync with ISSUES / REGIONS in src/app/map/MapClient.tsx.
+// Unconstrained strings let anyone seed the public map aggregate with
+// arbitrary region and issue keys.
+export const MAP_ISSUE_IDS = [
+  "housing-zoning", "education-cuts", "healthcare-privatization",
+  "greenbelt", "carbon-tax", "minimum-wage",
+] as const;
+
+export const MAP_REGION_IDS = [
+  "gta", "peel", "york", "durham", "hamilton", "waterloo", "ottawa",
+  "london", "kingston", "sudbury", "windsor", "thunderbay", "barrie",
+  "cambridge",
+] as const;
+
 export const RegionVoteSchema = z.object({
-  issueId: z.string().min(1),
-  regionId: z.string().min(1),
+  issueId: z.enum(MAP_ISSUE_IDS),
+  regionId: z.enum(MAP_REGION_IDS),
   stance: z.enum(["left", "right", "centre"]),
 });
 
@@ -90,7 +110,10 @@ export const PushSubscribeSchema = z.object({
 export const AdminBlastSchema = z.object({
   title: z.string().min(1).max(200),
   body: z.string().min(1).max(500),
-  url: z.string().optional(),
+  // Same-origin relative paths only — this value is handed to the service
+  // worker and passed to clients.openWindow().
+  // The (?!\/) guard rejects protocol-relative URLs like //evil.com.
+  url: z.string().regex(/^\/(?!\/)[A-Za-z0-9\-._~!$&'()*+,;=:@%\/?#]*$/).max(500).optional(),
 });
 
 export const AdminCardPatchSchema = z.object({
@@ -133,4 +156,75 @@ export const FeedbackSchema = z.object({
   email: z.string().email().optional(),
   category: z.enum(["general", "bug", "idea", "support"]).default("general"),
   message: z.string().min(5).max(2000),
+});
+export const CirclePostDeleteSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const AdminForecastCreateSchema = z.object({
+  question: z.string().min(1).max(500),
+  context: z.string().min(1).max(2000),
+  category: z.string().min(1).max(100),
+  closesAt: z.coerce.date(),
+  resolvesAt: z.coerce.date(),
+  weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
+export const AdminForecastPatchSchema = z.object({
+  id: z.string().uuid(),
+  approvePending: z.boolean().optional(),
+  outcome: z.boolean().optional(),
+  outcomeExplanation: z.string().max(2000).optional(),
+});
+
+export const AdminWitnessCreateSchema = z.object({
+  title: z.string().min(1).max(300),
+  description: z.string().min(1).max(2000),
+  category: z.string().min(1).max(100),
+  deadlineAt: z.coerce.date(),
+  sourceUrl: z.string().url().max(1000).optional().nullable(),
+  weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
+export const AdminWitnessPatchSchema = z.object({
+  id: z.string().uuid(),
+  approvePending: z.boolean().optional(),
+  outcome: z.string().max(100).optional(),
+  outcomeExplanation: z.string().max(2000).optional(),
+});
+
+export const AdminIdSchema = z.object({ id: z.string().uuid() });
+
+export const AdminCardUpdateSchema = z.object({
+  id: z.string().uuid(),
+  approved: z.boolean().optional(),
+  title: z.string().max(500).optional(),
+  summary: z.string().max(4000).optional(),
+  category: z.string().max(100).optional(),
+  sourceName: z.string().max(200).optional(),
+  sourceUrl: z.string().url().max(1000).optional().or(z.literal("")),
+  deepDive: z.string().max(8000).optional(),
+  stat: z.string().max(500).optional(),
+});
+
+export const AdminCardCreateSchema = z.object({
+  title: z.string().min(1).max(500),
+  summary: z.string().min(1).max(4000),
+  category: z.string().max(100).optional().nullable(),
+  sourceName: z.string().max(200).optional().nullable(),
+  sourceUrl: z.string().url().max(1000).optional().nullable().or(z.literal("")),
+  stat: z.string().max(500).optional().nullable(),
+  deepDive: z.string().max(8000).optional().nullable(),
+  perspectives: z.object({
+    left: z.string().max(4000),
+    centre: z.string().max(4000),
+    right: z.string().max(4000),
+  }).optional(),
+  pollQuestion: z.string().max(500).optional().nullable(),
+  pollOptions: z.array(z.string().min(1).max(200)).max(10).optional(),
+});
+
+export const PerspectiveViewSchema = z.object({
+  cardDbId: z.string().uuid(),
+  perspective: z.enum(["left", "centre", "right"]),
 });

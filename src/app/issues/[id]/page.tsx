@@ -1,17 +1,23 @@
 import { db } from "@/db";
 import { contentCards, polls, pollVotes, userOpinions, users } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import IssueClient, { type IssueCard, type IssuePoll } from "./IssueClient";
 
-export default async function IssuePage({ params }: { params: { id: string } }) {
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export default async function IssuePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { userId } = await auth();
 
-  const card = await db.select().from(contentCards).where(eq(contentCards.id, params.id));
+  // Postgres raises on a malformed uuid — bounce to 404 instead of a 500.
+  if (!UUID_RE.test(id)) notFound();
+
+  const card = await db.select().from(contentCards).where(eq(contentCards.id, id));
   if (!card[0]) notFound();
 
-  const linkedPolls = await db.select().from(polls).where(eq(polls.cardId, params.id));
+  const linkedPolls = await db.select().from(polls).where(eq(polls.cardId, id));
 
   let userVotes: { pollId: string; optionIndex: number }[] = [];
   let userOpinion: string | null = null;
@@ -28,10 +34,10 @@ export default async function IssuePage({ params }: { params: { id: string } }) 
     const opinion = await db
       .select()
       .from(userOpinions)
-      .where(eq(userOpinions.userId, userId))
+      .where(and(eq(userOpinions.userId, userId), eq(userOpinions.cardId, id)))
       .limit(1);
-    
-    if (opinion[0]?.cardId === params.id) userOpinion = opinion[0].opinion;
+
+    if (opinion[0]) userOpinion = opinion[0].opinion;
 
     const user = await db.select({ compassPosition: users.compassPosition }).from(users).where(eq(users.id, userId));
     if (user[0]?.compassPosition) compassPosition = user[0].compassPosition as { x: number; y: number };

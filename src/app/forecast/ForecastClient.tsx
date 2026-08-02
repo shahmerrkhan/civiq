@@ -613,7 +613,7 @@ function QuestionCard({
                     transition: "all 0.15s ease",
                   }}>
                     {pendingConfidence >= 85
-                      ? <><Flame size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />High conviction — {pendingConfidence} pts if you're right</>
+                      ? <><Flame size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />High conviction — {pendingConfidence} pts if you&apos;re right</>
                       : pendingConfidence >= 70
                       ? <><Lightbulb size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Moderate confidence — {pendingConfidence} pts if correct</>
                       : <><Dices size={14} style={{ display: "inline", verticalAlign: "-2px", marginRight: "4px" }} />Low confidence — {pendingConfidence} pts if correct</>}

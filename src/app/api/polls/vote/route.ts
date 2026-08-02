@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { pollVotes, users, userActivity } from "@/db/schema";
+import { pollVotes, polls, users, userActivity } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -14,6 +14,24 @@ export async function POST(req: Request) {
     const parsed = VoteSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     const { pollId, optionIndex } = parsed.data;
+
+    // poll_votes.poll_id has no FK, so an unchecked pollId lets anyone mint
+    // votes for polls that don't exist and inflate their civic score.
+    const pollRows = await db
+      .select({ options: polls.options, expiresAt: polls.expiresAt })
+      .from(polls)
+      .where(eq(polls.id, pollId))
+      .limit(1);
+
+    if (!pollRows[0]) return NextResponse.json({ error: "Poll not found" }, { status: 404 });
+
+    const options = pollRows[0].options as unknown[];
+    if (!Array.isArray(options) || optionIndex >= options.length) {
+      return NextResponse.json({ error: "Invalid option" }, { status: 400 });
+    }
+    if (pollRows[0].expiresAt && new Date(pollRows[0].expiresAt) < new Date()) {
+      return NextResponse.json({ error: "This poll has closed" }, { status: 400 });
+    }
 
     const userRows = await db
       .select({ compassPosition: users.compassPosition })

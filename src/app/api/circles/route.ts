@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ circles: sorted });
   } catch (err) {
     console.error("Circles GET error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to load circles" }, { status: 500 });
   }
 }
 
@@ -134,6 +134,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ joined: true });
   } catch (err) {
     console.error("Circles POST error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update membership" }, { status: 500 });
   }
 }

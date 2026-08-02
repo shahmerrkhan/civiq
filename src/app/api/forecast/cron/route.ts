@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateWeeklyForecasts, closeExpiredVoting, resolveExpiredForecasts } from "@/lib/forecast";
+import { isCronAuthorized } from "@/lib/cron";
 
 function getWeekStart() {
   const now = new Date();
@@ -11,8 +12,7 @@ function getWeekStart() {
 
 export async function GET(req: NextRequest) {
   // Protect with a secret so only Vercel Cron can call this
-  const secret = req.headers.get("x-cron-secret");
-  if (secret !== process.env.CRON_SECRET) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

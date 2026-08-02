@@ -24,7 +24,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Push subscribe error:", err);
+    return NextResponse.json({ error: "Failed to save subscription" }, { status: 500 });
   }
 }
 

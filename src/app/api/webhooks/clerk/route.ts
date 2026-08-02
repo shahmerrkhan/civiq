@@ -2,6 +2,7 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { sql } from "@/db";
+import { deleteAllUserData } from "@/lib/user-delete";
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -67,6 +68,12 @@ export async function POST(req: Request) {
       if (email) {
         await sql`UPDATE users SET email = ${email} WHERE id = ${id}`;
       }
+    }
+
+    // Without this, an account deleted from Clerk's own UI leaves all of its
+    // rows (including opinions and posts) in our database indefinitely.
+    if (evt.type === "user.deleted" && evt.data.id) {
+      await deleteAllUserData(evt.data.id);
     }
   } catch (err) {
     console.error("Webhook DB error:", err);

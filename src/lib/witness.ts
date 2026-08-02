@@ -3,8 +3,27 @@ import { witnessEvents, witnessWatches, pushSubscriptions } from "@/db/schema";
 import { eq, and, lte } from "drizzle-orm";
 import webpush from "web-push";
 import { geminiGenerate } from "@/lib/gemini";
+import { withLock } from "@/lib/lock";
 
 export async function generateWeeklyWitnessEvents(weekStart: string) {
+  const existing = await db
+    .select()
+    .from(witnessEvents)
+    .where(eq(witnessEvents.weekStart, weekStart));
+
+  if (existing.length >= 5) return existing;
+
+  // This runs off a public GET, so concurrent first-of-the-week requests would
+  // otherwise each fire their own grounded generation.
+  return withLock(
+    `civiq:lock:witness:${weekStart}`,
+    120,
+    () => doGenerateWeeklyWitnessEvents(weekStart),
+    existing
+  );
+}
+
+async function doGenerateWeeklyWitnessEvents(weekStart: string) {
   const existing = await db
     .select()
     .from(witnessEvents)
@@ -138,11 +157,14 @@ Return ONLY valid JSON, no markdown:
 
 async function notifyWatchers(eventId: string, title: string, outcome: string, explanation: string) {
   try {
-    if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return;
+    // The public key is only ever set as NEXT_PUBLIC_VAPID_PUBLIC_KEY; reading
+    // VAPID_PUBLIC_KEY silently disabled these notifications entirely.
+    const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? process.env.VAPID_PUBLIC_KEY;
+    if (!vapidPublic || !process.env.VAPID_PRIVATE_KEY) return;
 
     webpush.setVapidDetails(
-      "mailto:civiq@civicclarityfoundation.org",
-      process.env.VAPID_PUBLIC_KEY,
+      process.env.VAPID_EMAIL ?? "mailto:civiq@civicclarityfoundation.org",
+      vapidPublic,
       process.env.VAPID_PRIVATE_KEY
     );
 

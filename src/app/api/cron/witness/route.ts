@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateWeeklyWitnessEvents, resolveExpiredWitnessEvents } from "@/lib/witness";
+import { isCronAuthorized } from "@/lib/cron";
 
 function getWeekStart() {
   const now = new Date();
@@ -24,8 +25,7 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3, label = "operatio
 }
 
 export async function GET(req: NextRequest) {
-  const secret = req.headers.get("x-cron-secret");
-  if (secret !== process.env.CRON_SECRET) {
+  if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
