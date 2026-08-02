@@ -12,6 +12,10 @@ type Challenge = {
   type: string;
   xpReward: number;
   completed: boolean;
+  claimable?: boolean;
+  progress?: number;
+  required?: number;
+  hint?: string;
 };
 
 type ChallengesData = {
@@ -44,6 +48,7 @@ export default function ChallengesClient() {
   const [completing, setCompleting] = useState<string | null>(null);
   const [justCompleted, setJustCompleted] = useState<string | null>(null);
   const [, setShowBadge] = useState(false);
+  const [blockedMsg, setBlockedMsg] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch("/api/challenges")
@@ -75,6 +80,19 @@ export default function ChallengesClient() {
           return { ...prev, challenges: updated, completedCount, allCompleted };
         });
         setTimeout(() => setJustCompleted(null), 2000);
+      } else if (res.status === 422) {
+        // The underlying action hasn't happened yet — tell them what's missing.
+        setBlockedMsg(prev => ({
+          ...prev,
+          [challengeId]: result.required > 1
+            ? `${result.reason} (${result.progress}/${result.required} done)`
+            : result.reason ?? "Not finished yet.",
+        }));
+        setTimeout(() => setBlockedMsg(prev => {
+          const next = { ...prev };
+          delete next[challengeId];
+          return next;
+        }), 5000);
       }
     } catch {}
     setCompleting(null);
@@ -257,23 +275,47 @@ export default function ChallengesClient() {
                           {challenge.description}
                         </div>
 
+                        {/* Progress toward the verified requirement */}
+                        {!isDone && (challenge.required ?? 1) > 1 && (
+                          <div style={{ fontSize: "12px", color: "#555", marginBottom: "10px" }}>
+                            {challenge.progress ?? 0} of {challenge.required} done
+                          </div>
+                        )}
+
+                        {blockedMsg[challenge.id] && (
+                          <div style={{
+                            fontSize: "12px", color: "#f5a623", lineHeight: "1.5",
+                            backgroundColor: "rgba(245,166,35,0.08)",
+                            border: "1px solid rgba(245,166,35,0.2)",
+                            borderRadius: "8px", padding: "8px 10px", marginBottom: "10px",
+                          }}>
+                            {blockedMsg[challenge.id]}
+                          </div>
+                        )}
+
                         <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
                           {!isDone && (
                             <motion.button
                               whileTap={{ scale: 0.97 }}
                               onClick={() => complete(challenge.id)}
-                              disabled={isCompleting}
+                              disabled={isCompleting || challenge.claimable === false}
+                              title={challenge.claimable === false ? challenge.hint : undefined}
                               style={{
                                 fontSize: "12px", fontWeight: "700",
-                                color: "#000",
-                                backgroundColor: isCompleting ? "#888" : meta.color,
+                                color: challenge.claimable === false ? "#666" : "#000",
+                                backgroundColor: isCompleting
+                                  ? "#888"
+                                  : challenge.claimable === false ? "rgba(255,255,255,0.05)" : meta.color,
                                 border: "none", borderRadius: "8px",
-                                padding: "7px 16px", cursor: isCompleting ? "not-allowed" : "pointer",
+                                padding: "7px 16px",
+                                cursor: isCompleting || challenge.claimable === false ? "not-allowed" : "pointer",
                                 fontFamily: "'DM Sans', sans-serif",
                                 transition: "background-color 0.2s",
                               }}
                             >
-                              {isCompleting ? "Marking..." : "Mark complete"}
+                              {isCompleting
+                                ? "Marking..."
+                                : challenge.claimable === false ? "Not done yet" : "Claim XP"}
                             </motion.button>
                           )}
 

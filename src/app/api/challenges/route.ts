@@ -3,15 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { civicChallenges, civicChallengeCompletions, civicChallengeStreaks } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
-
-function getThisMonday(): string {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  return monday.toISOString().slice(0, 10);
-}
+import { getThisMonday, getWeekStartDate, verifyChallenge } from "@/lib/challenges";
 
 const WEEKLY_CHALLENGES = [
   {
@@ -81,11 +73,22 @@ export async function GET() {
   const streak = streakRow[0]?.currentStreak ?? 0;
   const allCompleted = challenges.every(c => completedIds.has(c.id));
 
+  // Real progress per challenge so the UI can only offer "claim" once the
+  // underlying work is genuinely done.
+  const weekStartDate = getWeekStartDate();
+  const verifications = await Promise.all(
+    challenges.map(c => verifyChallenge(userId, c.type, weekStartDate))
+  );
+
   return NextResponse.json({
     weekStart,
-    challenges: challenges.map(c => ({
+    challenges: challenges.map((c, i) => ({
       ...c,
       completed: completedIds.has(c.id),
+      claimable: !completedIds.has(c.id) && verifications[i].satisfied,
+      progress: verifications[i].progress,
+      required: verifications[i].required,
+      hint: verifications[i].reason,
     })),
     allCompleted,
     streak,
@@ -97,6 +100,8 @@ export async function GET() {
   }
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function POST(req: Request) {
   try {
   const { userId } = await auth();
@@ -104,8 +109,23 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => null);
   const challengeId = body?.challengeId;
-  if (!challengeId || typeof challengeId !== "string") {
+  if (!challengeId || typeof challengeId !== "string" || !UUID_RE.test(challengeId)) {
     return NextResponse.json({ error: "Missing challengeId" }, { status: 400 });
+  }
+
+  const weekStart = getThisMonday();
+
+  // The challenge must exist and belong to the current week — otherwise a stale
+  // or arbitrary id could be replayed for XP.
+  const challengeRow = await db
+    .select()
+    .from(civicChallenges)
+    .where(eq(civicChallenges.id, challengeId))
+    .limit(1);
+
+  if (!challengeRow[0]) return NextResponse.json({ error: "Challenge not found" }, { status: 404 });
+  if (challengeRow[0].weekStart !== weekStart) {
+    return NextResponse.json({ error: "That challenge is no longer active" }, { status: 400 });
   }
 
   // Check already completed
@@ -122,10 +142,22 @@ export async function POST(req: Request) {
 
   if (existing[0]) return NextResponse.json({ error: "Already completed" }, { status: 409 });
 
+  // Verify the underlying action actually happened this week before crediting.
+  const verification = await verifyChallenge(userId, challengeRow[0].type, getWeekStartDate());
+  if (!verification.satisfied) {
+    return NextResponse.json(
+      {
+        error: "Not finished yet",
+        reason: verification.reason,
+        progress: verification.progress,
+        required: verification.required,
+      },
+      { status: 422 }
+    );
+  }
+
   await db.insert(civicChallengeCompletions).values({ userId, challengeId });
 
-  // Check if all 3 done this week
-  const weekStart = getThisMonday();
   const allChallenges = await db
     .select()
     .from(civicChallenges)

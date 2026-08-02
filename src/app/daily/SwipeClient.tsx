@@ -6,6 +6,7 @@ import { Flame, HelpCircle, Frown, Lightbulb, Bookmark, Share2, BarChart2 } from
 
 type SwipeCard = {
   id: number;
+  dbId: string;
   title: string;
   summary: string;
   category: string;
@@ -15,6 +16,19 @@ type SwipeCard = {
   deepdive: string;
   stat?: string;
 };
+
+// Records that the reader actually opened a perspective. The server decides
+// whether it counts as reading the opposing side.
+async function recordPerspectiveView(cardDbId: string | undefined, perspective: "left" | "centre" | "right") {
+  if (!cardDbId) return;
+  try {
+    await fetch("/api/perspective", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cardDbId, perspective }),
+    });
+  } catch {}
+}
 
 const CATEGORY_COLORS: Record<string, string> = {
   Infrastructure: "#60a5fa",
@@ -458,7 +472,7 @@ export default function SwipeClient() {
                   <button
                     key={p}
                     className="perspective-btn"
-                    onClick={() => setPerspective(p)}
+                    onClick={() => { setPerspective(p); recordPerspectiveView(card.dbId, p); }}
                     style={{
                       borderColor: perspective === p ? pColors[p] : undefined,
                       backgroundColor: perspective === p ? `${pColors[p]}15` : undefined,

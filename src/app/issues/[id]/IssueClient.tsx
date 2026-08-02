@@ -15,6 +15,19 @@ const PERSPECTIVE_CONFIG = [
   { key: "right", label: "Right", color: "#f87171", icon: "▶" },
 ];
 
+// Records that the reader actually opened a perspective. The server decides
+// whether it counts as reading the opposing side.
+async function recordPerspectiveView(cardDbId: string, perspective: string) {
+  if (!["left", "centre", "right"].includes(perspective)) return;
+  try {
+    await fetch("/api/perspective", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cardDbId, perspective }),
+    });
+  } catch {}
+}
+
 export type IssueCard = {
   id: string;
   category: string | null;
@@ -130,7 +143,7 @@ export default function IssueClient({ card, polls, userVotes, userOpinion, userI
               {PERSPECTIVE_CONFIG.map(({ key, label, color }) => (
                 <button
                   key={key}
-                  onClick={() => setActivePerspective(key)}
+                  onClick={() => { setActivePerspective(key); recordPerspectiveView(card.id, key); }}
                   style={{
                     padding: "8px 18px", borderRadius: "10px", border: "none",
                     backgroundColor: activePerspective === key ? `${color}20` : "rgba(255,255,255,0.03)",
